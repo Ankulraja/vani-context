@@ -214,6 +214,13 @@ Design decisions:
     `GET /context?glid=95568576`, and the agent's first line was "जी, आपने WhatsApp पर HP 16GB pen drive का rate
     दो सौ चालीस रुपये per piece बताया था। क्या मैं यह Barmer buyer को update कर दूँ?" — i.e. it resumed from
     the WhatsApp event. On end, `POST /events` arrived (empty summary).
+- **Dashboard voice tests by the user (2026-10-08 23:38 and 23:49) passed for two GLIDs:** 95568576 (VANI said
+  the ₹240/₹230 line unprompted) and **87677035 Anuradha Oil Mill** (file did not exist; Sarvam's on_start hit
+  `GET /context?glid=87677035`, the API built seller.md on the fly and VANI opened with the oil enquiry).
+  **on_end DOES deliver `call_summary` for voice calls** (both summaries landed in `events.jsonl`, e.g.
+  "rescheduled a callback for tomorrow at 10 AM"); it was empty only for `send_chat` text tests. So the
+  on_end tool is the live refresh path for voice; the webhook is the backup / production path.
+  To switch the test user: dashboard → Variables → `glid` default value (user did this by hand).
 - **`POST /webhook/sarvam` added and tested** with a fake payload (transcript, empty call_summary): the API
   summarised the transcript with sarvam-105b ("seller agreed ₹240/piece, ₹230 above 100 pcs, call back 11 AM"),
   appended the event, rebuilt seller.md in 1.76 s, and the next opener continued from it. Falls back to the
