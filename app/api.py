@@ -1,0 +1,125 @@
+"""VANI Context API — what the Sarvam Voice Agent (and anything else) calls.
+
+  GET  /context/{glid}            -> {"name", "company", "opener", "context", "updated_at", ...}
+                                     (used by the agent's on_start tool; fields map to agent variables)
+  GET  /context/{glid}/seller.md  -> the raw markdown file (reusable outside the bot)
+  POST /events/{glid}             -> append a new event (e.g. call summary from on_end), regenerate
+                                     seller.md, return freshness seconds
+  GET  /health
+
+Run:  uvicorn app.api:app --reload --port 8000
+Then expose with ngrok so Sarvam can reach it:  ngrok http 8000
+"""
+from __future__ import annotations
+
+import json
+import time
+from datetime import datetime
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel, Field
+
+from app.builder.seller_md import OUT_DIR, build_seller_md
+
+app = FastAPI(title="VANI Context API", version="0.1")
+
+
+# ------------------------------------------------------------------ helpers
+def _md_path(glid: int) -> Path:
+    return OUT_DIR / str(glid) / "seller.md"
+
+
+def _parse_md(md: str) -> dict:
+    """Pull the few fields the agent needs as separate variables out of the markdown."""
+    out = {"opener": "", "next_action": "", "avoid": "", "story": ""}
+    for line in md.splitlines():
+        if line.startswith("- **Opener (Hinglish):**"):
+            out["opener"] = line.split("**", 2)[2].strip()
+        elif line.startswith("- **Next best action:**"):
+            out["next_action"] = line.split("**", 2)[2].strip()
+        elif line.startswith("- **Avoid:**"):
+            out["avoid"] = line.split("**", 2)[2].strip()
+    if "## Story so far" in md:
+        out["story"] = md.split("## Story so far", 1)[1].split("##", 1)[0].strip()
+    return out
+
+
+def _ensure_built(glid: int, rebuild: bool = False) -> dict:
+    p = _md_path(glid)
+    if rebuild or not p.exists():
+        try:
+            return build_seller_md(glid)
+        except KeyError as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+    md = p.read_text()
+    return {"path": str(p), "md": md, "seconds_total": 0.0, "insight_source": "cached"}
+
+
+# ------------------------------------------------------------------ routes
+@app.get("/health")
+def health():
+    return {"ok": True, "time": datetime.now().isoformat(timespec="seconds")}
+
+
+@app.get("/context/{glid}")
+def get_context(glid: int, rebuild: bool = False):
+    """Everything the agent needs before it speaks. Flat keys so Sarvam's
+    'save reply into variables' can map them 1:1 to agent variables."""
+    r = _ensure_built(glid, rebuild)
+    md = r["md"]
+    events = json.loads((OUT_DIR / str(glid) / "events.json").read_text())
+    fields = _parse_md(md)
+    company = events["profile"]["company"] or f"GLID {glid}"
+    return {
+        "glid": glid,
+        "name": company,  # we have no person name in the dataset; the company works as the address
+        "company": company,
+        "city": events["profile"]["city"],
+        "opener": fields["opener"],
+        "next_action": fields["next_action"],
+        "avoid": fields["avoid"],
+        "story": fields["story"],
+        "unread_enquiries": events["unread_enquiries"],
+        "context": md,  # full seller.md goes into the agent's prompt as {{user_context}}
+        "updated_at": datetime.fromtimestamp(_md_path(glid).stat().st_mtime).isoformat(timespec="seconds"),
+        "build_seconds": r["seconds_total"],
+        "insight_source": r["insight_source"],
+    }
+
+
+@app.get("/context/{glid}/seller.md", response_class=PlainTextResponse)
+def get_context_md(glid: int):
+    return _ensure_built(glid)["md"]
+
+
+class Event(BaseModel):
+    channel: str = Field(..., examples=["voice", "whatsapp", "chat", "app"])
+    summary: str = Field(..., examples=["Seller asked to call back after Diwali about the Barmer pen drive enquiry"])
+    time: str | None = None  # ISO; defaults to now
+    meta: dict = Field(default_factory=dict)  # disposition, interaction_id, etc.
+
+
+@app.post("/events/{glid}")
+def post_event(glid: int, ev: Event):
+    """Append one new event and regenerate the memory file. Returns how long freshness took."""
+    t0 = time.perf_counter()
+    d = OUT_DIR / str(glid)
+    d.mkdir(parents=True, exist_ok=True)
+    rec = ev.model_dump()
+    rec["time"] = rec["time"] or datetime.now().strftime("%Y-%m-%d %H:%M")
+    with (d / "events.jsonl").open("a") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    try:
+        r = build_seller_md(glid)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    return {
+        "ok": True,
+        "glid": glid,
+        "event": rec,
+        "freshness_seconds": round(time.perf_counter() - t0, 2),
+        "insight_source": r["insight_source"],
+        "opener": _parse_md(r["md"])["opener"],
+    }
