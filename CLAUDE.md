@@ -295,18 +295,26 @@ Hackathon deck PDF: `~/Desktop/Voice_AI_Hackathon_2.0_Deck_Revised - Final.pptx.
 
 ## Next steps (in order)
 
-1. User: commit `CLAUDE.md`, `.mcp.json`, `.gitignore`; add a dated Day-0 line to `skills.md`;
-   move `pss-runner/` out of the repo; press "Test agent" in the dashboard to hear v1 by voice.
-2. (done 2026-10-08) Agent v1 configured via MCP and committed.
-3. (done) `app/sources/seller.py` — seller side. Buyer side (`app/sources/buyer.py` from the getContext JSON) still to do.
-4. (done) `app/builder/seller_md.py`. `buyer_md.py` still to do.
-5. (done) `app/api.py`. Expose with `cloudflared tunnel --url http://localhost:8000` (free quick tunnel,
-   URL changes each run → update the agent's tool URLs via MCP each time, or make a named tunnel on Day 1).
-6. Via MCP: add `on_start` HTTP tool → our `/context`, save reply into `user_context` + `opener`
-   variables, use them in greeting/instructions; `on_end` HTTP tool → our `/events`.
-   Test in web widget (chat) and phone.
-7. Cross-channel demo: chat on widget → call on phone → agent resumes. Record video.
-8. README, skills.md, note on sources / lookback / refresh logic.
+Background processes Claude started on 2026-10-08 (may be dead after a reboot): `uvicorn app.api:app --port 8000`
+(log `/tmp/vani_api.log`) and `cloudflared tunnel --url http://localhost:8000` (log `/tmp/cloudflared.log`,
+URL in `/tmp/vani_public_url.txt`). Restart both, then re-point the two agent tools at the new URL.
+
+**Rule check before Day 1:** the deck says "all build work happens during the 2 days; setup/learning beforehand
+is fine". Tonight's code is a learning prototype on stand-in data. Plan: on Day 1 rebuild `app/sources/` on the
+real starter APIs, re-create the agent tools, and log all of it in `skills.md` so the journey is honest.
+
+1. User: add Day-0 lines to `skills.md`; move `pss-runner/` out; press "Test agent" in the dashboard (draft v2)
+   to hear the memory opener by voice; send Org ID to organisers.
+2. Buyer side: `app/sources/buyer.py` (parse getContext JSON from the Kibana CSV) + `app/builder/buyer_md.py`
+   + `GET /context/{glid}` auto-detecting buyer vs seller. Same file style as seller.md.
+3. Agent polish via MCP: voicemail message (`configure_voicemail`), call goal / evaluation criteria, then
+   `agents commit` → v2. Intro line may address the company name ("Alfa Enterprises ji") — fine for sellers.
+4. Phone test: `verify_phone_number` (OTP to the user's phone) → `place_test_call(app_variables={"glid": "95568576"})`
+   with `webhook_config.url=<TUNNEL>/webhook/sarvam` where supported; confirm the webhook arrives.
+5. Web widget / chat channel: Deploy with Code → Embed (dashboard). Demo flow: chat on widget → event →
+   phone call resumes (or reverse). Record the 5–7 min video.
+6. Freshness dashboard: tiny Streamlit page showing seller.md, events.jsonl and `freshness_seconds` per event.
+7. README (architecture, sources, lookback 30 d/180 d, refresh logic), `skills.md` build journey, approach note.
 
 ## Conventions
 
