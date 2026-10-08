@@ -89,6 +89,12 @@ def get_context(glid: int, rebuild: bool = False):
     }
 
 
+@app.get("/context")
+def get_context_q(glid: int, rebuild: bool = False):
+    """Same as /context/{glid} but with ?glid= — easier to bind to an agent variable in Sarvam tools."""
+    return get_context(glid, rebuild)
+
+
 @app.get("/context/{glid}/seller.md", response_class=PlainTextResponse)
 def get_context_md(glid: int):
     return _ensure_built(glid)["md"]
@@ -101,10 +107,74 @@ class Event(BaseModel):
     meta: dict = Field(default_factory=dict)  # disposition, interaction_id, etc.
 
 
+# ------------------------------------------------------------------ Sarvam call-end webhook
+def _summarise_transcript(turns: list[dict]) -> str:
+    """2-line summary of a Sarvam transcript via sarvam-105b (reasoning OFF). Falls back to last user line."""
+    lines = [f"{t.get('role', '?')}: {t.get('indic_text') or t.get('en_text', '')}" for t in turns if t]
+    if not lines:
+        return ""
+    try:
+        import os
+        from sarvamai import SarvamAI
+        client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
+        r = client.chat.completions(
+            model="sarvam-105b", temperature=0.2, reasoning_effort=None, max_tokens=200,
+            messages=[{"role": "user", "content":
+                       "Summarise this IndiaMART call between VANI (agent) and a seller (user) in 2 short English "
+                       "sentences: what was agreed, any price/quantity/time mentioned, and what the seller wants next. "
+                       "Facts only.\n\n" + "\n".join(lines)[-4000:]}],
+        )
+        return (r.choices[0].message.content or "").strip()
+    except Exception:  # noqa: BLE001
+        users = [l for l in lines if l.startswith("user:")]
+        return ("Seller said: " + users[-1][5:].strip()) if users else lines[-1]
+
+
+@app.post("/webhook/sarvam")
+def sarvam_webhook(payload: dict):
+    """Sarvam POSTs here after every call (campaign / inbound deployment / instant outbound).
+    Shape: sarvam://schemas/webhook-payload. We read glid + call_summary from the agent variables,
+    else summarise interaction_transcript, then append the event and rebuild the memory file."""
+    fav = payload.get("final_agent_variables") or {}
+    oav = payload.get("output_agent_variables") or {}
+    iav = payload.get("initial_agent_variables") or {}
+    glid = fav.get("glid") or oav.get("glid") or iav.get("glid") or payload.get("user_identifier")
+    try:
+        glid = int(str(glid))
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail=f"no usable glid in payload (got {glid!r})")
+    summary = (oav.get("call_summary") or fav.get("call_summary") or "").strip()
+    source = "call_summary"
+    if not summary:
+        summary = _summarise_transcript(payload.get("interaction_transcript") or [])
+        source = "transcript_llm"
+    if not summary:
+        return {"ok": False, "glid": glid, "skipped": "no summary and no transcript"}
+    ev = Event(channel="voice", summary=summary, time=None, meta={
+        "interaction_id": payload.get("interaction_id"), "duration": payload.get("duration"),
+        "connectivity": payload.get("connectivity_status"), "summary_source": source,
+    })
+    r = post_event(glid, ev)
+    r["summary_source"] = source
+    return r
+
+
+class EventWithGlid(Event):
+    glid: int
+
+
+@app.post("/events")
+def post_event_q(ev: EventWithGlid):
+    """Same as /events/{glid} but glid in the body — for the agent's on_end tool."""
+    return post_event(ev.glid, Event(**ev.model_dump(exclude={"glid"})))
+
+
 @app.post("/events/{glid}")
 def post_event(glid: int, ev: Event):
     """Append one new event and regenerate the memory file. Returns how long freshness took."""
     t0 = time.perf_counter()
+    if not ev.summary.strip():  # e.g. on_end fired before the call summary was extracted
+        return {"ok": False, "glid": glid, "skipped": "empty summary", "freshness_seconds": 0.0}
     d = OUT_DIR / str(glid)
     d.mkdir(parents=True, exist_ok=True)
     rec = ev.model_dump()

@@ -99,14 +99,17 @@ def render_facts(ev: dict) -> dict[str, str]:
 INSIGHT_PROMPT = """You write the memory file an IndiaMART voice bot (VANI) reads before calling a seller.
 Below is the seller's recent activity as JSON. Write ONLY a JSON object with these keys:
 - "story": 2 sentences, English, what this seller has been doing and what matters right now. No fluff.
-- "opener": the first line VANI should say after the seller confirms their name. Hinglish in Roman script,
-  under 25 words, mentions the single most recent concrete thing (an unread enquiry, a fixed meeting, a quote).
+- "opener": the first line VANI should say on the NEXT conversation, after the seller confirms their name.
+  Hinglish in Roman script, under 25 words. It refers to the single most recent concrete thing (an unread
+  enquiry, a fixed meeting, a quote, a callback that was promised) in PAST tense ("aapne bola tha", "humne tay
+  kiya tha") and then asks one short question to continue. Never say the agent is doing something "right now".
 - "next_action": one line, English, the most useful thing VANI can help with on this call.
 - "avoid": one line, English, what VANI must not do or repeat, based on past calls (e.g. objections, hang-ups).
 Rules:
-- "live_events" are the NEWEST things that happened, on other channels (voice call, WhatsApp, chat, app),
-  after the rest of the data. If the list is non-empty, the opener MUST continue from the newest live event
-  (what the seller said or asked there), and the story must mention it. This is how VANI resumes a conversation.
+- "live_events_newest_first" are the NEWEST things that happened, on other channels (voice call, WhatsApp,
+  chat, app), after the rest of the data. The FIRST item is the newest. If the list is non-empty, the opener
+  MUST continue from that first item (what the seller said or agreed there), and the story must mention it.
+  This is how VANI resumes a conversation across channels.
 - Judge the seller's mood from the MOST RECENT VANI call outcome, not older ones (a later "Meeting Fixed"
   outweighs earlier "Not Interested").
 - Facts must come from the JSON only. Do not invent names, dates or numbers.
@@ -117,7 +120,7 @@ SELLER JSON:
 
 def llm_insight(ev: dict) -> tuple[dict, float, str]:
     """Returns (insight dict, seconds, source) where source is 'llm' or 'fallback'."""
-    slim = {"live_events": ev["live_events"][-3:]}
+    slim = {"live_events_newest_first": list(reversed(ev["live_events"][-3:]))}
     slim.update({k: v for k, v in ev.items() if k not in ("replies", "live_events")})
     slim["enquiries"] = ev["enquiries"][:6]
     slim["vani_latest_transcript"] = ev["vani_latest_transcript"][:8]

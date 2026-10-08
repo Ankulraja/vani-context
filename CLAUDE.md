@@ -195,10 +195,31 @@ Design decisions:
   itself recalled "kal Delhi buyers se 2 inch MS pipes ke liye 3 enquiries, 2 unread" and offered help.
   `send_chat` cannot inject variables — it uses the variable defaults, so for chat demos set the
   defaults; for phone/SDK calls pass `agent_variables`.
-- Still to do on the agent (needs our API first): `create_api_tool` with `lifecycle="on_start"` →
-  GET `/context/{glid}` → `save_to_variables` [{response_path:"context", variable_name:"user_context"},
-  {response_path:"name", variable_name:"user_name"}]; `lifecycle="on_end"` → POST `/events/{glid}`
-  with `{{call_summary}}`. Then voicemail message + call goal + commit v2.
+- **Agent wired to our API (2026-10-08 23:25, draft v2, NOT yet committed as a version):**
+  - Variables now: `glid` (default "95568576"), `user_name`, `user_context`, `opener`, `next_action`, `avoid`,
+    `call_summary` (post-call extracted). Prompt Facts section uses `{{user_context}}`, `{{opener}}`,
+    `{{next_action}}`, `{{avoid}}`; guideline step 2 = "say the suggested first line, ask whether to continue".
+  - Tool `load_seller_memory` (id 16bb8840-…, lifecycle **on_start**): GET `<TUNNEL>/context?glid={{glid}}`,
+    save_to_variables context→user_context, opener→opener, next_action→next_action, avoid→avoid, name→user_name.
+  - Tool `save_call_to_memory` (id bd0e64ac-…, lifecycle **on_end**): POST `<TUNNEL>/events`
+    body {glid, channel:"voice", summary:{{call_summary}}}. **Known limitation:** `call_summary` is extracted
+    AFTER on_end fires, so this POST arrives with an empty summary (API now skips empty summaries).
+    Real path = Sarvam **call-end webhook** → `POST <TUNNEL>/webhook/sarvam` (payload schema
+    `sarvam://schemas/webhook-payload`: `final_agent_variables.call_summary`, `interaction_transcript`).
+    Set `webhook_config.url` on the deployment / campaign / instant-outbound call.
+  - `<TUNNEL>` = cloudflared quick tunnel, **changes every restart**. Current: see `/tmp/vani_public_url.txt`.
+    Start: `cloudflared tunnel --url http://localhost:8000` (log `/tmp/cloudflared.log`). After a restart,
+    update both tools' URLs via MCP (`agents` delete_tool + `create_api_tool`, or dashboard Tools tab).
+  - **End-to-end verified via `send_chat` (draft v2):** Sarvam's egress IP 4.213.167.70 hit
+    `GET /context?glid=95568576`, and the agent's first line was "जी, आपने WhatsApp पर HP 16GB pen drive का rate
+    दो सौ चालीस रुपये per piece बताया था। क्या मैं यह Barmer buyer को update कर दूँ?" — i.e. it resumed from
+    the WhatsApp event. On end, `POST /events` arrived (empty summary).
+- **`POST /webhook/sarvam` added and tested** with a fake payload (transcript, empty call_summary): the API
+  summarised the transcript with sarvam-105b ("seller agreed ₹240/piece, ₹230 above 100 pcs, call back 11 AM"),
+  appended the event, rebuilt seller.md in 1.76 s, and the next opener continued from it. Falls back to the
+  last user line if the LLM fails. Reads glid from final/output/initial_agent_variables or user_identifier.
+- Remaining on the agent: voicemail message + call goal (playbook says required), commit v2, phone test
+  (`verify_phone_number` → `place_test_call` with `app_variables={"glid": ...}`), web widget embed.
 
 ## Dataset findings (2026-10-08 night)
 
