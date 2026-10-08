@@ -21,14 +21,31 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
+from app.builder.buyer_md import build_buyer_md
 from app.builder.seller_md import OUT_DIR, build_seller_md
+from app.sources.buyer import _all_contexts as _buyer_contexts
+from app.sources.seller import _csv as _seller_csv
 
 app = FastAPI(title="VANI Context API", version="0.1")
 
 
 # ------------------------------------------------------------------ helpers
+def role_of(glid: int) -> str:
+    """'seller' if the GLID is in the seller profile CSV, 'buyer' if in the buyer getContext export."""
+    prof = _seller_csv("gc_seller_profile.csv")
+    if (prof["fk_glusr_usr_id"] == glid).any():
+        return "seller"
+    if glid in _buyer_contexts():
+        return "buyer"
+    raise HTTPException(status_code=404, detail=f"GLID {glid} not found in seller or buyer data")
+
+
+def build_context(glid: int) -> dict:
+    return build_seller_md(glid) if role_of(glid) == "seller" else build_buyer_md(glid)
+
+
 def _md_path(glid: int) -> Path:
-    return OUT_DIR / str(glid) / "seller.md"
+    return OUT_DIR / str(glid) / f"{role_of(glid)}.md"
 
 
 def _parse_md(md: str) -> dict:
@@ -50,7 +67,7 @@ def _ensure_built(glid: int, rebuild: bool = False) -> dict:
     p = _md_path(glid)
     if rebuild or not p.exists():
         try:
-            return build_seller_md(glid)
+            return build_context(glid)
         except KeyError as e:
             raise HTTPException(status_code=404, detail=str(e)) from e
     md = p.read_text()
@@ -71,18 +88,22 @@ def get_context(glid: int, rebuild: bool = False):
     md = r["md"]
     events = json.loads((OUT_DIR / str(glid) / "events.json").read_text())
     fields = _parse_md(md)
-    company = events["profile"]["company"] or f"GLID {glid}"
+    role = role_of(glid)
+    prof = events["profile"]
+    name = prof.get("name") or prof.get("company") or f"GLID {glid}"  # sellers have no person name; the company works as the address
+    company = prof.get("company") or name
     return {
         "glid": glid,
-        "name": company,  # we have no person name in the dataset; the company works as the address
+        "role": role,
+        "name": name,
         "company": company,
-        "city": events["profile"]["city"],
+        "city": prof.get("city"),
         "opener": fields["opener"],
         "next_action": fields["next_action"],
         "avoid": fields["avoid"],
         "story": fields["story"],
-        "unread_enquiries": events["unread_enquiries"],
-        "context": md,  # full seller.md goes into the agent's prompt as {{user_context}}
+        "unread_enquiries": events.get("unread_enquiries", 0),
+        "context": md,  # full seller.md / buyer.md goes into the agent's prompt as {{user_context}}
         "updated_at": datetime.fromtimestamp(_md_path(glid).stat().st_mtime).isoformat(timespec="seconds"),
         "build_seconds": r["seconds_total"],
         "insight_source": r["insight_source"],
@@ -96,6 +117,8 @@ def get_context_q(glid: int, rebuild: bool = False):
 
 
 @app.get("/context/{glid}/seller.md", response_class=PlainTextResponse)
+@app.get("/context/{glid}/buyer.md", response_class=PlainTextResponse)
+@app.get("/context/{glid}/md", response_class=PlainTextResponse)
 def get_context_md(glid: int):
     return _ensure_built(glid)["md"]
 
@@ -182,7 +205,7 @@ def post_event(glid: int, ev: Event):
     with (d / "events.jsonl").open("a") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     try:
-        r = build_seller_md(glid)
+        r = build_context(glid)
     except KeyError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     return {

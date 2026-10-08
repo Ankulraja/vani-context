@@ -225,6 +225,12 @@ Design decisions:
   summarised the transcript with sarvam-105b ("seller agreed ₹240/piece, ₹230 above 100 pcs, call back 11 AM"),
   appended the event, rebuilt seller.md in 1.76 s, and the next opener continued from it. Falls back to the
   last user line if the LLM fails. Reads glid from final/output/initial_agent_variables or user_identifier.
+- **Buyer support on the agent (2026-10-09 00:00):** prompt is now role-neutral (uses `{{user_role}}`, buyer and
+  seller objectives). New variable `user_role`. on_start tool recreated as **`load_user_memory`
+  (id 938b670c-…)** with extra mapping role→user_role (old `load_seller_memory` deleted). `glid` default is
+  now **274238067 (buyer Aarti Singh)** for the user's next dashboard test. `send_chat` test passed: first
+  line was "आपने बताया था कि VP Precon का quote एक हज़ार आठ सौ पचास रुपये per bollard बहुत ज़्यादा है…" (from a live
+  voice event posted to `/events/274238067`).
 - Remaining on the agent: voicemail message + call goal (playbook says required), commit v2, phone test
   (`verify_phone_number` → `place_test_call` with `app_variables={"glid": ...}`), web widget embed.
 
@@ -263,8 +269,18 @@ Design decisions:
 | `app/sources/seller.py` | `get_seller_events(glid, as_of=None) -> dict`. Reads the 11 CSVs (cached with lru_cache), applies lookback (30 d activity / 180 d conversations), returns profile, enquiries (+unread count), replies, buyer-call stats, buylead stats, WhatsApp turns, VANI calls + latest transcript (with its date), executive-call stats, PNS quotes, and `live_events` (from `context_files/<glid>/events.jsonl`). Only file that knows CSV columns → swap for real APIs here. | ~0.6 s |
 | `app/builder/seller_md.py` | `build_seller_md(glid, as_of=None, use_llm=True) -> dict`. Facts rendered by code (`render_facts`), 4 insight fields by `sarvam-105b` (`llm_insight`: story, Hinglish opener, next_action, avoid) with rule-based fallback. Writes `context_files/<glid>/seller.md` (~33 lines, ~2.5 KB) + `events.json`. Returns timings for the freshness metric. | 1.7 s with LLM, 0.6 s without |
 | `scripts/explore_seller.py [glid]` | prints a seller's raw history from every file | — |
+| `app/sources/buyer.py` | `get_buyer_events(glid)`. Parses the Kibana CSV once (lru_cache; 237 usable GLIDs, 141 rows unusable: 68 NaN + truncated JSON), latest snapshot per GLID. Returns profile (name, company, city, customer_type, verifications, vintage), 30-day activity stream (ENQ / C2C=called seller / Browse / Search / BL), counts, top categories, sellers_contacted, last_enquiry, last_lead, active_buyleads, WhatsApp texts (parsed from CHAT_CONTENT), IndiaMART connect calls, tickets, live_events. `buyer_glids()` lists them. | 0.2 s (after first load ~1 s) |
+| `app/builder/insight.py` | shared `llm_insight(slim, role, extra)` → story / opener / next_action / avoid via sarvam-105b (reasoning off) | ~1–1.5 s |
+| `app/builder/buyer_md.py` | `build_buyer_md(glid)` → `context_files/<glid>/buyer.md` (~34 lines). Hint to LLM: WhatsApp "You just spoke with X" = buyer phoned seller X. | 1.7 s |
 | `app/api.py` | FastAPI. `GET /context/{glid}` → flat JSON (`name`, `company`, `city`, `opener`, `next_action`, `avoid`, `story`, `unread_enquiries`, `context`=full seller.md, `updated_at`, `build_seconds`); `?rebuild=true` forces regeneration. `GET /context/{glid}/seller.md` raw file. `POST /events/{glid}` body `{channel, summary, time?, meta?}` → appends to `context_files/<glid>/events.jsonl`, rebuilds, returns `freshness_seconds` + new opener. `GET /health`. | cached GET 0 s; POST→fresh file **~1.8 s** |
 
+**Role detection:** `role_of(glid)` = seller if in `gc_seller_profile.csv`, else buyer if in the getContext export,
+else 404. `GET /context` returns `role`, `name` (buyer person name / seller company), builds the right file.
+`GET /context/{glid}/md` returns whichever file exists. `POST /events` rebuilds the right file too.
+**Demo buyer = GLID 274238067 "Aarti Singh", Gharaunda** (new free user; 29 Sep enquiries + calls for Concrete
+Bollards to 11 sellers, active buy-lead "Concrete Cylindrical Bollards", 30 Sep phoned 4 sellers, WhatsApp
+seller replies). Backup buyer: 59681744 Ramesh, Global Print And Solution, Mumbai (paper bags / hand bells;
+IndiaMART connect calls "not interested"). Buyer data has no phone numbers either.
 Run API: `uvicorn app.api:app --port 8000` (log in `/tmp/vani_api.log` when started by Claude).
 **Live events** (`events.jsonl`) are rendered in a "## Latest across channels (live)" section right under
 the story, and the LLM prompt forces the opener to continue from the newest live event. Verified: after
@@ -312,8 +328,7 @@ real starter APIs, re-create the agent tools, and log all of it in `skills.md` s
 
 1. User: add Day-0 lines to `skills.md`; move `pss-runner/` out; press "Test agent" in the dashboard (draft v2)
    to hear the memory opener by voice; send Org ID to organisers.
-2. Buyer side: `app/sources/buyer.py` (parse getContext JSON from the Kibana CSV) + `app/builder/buyer_md.py`
-   + `GET /context/{glid}` auto-detecting buyer vs seller. Same file style as seller.md.
+2. (done 2026-10-09 00:00) Buyer side: source + builder + role-aware API, tested end to end with the agent.
 3. Agent polish via MCP: voicemail message (`configure_voicemail`), call goal / evaluation criteria, then
    `agents commit` → v2. Intro line may address the company name ("Alfa Enterprises ji") — fine for sellers.
 4. Phone test: `verify_phone_number` (OTP to the user's phone) → `place_test_call(app_variables={"glid": "95568576"})`
