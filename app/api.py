@@ -33,6 +33,10 @@ from app.sources.seller import _csv as _seller_csv
 
 app = FastAPI(title="VANI Context API", version="0.1")
 
+# The demo page frames the real indiamart.com and a Chrome extension there posts events to us from another origin.
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
 
 # ------------------------------------------------------------------ helpers
 def role_of(glid: int) -> str:
@@ -461,6 +465,18 @@ def post_event(glid: int, ev: Event):
         skip = "empty summary"
     elif (ev.outcome or "").strip() in SKIP_OUTCOMES:  # call dropped / wrong person: nothing worth remembering
         skip = f"outcome {ev.outcome}"
+    d = OUT_DIR / str(glid)
+    if not skip and ev.channel == "web":  # same website line twice (page reload / redirect) within 10 min = one action
+        f = d / "events.jsonl"
+        last = [json.loads(l) for l in f.read_text().splitlines()[-3:] if l.strip()] if f.exists() else []
+        for prev in last:
+            if prev.get("summary") == ev.summary.strip():
+                try:
+                    age = (datetime.now() - datetime.strptime(prev.get("time", ""), "%Y-%m-%d %H:%M")).total_seconds()
+                except ValueError:
+                    age = 0
+                if age < 600:
+                    skip = "duplicate web event"
     if skip:
         if lang_changed:  # still regenerate, so the next greeting is in the new language
             build_context(glid)

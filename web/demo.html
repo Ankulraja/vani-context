@@ -126,8 +126,15 @@
   .browser { flex:1; min-height:0; background:#fff; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; color:#111; box-shadow:0 1px 2px rgba(0,0,0,.05); }
   .chrome { height:36px; background:#f6f6f4; display:flex; align-items:center; gap:8px; padding:0 12px; border-bottom:1px solid var(--line); }
   .chrome .dots i { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:5px; } .chrome .dots i:nth-child(1){background:#ff5f57} .chrome .dots i:nth-child(2){background:#febc2e} .chrome .dots i:nth-child(3){background:#28c840}
-  .url { flex:1; background:#fff; border-radius:16px; padding:4px 12px; font-size:12px; color:#555; border:1px solid #e0e0e0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .url { flex:1; background:#fff; border-radius:16px; padding:4px 12px; font-size:12px; color:#555; border:1px solid #e0e0e0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font:inherit; font-size:12px; outline:none; }
+  .url:focus { border-color:#999; }
+  .chrome .nav { background:transparent; color:#666; font-size:15px; padding:0 4px; }
   .site { flex:1; min-height:0; overflow:auto; scroll-behavior:smooth; }
+  .live { flex:1; min-height:0; border:0; width:100%; background:#fff; }
+  .seg { margin-left:auto; display:flex; background:var(--card2); border-radius:999px; padding:3px; }
+  .seg button { height:28px; padding:0 12px; border-radius:999px; background:transparent; color:var(--muted); font-size:12px; font-weight:600; }
+  .seg button.on { background:var(--black); color:#fff; }
+  .hint { font-size:11px; color:var(--muted); margin:6px 4px 0; }
   .im-head { position:sticky; top:0; z-index:3; background:#fff; border-bottom:1px solid #eee; padding:10px 18px; display:flex; align-items:center; gap:16px; }
   .im-logo { font-weight:800; font-size:20px; letter-spacing:-.5px; color:var(--im-blue); } .im-logo span { color:var(--im-orange); }
   .im-search { flex:1; display:flex; border:2px solid var(--im-blue); border-radius:6px; overflow:hidden; max-width:560px; }
@@ -213,10 +220,15 @@
 
   <!-- 2. DESKTOP BROWSER -->
   <section class="col">
-    <div class="label"><div class="t"><span class="ico">🖥</span>Website</div><b id="lblSite"></b></div>
+    <div class="label" style="flex-direction:row;align-items:center;gap:12px"><div><div class="t"><span class="ico">🖥</span>Website</div><b id="lblSite"></b></div>
+      <div class="seg" id="modeSeg"><button data-mode="emu" class="on">Emulated</button><button data-mode="live">Live indiamart.com</button></div></div>
     <div class="monitor"><div class="browser">
-      <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url" id="url">https://www.indiamart.com</span></div>
+      <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><button class="nav" id="navHome" title="Home" hidden>⌂</button><input class="url" id="url" value="https://www.indiamart.com" readonly /></div>
       <div class="site" id="site"></div>
+      <iframe class="live" id="live" hidden referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
+    </div>
+    <div class="hint" id="liveHint" hidden>Live mode needs the VANI Chrome extension (folder <code>extension/</code>, chrome://extensions → Load unpacked). It lets this frame show indiamart.com and sends your searches and clicks to the memory.</div>
+    <div style="display:none">
     </div></div>
   </section>
 
@@ -344,6 +356,7 @@ async function selectUser(glid) {
   fetch(`/active`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ glid }) }); // so the VANI call loads THIS user
   const [c, s, e] = await Promise.all([fetch(`/context?glid=${glid}`).then(r => r.json()), fetch(`/site/${glid}`).then(r => r.json()), fetch(`/events/${glid}`).then(r => r.json())]);
   knownEvents = e.length; renderMemory(c, false); renderSite(s);
+  if (mode === "live") loadLive();
 }
 
 /* ---------- WhatsApp ---------- */
@@ -380,8 +393,11 @@ function flushSeen() {
 }
 function act(summary) { clearTimeout(flushTimer); seenQueue = []; toast("📝 " + summary); postEvent("web", summary); }
 
+let lastSite = null;
 function renderSite(s) {
+  lastSite = s;
   const site = $("#site"); const who = s.role === "buyer" ? "Buyer" : "Seller";
+  if (mode === "live") { $("#lblSite").textContent = "live · " + new URL(liveHome()).hostname; return; }  // emulated panel is hidden
   $("#url").textContent = `https://${s.site}/${s.role === "buyer" ? "search?q=" : "leads/manager"}`; $("#lblSite").textContent = s.site;
   if (s.role === "buyer") {
     site.innerHTML = `
@@ -546,12 +562,41 @@ $("#reset").onclick = async () => {
   await fetch(`/events/${user.glid}`, { method: "DELETE" }); await selectUser(user.glid); toast("Memory reset to dataset only");
 };
 
+/* ---------- Live mode: the real indiamart.com inside the frame (needs the Chrome extension in extension/) ---------- */
+let mode = "emu";
+try { mode = localStorage.getItem("vani_site_mode") || "emu"; } catch (e) {}
+const liveHome = () => user && user.role === "seller" ? "https://seller.indiamart.com/" : "https://www.indiamart.com/";
+function loadLive(url) { const f = $("#live"); f.src = url || liveHome(); $("#url").value = f.src; }
+function setMode(m) {
+  mode = m; try { localStorage.setItem("vani_site_mode", m); } catch (e) {}
+  $("#modeSeg").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
+  const live = m === "live";
+  $("#site").hidden = live; $("#live").hidden = !live; $("#liveHint").hidden = !live; $("#navHome").hidden = !live;
+  $("#url").readOnly = !live;
+  // the emulated panel's scroll capture must not fire while it is hidden (layout shifts looked like "browsing")
+  if (live) { if (observer) observer.disconnect(); clearTimeout(flushTimer); seenQueue = []; }
+  else if (lastSite) renderSite(lastSite);
+  if (live) { if (!$("#live").src) loadLive(); $("#lblSite").textContent = "live · " + new URL(liveHome()).hostname; }
+  else if (user) { $("#lblSite").textContent = user.role === "buyer" ? "indiamart.com" : "seller.indiamart.com"; $("#url").value = `https://${$("#lblSite").textContent}/${user.role === "buyer" ? "search?q=" : "leads/manager"}`; }
+}
+$("#modeSeg").querySelectorAll("button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+$("#navHome").onclick = () => loadLive();
+$("#url").addEventListener("keydown", e => { if (e.key === "Enter" && mode === "live") { let u = $("#url").value.trim(); if (!/^https?:/.test(u)) u = "https://www.indiamart.com/search.mp?ss=" + encodeURIComponent(u); loadLive(u); } });
+// the extension's content script inside the frame tells us where the user is and what it captured
+window.addEventListener("message", e => {
+  const d = e.data || {};
+  if (d.vani === "url" && mode === "live") { $("#url").value = d.href; }
+  else if (d.vani === "event") { toast("📝 " + d.summary); const f = $("#fresh"); f.className = "fresh busy"; f.textContent = `web → ${user.role}.md…`; setTimeout(pollOnce, 2500); }
+});
+async function pollOnce() { if (!user) return; const ev = await fetch(`/events/${user.glid}`).then(r => r.json()).catch(() => null); if (ev && ev.length > knownEvents) { knownEvents = ev.length; refreshMemory(true, "✔ web → " + user.role + ".md"); } else setTimeout(pollOnce, 1500); }
+setMode(mode);
+
 // background: pick up events that arrive from elsewhere (dashboard test, another channel)
 setInterval(async () => { if (!user || pollTimer) return; const ev = await fetch(`/events/${user.glid}`).then(r => r.json()).catch(() => null); if (ev && ev.length > knownEvents) { knownEvents = ev.length; refreshMemory(true, "✔ new event from another channel"); } }, 6000);
 
 // deep link: /demo#95568576  (dev: #95568576&scr=incoming|incall|callDone shows a call screen; &mem opens the drawer)
 const hash = new URLSearchParams(location.hash.slice(1).replace(/^(\d+)/, "glid=$1"));
-selectUser(USERS.some(u => u.glid === Number(hash.get("glid"))) ? Number(hash.get("glid")) : USERS[0].glid).then(() => { if (hash.get("scr")) showScr(hash.get("scr")); if (hash.has("mem")) $("#brainBtn").click(); });
+selectUser(USERS.some(u => u.glid === Number(hash.get("glid"))) ? Number(hash.get("glid")) : USERS[0].glid).then(() => { if (hash.get("scr")) showScr(hash.get("scr")); if (hash.has("mem")) $("#brainBtn").click(); if (hash.has("live")) setMode("live"); });
 </script>
 </body>
 </html>
