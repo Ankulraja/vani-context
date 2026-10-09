@@ -123,6 +123,8 @@ async function load(rebuild = false) {
   const r = await fetch(`/context?${q}&rebuild=${rebuild}`); const d = await r.json();
   if (!r.ok) { $("#status").textContent = "❌ " + (d.detail || r.status); return; }
   current = d;
+  // Tell the API which user is on screen, so the next VANI call (widget/dashboard) loads this memory.
+  fetch(`/active`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ glid: d.glid }) });
   $("#status").innerHTML = `<span class="pill ok">${d.role}</span><b>${d.name}</b> · ${d.city || ""} · GLID ${d.glid} · ${(performance.now()-t0|0)} ms` +
     (d.build_seconds ? ` (built in ${d.build_seconds}s, insight: ${d.insight_source})` : " (cached)");
   $("#meta").textContent = `updated ${d.updated_at.replace("T"," ")}`;

@@ -338,6 +338,17 @@ Hindi maps patched to "नमस्ते {{user_name}}, आप कैसे ह
 failed memory fetch is obvious: `user_name` = "ji" (greeting becomes "Hello ji…"), `user_context` =
 "MEMORY NOT LOADED…". If VANI ever says "Hello ji" → the on_start tool could not reach the API (tunnel
 down / URL changed).
+**BUG FOUND 2026-10-09 ~16:00 IST (not fixed yet): widget always loads seller 93557756.** Sarvam analytics
+(`attempts` report) shows widget sessions with `user_id` = 87677035 / 274238067 / 95568576 (page's user-id DOES
+reach Sarvam), but `agent_variables.glid` = 93557756 and memory = Visionary Style. Cause: the on_start query param
+`uid` is bound to agent variable `user_identifier`, which Sarvam leaves EMPTY (API log: `GET /context?glid=93557756&uid=`),
+so `/context` falls back to the frozen `glid` default 93557756. Fix options: (a) find the real system-variable name
+for the User Identifier in the dashboard tool editor and rebind `uid`; (b) demo hack: page POSTs the selected GLID to
+the API as "active GLID", API uses it when uid is empty; (c) newer embed SDK with agentVariables.
+**Option (b) DONE 15:45 IST:** `POST /active {glid}` writes `context_files/_active.json`; `web/index.html` calls it on
+every Load memory. `GET /context` uses the active GLID only when the `uid` param is present but unusable (= agent
+call); page calls (no uid) and real uids are unaffected. No agent change needed. Verified by `send_chat` on v8:
+active=274238067 → VANI opened with Aarti Singh's VP Precon bollard quote. Limit: one on-screen user at a time.
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends

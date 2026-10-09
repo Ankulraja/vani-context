@@ -150,15 +150,44 @@ def resolve_uid(uid: str) -> int | None:
         return None
 
 
+# ------------------------------------------------------------------ demo: "active GLID" from the web page
+# Sarvam leaves the tool's {{user_identifier}} empty, so the widget's user-id never reaches us. Demo workaround:
+# the web page POSTs the GLID it has selected; an agent call without a usable uid gets that GLID.
+# One active user at a time — fine for a demo, not for production.
+ACTIVE_FILE = OUT_DIR / "_active.json"
+
+
+class Active(BaseModel):
+    glid: int
+
+
+@app.post("/active")
+def set_active(a: Active):
+    role_of(a.glid)  # 404 for unknown GLIDs
+    data = {"glid": a.glid, "set_at": datetime.now().isoformat(timespec="seconds")}
+    ACTIVE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ACTIVE_FILE.write_text(json.dumps(data))
+    return data
+
+
+@app.get("/active")
+def get_active():
+    return json.loads(ACTIVE_FILE.read_text()) if ACTIVE_FILE.exists() else {"glid": None}
+
+
 @app.get("/context")
 def get_context_q(glid: int | None = None, phone: str | None = None, uid: str | None = None, rebuild: bool = False):
     """Same as /context/{glid} but with ?glid= / ?phone= / ?uid= — easy to bind to agent variables in Sarvam tools.
-    Priority: uid (Sarvam User Identifier: widget user-id = GLID, or inbound caller number) → phone → glid.
+    Priority: uid (Sarvam User Identifier: widget user-id = GLID, or inbound caller number) → active GLID set by
+    the web page (only when the uid param is present but unusable, i.e. an agent call) → phone → glid.
     A uid that resolves to nothing falls back to glid (the agent's default), so a demo never dies."""
     if uid and not str(uid).startswith("user_"):  # widget default is user_<timestamp> = anonymous
         g = resolve_uid(uid)
         if g is not None:
             glid = g
+            uid = None  # resolved, skip the active-GLID fallback below
+    if uid is not None and get_active().get("glid"):  # agent call (sends uid=) with no usable uid -> page's GLID
+        glid = get_active()["glid"]
     if glid is None and phone:
         glid = glid_from_phone(phone)
     if glid is None:
