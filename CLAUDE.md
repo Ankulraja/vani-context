@@ -260,6 +260,58 @@ Design decisions:
   picker, labelled "User Identifier"). (playbook says required), commit v2, phone test
   (`verify_phone_number` → `place_test_call` with `app_variables={"glid": ...}`), web widget embed.
 
+**2026-10-09 17:40 IST — "voice change not reflected on localhost" solved + v10 committed (draft now v11).**
+- Cause: the dashboard "Test agent" runs the DRAFT; the web widget on `/demo` and `/` runs the latest COMMITTED
+  version. The user changed the voice in the draft (v10) → widget still ran v9 (Ishita). Rule: **any dashboard
+  change → `agents commit`** before testing on localhost.
+- v10 = voice **"Chaitra - Conversational Voice"** (`01a0cf16-944c-…`; catalogue describes it as a Kannada showcase
+  voice, user liked it in the dashboard), VAD 4/6/-40 (faster, more sensitive than v9's 6/8/-35), pace 1.15,
+  **inactivity nudge 12 s** (was 5 s: "Hey, are you still on the call?" fired while people were still thinking),
+  nudge text "Hello, are you there?" / "हैलो, आप सुन रहे हैं?".
+- on_end tool `save_call_to_memory` recreated (id `4663424b-…`) and now also posts `outcome` (= `call_outcome`) and
+  `callback_time`. API: `Event` has `outcome` / `callback_time`; `POST /events` **skips** outcomes
+  `no_conversation` / `wrong_person` (test calls where nobody really spoke were becoming the newest memory and
+  the next opener continued from "the user gave an unclear response"); a callback time is appended to the summary
+  line. Webhook summariser now uses the real role (was always "seller"). `/call` default app_version → 10.
+- Verified: `send_chat` on v10 → "अच्छा, तो आपको SanDisk Memory Card की enquiry आई थी, क्या आप उसका reply देना चाहेंगे?".
+- Sarvam analytics MCP reports (attempts / interactions / tool_table) timed out at 17:30 IST; retry later.
+- Analytics (worked at 17:45 with a 25-min window): widget calls have agent response time ~0.6 s; `user_id` for
+  widget calls = the page's GLID, dashboard calls = hashed email. Greeting once came out "नमस्ते आरती ji, आप कैसी हैं?"
+  despite the rule → `prefs.clean_greeting()` now fixes कैसी→कैसे and strips "ji/जी" after the name in code.
+
+**2026-10-09 17:55 IST — "make all the changes" round (user asked to apply the review):**
+- Memory file: new Flags line `- Recent VANI calls (live): 9 Oct resumed_and_helped · …` (`seller_md.recent_calls_line`,
+  outcome only, newest first; "summary noted" for events saved before outcomes existed).
+- `/demo`: freshness number stays visible ("updated 40 s ago · freshness 1.6s"). Captions: verified in the embed
+  source (`sarvam-convai-embed@1.0.19`) that the widget logs user speech as `console.log("Transcript:", json)`
+  (`server.event.transcription`) and VANI's lines as `console.log("Text message:", obj)` (`server.media.text`); the
+  hook now listens to both. Field names inside those messages still unverified by a real mic call.
+- Greeting prompt has a seller example ("आपको X की enquiry आई थी"); seller fallback greeting names the latest enquiry.
+- README.md written (architecture, sources, lookback 30/180 d, refresh logic, real vs simulated table, limitations,
+  run). skills.md started as the dated journey log.
+- **Test memories reset:** `DELETE /events/95568576` and `/274238067` (today's junk test calls / "tshirt" search).
+  Backups in `context_files/_backups/<glid>.jsonl`. New openers: Alfa = HP Pen Drive 16gb enquiry; Aarti = Concrete
+  Cylindrical Bollards quotes.
+- **ngrok installed** (`brew install ngrok`, v3.39). `scripts/tunnel.sh`: uses a static ngrok domain when
+  `NGROK_DOMAIN` is in `.env` (user must sign up at dashboard.ngrok.com, `ngrok config add-authtoken …`, claim the free
+  static domain), else falls back to cloudflared. Once static: set both tool URLs once, commit, never re-point again.
+- **18:05 IST `/demo` rebuilt as three channel screens (user request):** left = WhatsApp phone, middle = website
+  browser, **right = a separate call phone** (idle screen with "VANI will open with" greeting + opener + which event
+  it comes from, "☎ VANI calls <first name>" button → incoming → in-call with captions → "Call ended / ✔ Saved <summary>"
+  screen). The memory file moved to a **slide-out drawer** (🧠 Memory button in the top bar, freshness badge on it;
+  deep link `&mem` opens it). Browser panel unchanged, user wants to discuss it in detail next.
+- **18:30 IST `/demo` visual pass:** WhatsApp phone now dark theme with WhatsApp Web's own default wallpaper tile
+  (`web/wa-bg.png`, dimmed), real IndiaMART logo DP (`web/im-logo.png`, 57 px app icon from indiamart.com), name
+  "IndiaMART" + blue tick. Whole page restyled to the user's design language (screenshot of their Test.IM dashboard):
+  warm light canvas `#f1f1ee`, white 24 px cards with title+subtitle, floating pill top bar (brand / user chips /
+  memory+reset+avatar), black primary pills, grey text. Memory drawer is a white card with a black "VANI will open
+  with" box (class `openbox`; it was `.open`, which collided with `.drawer.open` and painted the drawer black).
+- **Real indiamart.com in the middle panel is NOT possible:** all IndiaMART hosts send `x-frame-options: sameorigin`.
+  Proposed instead (user to confirm "go with A"): a Tampermonkey userscript / bookmarklet on the real site that posts
+  searches, product views, Get Latest Price / Call Supplier clicks to `POST /events` with the active GLID.
+- Still user-side: earphones for widget calls; one real mic call on `/demo` to confirm captions; listen to Chaitra
+  on a full Hindi call (switch back to Ishita `01a0cf17-0b6e-…` + commit if it sounds off); git commit.
+
 ## Dataset findings (2026-10-08 night)
 
 - `scripts/explore_seller.py [glid]` prints one seller's profile + latest rows from every file (works).
@@ -402,6 +454,31 @@ the story, and the LLM prompt forces the opener to continue from the newest live
 POSTing a WhatsApp event ("HP 16GB at ₹240, call back 11 AM") the opener became "Seller ne WhatsApp par
 HP 16GB pen drive ka rate 240 rupees bataya tha, main Barmer buyer ko update karna chahti hoon."
 To reset the demo: delete `context_files/95568576/events.jsonl` and call `/context/95568576?rebuild=true`.
+
+**Simplified showroom demo page `/demo` (2026-10-09 17:00 IST, `web/demo.html`, route in `api.py`):** three panels, almost
+no explanatory text, meant for the video / judges. Deep link `/demo#<glid>` (dev: `&scr=incoming|incall` shows a call screen).
+- **Phone (left):** WhatsApp chat with "IndiaMART". Typing a message → `POST /whatsapp/{glid}` {text}: appends a
+  whatsapp event, rebuilds the .md, then sarvam-105b writes a 1–2 line reply from the fresh call card (~2 s total;
+  canned fallback). Reply shown as a bubble + "🧠 memory updated in Xs".
+  **"☎ VANI calls <name>"** (top bar) → incoming-call screen with ringtone (WebAudio) → Accept → in-call screen (timer,
+  waveform, live captions) that **drives the hidden Sarvam web widget**: the page mounts `<sarvam-widget>` with
+  `visibility:hidden`, clicks its expand button then its "Start" button inside the open shadow root, and reads the
+  state back from the shadow DOM text ("Connecting…" / "End Call"). End button clicks the widget's "End Call".
+  Captions come from hooking `console.log("Transcript:", json)` which the widget emits (shape unverified; harmless if
+  absent). Verified headless: collapsed=1 button, expanded → "Start" found. **Not yet verified with a real mic call.**
+  After the call the page polls `/events/{glid}` every 3 s (2 min) for the on_end voice summary, then re-renders.
+- **Desktop (middle):** browser frame. Buyer → indiamart.com with search + cards from `GET /site/{glid}` (top
+  categories + recent keywords from the dataset). Seller → seller.indiamart.com Lead Manager with the real enquiries
+  (unread flag, message). Actions post `web` events via `POST /events/{glid}`: search, open card/enquiry, Get Latest
+  Price / Call Supplier, Reply / Call buyer. **Scroll capture:** IntersectionObserver; a card that comes into view
+  after load for 0.9 s gets a "👁 seen" badge + toast; views are batched (3.5 s) into one event "Buyer browsed on
+  indiamart.com: A, B". Posts are serialised (one rebuild at a time).
+- **Memory (right):** `buyer.md`/`seller.md` rendered, "Latest across channels (live)" highlighted green, flash on
+  change, badge shows "✔ whatsapp → buyer.md in 1.5s" then "updated N s ago". Top box = "VANI will open with"
+  (greeting + opener). "reset" button → `DELETE /events/{glid}` (drops events.jsonl, rebuilds from dataset).
+- Every user switch POSTs `/active` so a VANI call (widget/dashboard) loads that user. Background poll (6 s) picks
+  up events from other channels. The old detailed page stays at `/` (`web/index.html`).
+- New API routes: `GET /site/{glid}`, `POST /whatsapp/{glid}`, `DELETE /events/{glid}`, `GET /demo`.
 
 Run: `python -m app.builder.seller_md 95568576` (add `--no-llm` for rules only).
 Sample output for 95568576 is in `context_files/95568576/seller.md` (git-ignored, regenerate any time).

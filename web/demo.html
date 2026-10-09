@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VANI · one memory, every channel</title>
+<style>
+  :root {
+    /* design language: warm light canvas, white rounded cards, black primary, soft grey text */
+    --stage:#f1f1ee; --card:#ffffff; --card2:#f6f6f4; --ink:#111214; --muted:#6f7278; --line:#e6e6e2; --black:#111214;
+    --im-blue:#2e3192; --im-orange:#ff6a00;
+    /* WhatsApp dark theme */
+    --wa-head:#202c33; --wa-bg:#0b141a; --wa-in:#202c33; --wa-out:#005c4b; --wa-ink:#e9edef; --wa-muted:#8696a0; --wa-accent:#00a884; --wa-tick:#53bdeb;
+    --ok:#22c55e; --paper:#fbfbfd; --paper-ink:#1c1e21; --paper-muted:#6b7280; --paper-line:#e5e7eb;
+  }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--stage); color:var(--ink);
+         font:14px/1.45 Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; overflow:hidden; -webkit-font-smoothing:antialiased; }
+  button { font:inherit; cursor:pointer; border:0; }
+
+  /* ---------- top bar: floating pill groups ---------- */
+  .bar { height:72px; display:flex; align-items:center; gap:14px; padding:12px 16px 0; }
+  .pill { height:52px; display:flex; align-items:center; gap:6px; padding:0 8px 0 10px; background:var(--card); border-radius:999px; box-shadow:0 1px 2px rgba(0,0,0,.04), 0 0 0 1px rgba(0,0,0,.03); }
+  .brand { font-weight:700; font-size:17px; letter-spacing:-.2px; display:flex; align-items:center; gap:10px; padding-right:12px; }
+  .brand img { width:30px; height:30px; border-radius:50%; background:#fff; object-fit:contain; }
+  .brand small { font-weight:400; color:var(--muted); font-size:12px; margin-left:2px; white-space:nowrap; }
+  .pill, .brain, .ghost { white-space:nowrap; }
+  .users { display:flex; gap:4px; margin:0 auto; min-width:0; overflow:auto; scrollbar-width:none; }
+  .bar > .pill:first-child, .bar > .pill:last-child { flex-shrink:0; }
+  @media (max-width:1560px) { .brand small { display:none; } .chip .r { display:none; } }
+  .chip { height:40px; padding:0 14px; border-radius:999px; background:transparent; color:var(--ink); font-size:14px; white-space:nowrap; display:flex; align-items:center; gap:8px; }
+  .chip:hover { background:var(--card2); }
+  .chip.on { background:var(--black); color:#fff; }
+  .chip .r { font-size:10px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; padding:2px 6px; border-radius:6px; background:var(--card2); color:var(--muted); }
+  .chip.on .r { background:rgba(255,255,255,.18); color:#fff; }
+  .ghost { height:40px; background:transparent; color:var(--muted); padding:0 14px; border-radius:999px; font-size:13px; }
+  .ghost:hover { background:var(--card2); color:var(--ink); }
+  .brain { height:40px; background:transparent; color:var(--ink); padding:0 8px 0 14px; border-radius:999px; font-size:14px; display:flex; align-items:center; gap:10px; }
+  .brain:hover { background:var(--card2); }
+  .brain.on { background:var(--black); color:#fff; }
+  .fresh { font-size:11px; font-weight:600; padding:4px 10px; border-radius:999px; background:var(--card2); color:var(--muted); white-space:nowrap; }
+  .brain.on .fresh { background:rgba(255,255,255,.18); color:#fff; }
+  .fresh.hot { background:#dcfce7; color:#166534; }
+  .fresh.busy { background:#fff4e0; color:#9a5b00; }
+  .avatar-me { width:40px; height:40px; border-radius:50%; background:var(--card2); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px; color:var(--ink); }
+
+  /* ---------- stage: three cards ---------- */
+  .stage { height:calc(100% - 72px); display:grid; grid-template-columns:360px minmax(480px,1fr) 360px; grid-template-rows:minmax(0,1fr); gap:16px; padding:16px; }
+  .col { min-width:0; min-height:0; display:flex; flex-direction:column; background:var(--card); border-radius:24px; padding:18px 18px 16px; box-shadow:0 1px 2px rgba(0,0,0,.04), 0 0 0 1px rgba(0,0,0,.03); }
+  .label { display:flex; flex-direction:column; gap:2px; margin:0 4px 14px; }
+  .label .t { font-size:17px; font-weight:600; letter-spacing:-.2px; color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .label .t .ico { width:30px; height:30px; border-radius:10px; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .label b { font-weight:400; color:var(--muted); font-size:13px; }
+
+  /* ---------- phones ---------- */
+  .phone { width:300px; height:620px; margin:0 auto; background:#000; border-radius:44px; padding:12px; box-shadow:0 24px 50px rgba(0,0,0,.22), inset 0 0 0 2px #2b2f3a; position:relative; }
+  .phone .notch { position:absolute; top:22px; left:50%; transform:translateX(-50%); width:96px; height:26px; background:#000; border-radius:14px; z-index:5; }
+  .screen { width:100%; height:100%; border-radius:34px; overflow:hidden; position:relative; background:var(--wa-bg); }
+  .scr { position:absolute; inset:0; display:flex; flex-direction:column; }
+  .scr[hidden] { display:none; }
+
+  /* WhatsApp (dark theme, doodle wallpaper) */
+  .wa-head { background:var(--wa-head); color:var(--wa-ink); padding:44px 12px 10px; display:flex; align-items:center; gap:10px; }
+  .wa-head .back { color:var(--wa-ink); font-size:18px; margin-right:-2px; opacity:.9; }
+  .avatar { width:38px; height:38px; border-radius:50%; background:#fff; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .avatar img { width:34px; height:34px; object-fit:contain; }
+  .wa-head .t { line-height:1.15; flex:1; min-width:0; } .wa-head .t .n { font-weight:600; font-size:15px; display:flex; align-items:center; gap:4px; }
+  .wa-head .t small { display:block; font-size:11px; color:var(--wa-muted); }
+  .wa-head .ic { color:var(--wa-ink); font-size:16px; opacity:.85; margin-left:6px; }
+  .tick { width:16px; height:16px; flex-shrink:0; }
+  .chat { flex:1; overflow:auto; padding:10px 10px 6px; display:flex; flex-direction:column; gap:6px;
+          background-color:var(--wa-bg);
+          /* WhatsApp's default dark wallpaper tile (same file WhatsApp Web uses), dimmed like the real app */
+          background-image:linear-gradient(rgba(11,20,26,.72), rgba(11,20,26,.72)), url("/wa-bg.png"); background-size:auto, 400px auto; }
+  .msg { max-width:84%; padding:7px 9px 5px; border-radius:10px; font-size:13px; line-height:1.35; box-shadow:0 1px 1px rgba(0,0,0,.3); position:relative; word-break:break-word; color:var(--wa-ink); }
+  .msg.in { background:var(--wa-in); align-self:flex-start; border-top-left-radius:2px; }
+  .msg.out { background:var(--wa-out); align-self:flex-end; border-top-right-radius:2px; }
+  .msg .meta { display:block; text-align:right; font-size:10px; color:var(--wa-muted); margin-top:2px; }
+  .msg.out .meta { color:#a8d4c6; }
+  .msg .meta .ticks { color:var(--wa-tick); margin-left:4px; }
+  .sys { align-self:center; background:#182229; color:var(--wa-muted); font-size:11px; padding:4px 10px; border-radius:8px; max-width:90%; text-align:center; box-shadow:0 1px 1px rgba(0,0,0,.3); }
+  .sys.ok { background:#0f3b2e; color:#86efac; }
+  .typing { align-self:flex-start; background:var(--wa-in); border-radius:10px; padding:8px 12px; display:flex; gap:4px; }
+  .typing i { width:6px; height:6px; border-radius:50%; background:var(--wa-muted); animation:blink 1.2s infinite; } .typing i:nth-child(2){animation-delay:.2s} .typing i:nth-child(3){animation-delay:.4s}
+  @keyframes blink { 0%,80%,100%{opacity:.3} 40%{opacity:1} }
+  .composer { display:flex; gap:6px; padding:8px; background:var(--wa-head); align-items:center; padding-bottom:16px; }
+  .composer input { flex:1; border:0; border-radius:20px; padding:9px 12px; font:inherit; font-size:13px; background:#2a3942; color:var(--wa-ink); }
+  .composer input::placeholder { color:var(--wa-muted); }
+  .composer button { width:36px; height:36px; border-radius:50%; background:var(--wa-accent); color:#fff; font-size:16px; }
+
+  /* Call phone */
+  .callscr { background:radial-gradient(400px 400px at 50% 20%, #243052 0%, #0d1220 70%); color:#fff; align-items:center; justify-content:flex-start; padding-top:76px; text-align:center; }
+  .callscr .big { width:92px; height:92px; border-radius:50%; background:linear-gradient(135deg,var(--im-orange),#ffb27a); display:flex; align-items:center; justify-content:center; font-size:38px; font-weight:700; position:relative; margin-bottom:14px; }
+  .callscr.ringing .big::before, .callscr.ringing .big::after { content:""; position:absolute; inset:-10px; border-radius:50%; border:2px solid rgba(255,140,60,.5); animation:pulse 1.8s ease-out infinite; }
+  .callscr.ringing .big::after { animation-delay:.9s; }
+  @keyframes pulse { 0%{transform:scale(1);opacity:.9} 100%{transform:scale(1.7);opacity:0} }
+  .callscr h2 { margin:4px 0 2px; font-size:22px; font-weight:600; }
+  .callscr .sub { color:#aab3c8; font-size:13px; }
+  .callscr .timer { font-variant-numeric:tabular-nums; font-size:15px; color:#cfd6e6; margin-top:6px; }
+  .callbtns { margin-top:auto; margin-bottom:40px; display:flex; gap:56px; }
+  .cbtn { width:64px; height:64px; border-radius:50%; font-size:26px; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px rgba(0,0,0,.4); }
+  .cbtn.acc { background:var(--ok); animation:bounce 1s infinite; } .cbtn.dec { background:#ef4444; } .cbtn.mute { background:#374151; font-size:20px; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  .wave { display:flex; gap:4px; align-items:center; height:34px; margin:14px 0 4px; }
+  .wave i { width:5px; border-radius:3px; background:var(--im-orange); animation:wave 1s ease-in-out infinite; height:10px; }
+  .wave i:nth-child(odd) { animation-duration:.8s; } .wave i:nth-child(3n) { animation-duration:1.3s; }
+  @keyframes wave { 0%,100%{height:8px} 50%{height:30px} }
+  .callscr.idle .wave i { animation:none; height:6px; opacity:.4; }
+  .caption { margin:8px 16px 0; background:rgba(255,255,255,.08); border-radius:12px; padding:8px 10px; font-size:12px; color:#dfe5f3; text-align:left; min-height:60px; max-height:170px; overflow:auto; width:calc(100% - 32px); }
+  .caption b { color:#ffb27a; } .caption .u b { color:#8ee0a2; }
+  .caption .hint { color:#8b93a7; }
+  .knows { margin:18px 16px 0; width:calc(100% - 32px); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:10px 12px; text-align:left; }
+  .knows .k { font-size:10px; letter-spacing:.8px; text-transform:uppercase; color:#ffb27a; font-weight:700; }
+  .knows .g { font-size:13px; margin-top:4px; line-height:1.4; }
+  .knows .o { font-size:12px; color:#aab3c8; margin-top:4px; }
+  .knows .src { font-size:10px; color:#6b7280; margin-top:6px; }
+  .ringbtn { margin-top:auto; margin-bottom:34px; background:var(--ok); color:#06240f; font-weight:700; padding:14px 22px; border-radius:999px; font-size:15px; display:flex; align-items:center; gap:10px; box-shadow:0 10px 25px rgba(34,197,94,.35); }
+  .ringbtn:disabled { opacity:.5; }
+  .done { margin:18px 16px 0; width:calc(100% - 32px); font-size:13px; color:#dfe5f3; }
+  .done .st { margin-top:10px; padding:10px; border-radius:12px; background:rgba(255,255,255,.06); font-size:12px; }
+  .done .st.ok { background:rgba(34,197,94,.15); color:#bbf7d0; }
+
+  /* ---------- desktop ---------- */
+  .monitor { flex:1; min-height:0; display:flex; flex-direction:column; background:var(--card2); border-radius:18px; padding:8px; box-shadow:inset 0 0 0 1px var(--line); }
+  .browser { flex:1; min-height:0; background:#fff; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; color:#111; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  .chrome { height:36px; background:#f6f6f4; display:flex; align-items:center; gap:8px; padding:0 12px; border-bottom:1px solid var(--line); }
+  .chrome .dots i { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:5px; } .chrome .dots i:nth-child(1){background:#ff5f57} .chrome .dots i:nth-child(2){background:#febc2e} .chrome .dots i:nth-child(3){background:#28c840}
+  .url { flex:1; background:#fff; border-radius:16px; padding:4px 12px; font-size:12px; color:#555; border:1px solid #e0e0e0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .site { flex:1; min-height:0; overflow:auto; scroll-behavior:smooth; }
+  .im-head { position:sticky; top:0; z-index:3; background:#fff; border-bottom:1px solid #eee; padding:10px 18px; display:flex; align-items:center; gap:16px; }
+  .im-logo { font-weight:800; font-size:20px; letter-spacing:-.5px; color:var(--im-blue); } .im-logo span { color:var(--im-orange); }
+  .im-search { flex:1; display:flex; border:2px solid var(--im-blue); border-radius:6px; overflow:hidden; max-width:560px; }
+  .im-search input { flex:1; border:0; padding:8px 12px; font:inherit; font-size:13px; }
+  .im-search button { background:var(--im-blue); color:#fff; padding:0 16px; }
+  .im-user { font-size:12px; color:#444; margin-left:auto; white-space:nowrap; } .im-user b { color:var(--im-blue); }
+  .hero { margin:16px 18px 6px; padding:18px 20px; border-radius:10px; background:linear-gradient(90deg,#eef0ff,#fff4ec); display:flex; align-items:center; justify-content:space-between; }
+  .hero h3 { margin:0; font-size:17px; color:#1c1e21; } .hero p { margin:4px 0 0; font-size:12px; color:#555; }
+  .hero .tag { background:var(--im-orange); color:#fff; font-size:11px; padding:4px 10px; border-radius:999px; }
+  .sect { margin:14px 18px 6px; font-size:13px; font-weight:600; color:#333; display:flex; align-items:center; gap:8px; }
+  .sect small { font-weight:400; color:#777; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:14px; padding:4px 18px 24px; }
+  .card { border:1px solid #e6e6e6; border-radius:10px; overflow:hidden; background:#fff; transition:box-shadow .2s, transform .2s; cursor:pointer; position:relative; }
+  .card:hover { box-shadow:0 8px 24px rgba(0,0,0,.1); transform:translateY(-2px); }
+  .card .img { height:118px; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:800; color:#fff; letter-spacing:1px; }
+  .card .body { padding:10px 12px 12px; }
+  .card h4 { margin:0 0 2px; font-size:14px; line-height:1.3; color:#1c1e21; }
+  .card .sub { font-size:12px; color:#666; } .card .meta { font-size:11px; color:#999; margin-top:2px; }
+  .card .act { display:flex; gap:6px; margin-top:10px; }
+  .card .act button { flex:1; padding:7px 6px; border-radius:6px; font-size:12px; font-weight:600; }
+  .act .pri { background:var(--im-blue); color:#fff; } .act .sec { background:#fff; color:var(--im-blue); border:1px solid var(--im-blue); }
+  .seen { position:absolute; top:8px; right:8px; background:rgba(0,0,0,.65); color:#fff; font-size:10px; padding:2px 7px; border-radius:999px; opacity:0; transition:opacity .3s; }
+  .card.captured .seen { opacity:1; }
+  .lead { border:1px solid #e6e6e6; border-radius:10px; padding:12px 14px; margin:0 18px 10px; display:flex; gap:12px; align-items:flex-start; background:#fff; cursor:pointer; position:relative; }
+  .lead.unread { border-left:4px solid var(--im-orange); }
+  .lead .ic { width:40px; height:40px; border-radius:8px; background:#eef0ff; color:var(--im-blue); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
+  .lead h4 { margin:0; font-size:14px; } .lead .sub { font-size:12px; color:#555; } .lead .msgp { font-size:12px; color:#777; margin-top:4px; font-style:italic; }
+  .lead .meta { font-size:11px; color:#999; margin-left:auto; white-space:nowrap; }
+  .lead .act { display:flex; gap:6px; margin-top:8px; } .lead .act button { padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; }
+  .lead .seen { top:10px; right:10px; }
+  .lead.captured .seen { opacity:1; }
+
+  /* ---------- memory drawer ---------- */
+  .drawer { position:fixed; top:72px; right:0; bottom:0; width:440px; transform:translateX(105%); transition:transform .3s ease; z-index:40; padding:16px; background:transparent; }
+  .drawer.open { transform:translateX(0); }
+  .mem { height:100%; background:var(--card); color:var(--ink); border-radius:24px; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.04); overflow:hidden; }
+  .mem-head { padding:16px 18px 12px; display:flex; align-items:center; gap:10px; }
+  .mem-head .file { font-size:17px; font-weight:600; letter-spacing:-.2px; }
+  .mem-head .path { font-size:12px; color:var(--muted); font-family:ui-monospace,Menlo,monospace; }
+  .mem-head .x { margin-left:auto; width:36px; height:36px; border-radius:50%; background:var(--card2); color:var(--muted); font-size:16px; }
+  .openbox { margin:0 14px; padding:12px 14px; border-radius:16px; background:var(--black); color:#fff; font-size:13px; }
+  .openbox .k { font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; color:#9ca3af; font-weight:600; }
+  .openbox .g { font-size:14px; margin:4px 0 4px; } .openbox .o { color:#cfd3da; }
+  .md { flex:1; min-height:0; overflow:auto; padding:8px 18px 18px; font-size:12.5px; line-height:1.5; transition:background .4s; }
+  .md.flash { background:#fffbe6; }
+  .md h1 { font-size:14px; margin:8px 0 0; } .md h2 { font-size:11px; margin:14px 0 4px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:600; }
+  .md ul { margin:3px 0; padding-left:16px; } .md li { margin:2px 0; } .md em { color:var(--paper-muted); font-size:11px; } .md p { margin:4px 0; }
+  .md h2.live { color:#166534; } .md ul.live { background:#f0fdf4; border-radius:8px; padding:6px 6px 6px 22px; border:1px solid #bbf7d0; }
+  .md ul.live li:first-child { font-weight:600; }
+  .md b { font-weight:600; }
+
+  /* ---------- toast ---------- */
+  #toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%) translateY(20px); background:var(--black); color:#fff; padding:10px 16px; border-radius:999px; font-size:13px; opacity:0; transition:all .3s; box-shadow:0 10px 30px rgba(0,0,0,.2); pointer-events:none; z-index:50; }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  sarvam-widget { visibility:hidden; }  /* driven from the call phone; never shown */
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="pill brand"><img src="/im-logo.png" alt="" />VANI<small>· knows you before it speaks</small></div>
+  <div class="pill users" id="users"></div>
+  <div class="pill">
+    <button class="brain" id="brainBtn" title="The memory file every channel reads">🧠 Memory <span class="fresh" id="fresh">loading…</span></button>
+    <button class="ghost" id="reset" title="Delete this user's live events and rebuild the memory from the dataset">reset</button>
+    <div class="avatar-me">AP</div>
+  </div>
+</header>
+
+<main class="stage">
+  <!-- 1. WHATSAPP PHONE -->
+  <section class="col">
+    <div class="label"><div class="t"><span class="ico">💬</span>WhatsApp</div><b id="lblPhone"></b></div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="scr" id="waScr">
+        <div class="wa-head"><span class="back">‹</span><div class="avatar"><img src="/im-logo.png" alt="IndiaMART" /></div>
+          <div class="t"><div class="n">IndiaMART <svg class="tick" viewBox="0 0 24 24" aria-label="verified"><path fill="#53bdeb" d="M22.5 12.5c0-1.3-.8-2.4-2-2.9.3-.5.5-1.1.5-1.7 0-1.9-1.5-3.4-3.4-3.4-.6 0-1.2.2-1.7.5-.5-1.2-1.6-2-2.9-2s-2.4.8-2.9 2c-.5-.3-1.1-.5-1.7-.5-1.9 0-3.4 1.5-3.4 3.4 0 .6.2 1.2.5 1.7-1.2.5-2 1.6-2 2.9s.8 2.4 2 2.9c-.3.5-.5 1.1-.5 1.7 0 1.9 1.5 3.4 3.4 3.4.6 0 1.2-.2 1.7-.5.5 1.2 1.6 2 2.9 2s2.4-.8 2.9-2c.5.3 1.1.5 1.7.5 1.9 0 3.4-1.5 3.4-3.4 0-.6-.2-1.2-.5-1.7 1.2-.5 2-1.6 2-2.9z"/><path fill="#0b141a" d="M10.2 16.3l-3.5-3.5 1.4-1.4 2.1 2.1 5.3-5.3 1.4 1.4z"/></svg></div><small>online</small></div>
+          <span class="ic">📞</span><span class="ic">⋮</span></div>
+        <div class="chat" id="chat"></div>
+        <div class="composer"><input id="waInput" placeholder="Type a message" autocomplete="off" /><button id="waSend">➤</button></div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 2. DESKTOP BROWSER -->
+  <section class="col">
+    <div class="label"><div class="t"><span class="ico">🖥</span>Website</div><b id="lblSite"></b></div>
+    <div class="monitor"><div class="browser">
+      <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url" id="url">https://www.indiamart.com</span></div>
+      <div class="site" id="site"></div>
+    </div></div>
+  </section>
+
+  <!-- 3. CALL PHONE -->
+  <section class="col">
+    <div class="label"><div class="t"><span class="ico">☎</span>VANI call</div><b id="lblCall"></b></div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="scr callscr idle" id="callIdle">
+        <div class="big">V</div>
+        <h2>VANI</h2><div class="sub">IndiaMART voice assistant</div>
+        <div class="knows"><div class="k">VANI will open with</div><div class="g" id="idleGreet">…</div><div class="o" id="idleOpener"></div><div class="src" id="idleSrc"></div></div>
+        <button class="ringbtn" id="ring">☎ VANI calls <span id="ringName">…</span></button>
+      </div>
+      <div class="scr callscr ringing" id="incoming" hidden>
+        <div class="big">V</div>
+        <h2>VANI</h2><div class="sub">IndiaMART · incoming call</div>
+        <div class="sub" style="margin-top:20px;font-size:12px;color:#ffb27a;padding:0 18px" id="incHint"></div>
+        <div class="callbtns"><button class="cbtn dec" id="decline">✕</button><button class="cbtn acc" id="accept">📞</button></div>
+      </div>
+      <div class="scr callscr idle" id="incall" hidden>
+        <div class="big">V</div>
+        <h2>VANI</h2><div class="sub" id="callStatus">Connecting…</div><div class="timer" id="timer">00:00</div>
+        <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="caption" id="caption"><span class="hint">Connecting to Sarvam…</span></div>
+        <div class="callbtns"><button class="cbtn mute" id="muteBtn">🎙</button><button class="cbtn dec" id="endBtn">📵</button></div>
+      </div>
+      <div class="scr callscr idle" id="callDone" hidden>
+        <div class="big">V</div>
+        <h2>Call ended</h2><div class="sub" id="doneDur">00:00</div>
+        <div class="done"><div class="st" id="doneState">🧠 VANI is saving this call to memory…</div></div>
+        <button class="ringbtn" id="doneBack" style="background:#374151;color:#fff;box-shadow:none">Back</button>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<!-- memory drawer: the one file every channel reads -->
+<aside class="drawer" id="drawer">
+  <div class="mem">
+    <div class="mem-head"><div><div class="file" id="fileName">buyer.md</div><div class="path" id="filePath"></div></div><button class="x" id="drawerClose">✕</button></div>
+    <div class="openbox" id="open"><span class="k">VANI will open with</span><div class="g" id="greet">…</div><div class="o" id="opener"></div></div>
+    <div class="md" id="md"></div>
+  </div>
+</aside>
+<div id="toast"></div>
+<div id="widgetSlot"></div>
+
+<script src="/config.js" onerror="void 0"></script>
+<script>
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const USERS = [
+  { glid: 274238067, name: "Aarti Singh", role: "buyer",  hint: "bollards, Gharaunda" },
+  { glid: 59681744,  name: "Ramesh",      role: "buyer",  hint: "hand bells, Mumbai" },
+  { glid: 95568576,  name: "Alfa Enterprises", role: "seller", hint: "pen drives, Delhi" },
+  { glid: 87677035,  name: "Anuradha Oil Mill", role: "seller", hint: "Kanpur" },
+  { glid: 93557756,  name: "Visionary Style", role: "seller", hint: "said stop calling" },
+];
+let user = null, ctx = null, knownEvents = 0, posting = Promise.resolve(), lastRefresh = null, lastBuildSeconds = null;
+
+/* ---------- helpers ---------- */
+function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("show"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2600); }
+const now = () => new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+function mdToHtml(md) {
+  const lines = md.split("\n"); let out = [], inList = false;
+  const inline = s => s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/^_(.+)_$/, "<em>$1</em>").replace(/`(.+?)`/g, "<code>$1</code>");
+  for (let l of lines) {
+    if (l.startsWith("- ")) { if (!inList) { out.push("<ul>"); inList = true; } out.push("<li>" + inline(l.slice(2)) + "</li>"); continue; }
+    if (inList) { out.push("</ul>"); inList = false; }
+    if (l.startsWith("# ")) out.push("<h1>" + inline(l.slice(2)) + "</h1>");
+    else if (l.startsWith("## ")) out.push("<h2>" + inline(l.slice(3)) + "</h2>");
+    else if (l.trim()) out.push("<p>" + inline(l) + "</p>");
+  }
+  if (inList) out.push("</ul>");
+  return out.join("\n");
+}
+
+/* ---------- memory (drawer + call phone idle card) ---------- */
+function renderMemory(d, flash = false, note = "") {
+  ctx = d;
+  $("#fileName").textContent = `${d.role}.md`;
+  $("#filePath").textContent = `context_files/${d.glid}/${d.role}.md · ${d.context.length} chars`;
+  $("#greet").textContent = d.greeting || "—"; $("#opener").textContent = d.opener || "";
+  $("#idleGreet").textContent = d.greeting || "—"; $("#idleOpener").textContent = d.opener || "";
+  const live = (d.context.split("## Latest across channels")[1] || "").split("##")[0].split("\n").map(s => s.trim()).filter(s => s.startsWith("- "));
+  $("#idleSrc").textContent = live.length ? "from: " + live[0].replace(/^- 🔄 /, "").replace(/\*\*/g, "").slice(0, 110) + "…" : `from the ${d.role}'s IndiaMART history (${d.role}.md)`;
+  const md = $("#md"); md.innerHTML = mdToHtml(d.context);
+  md.querySelectorAll("h2").forEach(h => { if (h.textContent.startsWith("Latest across channels")) { h.classList.add("live"); const ul = h.nextElementSibling; if (ul && ul.tagName === "UL") ul.classList.add("live"); } });
+  lastRefresh = Date.now();
+  const m = note && note.match(/in ([\d.]+)s/); if (m) lastBuildSeconds = m[1]; else if (d.build_seconds) lastBuildSeconds = d.build_seconds;
+  const f = $("#fresh"); f.className = "fresh" + (flash ? " hot" : ""); f.textContent = note || (d.build_seconds ? `rebuilt in ${d.build_seconds}s` : "cached");
+  if (flash) { md.classList.add("flash"); setTimeout(() => md.classList.remove("flash"), 1500); md.scrollTop = 0; $("#idleGreet").parentElement.animate([{ background: "rgba(34,197,94,.35)" }, { background: "rgba(255,255,255,.06)" }], { duration: 1500 }); }
+}
+setInterval(() => { if (!lastRefresh || $("#fresh").classList.contains("busy")) return; const s = Math.round((Date.now() - lastRefresh) / 1000); if (s > 8) { $("#fresh").classList.remove("hot"); $("#fresh").textContent = `updated ${s < 60 ? s + " s" : Math.round(s / 60) + " min"} ago` + (lastBuildSeconds ? ` · freshness ${lastBuildSeconds}s` : ""); } }, 2000);
+
+async function refreshMemory(flash, note) {
+  const r = await fetch(`/context?glid=${user.glid}`); const d = await r.json();
+  if (r.ok) renderMemory(d, flash, note);
+}
+function postEvent(channel, summary) {
+  // one rebuild at a time, so two quick website actions do not race
+  posting = posting.then(async () => {
+    const f = $("#fresh"); f.className = "fresh busy"; f.textContent = `writing ${user.role}.md…`;
+    const r = await fetch(`/events/${user.glid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channel, summary }) });
+    const d = await r.json();
+    if (d.ok) { knownEvents++; await refreshMemory(true, `✔ ${channel} → ${user.role}.md in ${d.freshness_seconds}s`); }
+    else { f.className = "fresh"; f.textContent = "not saved: " + (d.detail || d.skipped); }
+    return d;
+  }).catch(e => { console.error(e); $("#fresh").className = "fresh"; $("#fresh").textContent = "error"; });
+  return posting;
+}
+$("#brainBtn").onclick = () => { $("#drawer").classList.toggle("open"); $("#brainBtn").classList.toggle("on", $("#drawer").classList.contains("open")); };
+$("#drawerClose").onclick = () => { $("#drawer").classList.remove("open"); $("#brainBtn").classList.remove("on"); };
+
+/* ---------- users ---------- */
+function renderUsers() {
+  $("#users").innerHTML = USERS.map(u => `<button class="chip ${user && user.glid === u.glid ? "on" : ""}" data-glid="${u.glid}"><span class="r">${u.role}</span>${u.name}</button>`).join("");
+  $("#users").querySelectorAll(".chip").forEach(b => b.onclick = () => selectUser(Number(b.dataset.glid)));
+}
+async function selectUser(glid) {
+  user = USERS.find(u => u.glid === glid); renderUsers();
+  $("#ringName").textContent = user.name.split(" ")[0]; $("#lblPhone").textContent = user.name; $("#lblCall").textContent = user.name; $("#fresh").className = "fresh busy"; $("#fresh").textContent = "loading…";
+  $("#chat").innerHTML = `<div class="sys">Today</div><div class="sys">${user.role === "buyer" ? "Hi " + user.name + "! This is IndiaMART. Tell us what you need." : "Hi " + user.name + "! IndiaMART here. Reply to buyers or tell us your rates."}</div>`;
+  showScr("callIdle");
+  fetch(`/active`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ glid }) }); // so the VANI call loads THIS user
+  const [c, s, e] = await Promise.all([fetch(`/context?glid=${glid}`).then(r => r.json()), fetch(`/site/${glid}`).then(r => r.json()), fetch(`/events/${glid}`).then(r => r.json())]);
+  knownEvents = e.length; renderMemory(c, false); renderSite(s);
+}
+
+/* ---------- WhatsApp ---------- */
+function bubble(text, dir, extra = "") { const el = document.createElement("div"); el.className = "msg " + dir; el.innerHTML = `${text}<span class="meta">${now()}${dir === "out" ? '<span class="ticks">✓✓</span>' : ""}</span>${extra}`; $("#chat").appendChild(el); $("#chat").scrollTop = 1e6; return el; }
+function sysline(text, ok = false) { const el = document.createElement("div"); el.className = "sys" + (ok ? " ok" : ""); el.textContent = text; $("#chat").appendChild(el); $("#chat").scrollTop = 1e6; }
+async function sendWhatsApp() {
+  const text = $("#waInput").value.trim(); if (!text || !user) return;
+  $("#waInput").value = ""; bubble(text, "out");
+  const typing = document.createElement("div"); typing.className = "typing"; typing.innerHTML = "<i></i><i></i><i></i>"; $("#chat").appendChild(typing); $("#chat").scrollTop = 1e6;
+  $("#fresh").className = "fresh busy"; $("#fresh").textContent = `whatsapp → ${user.role}.md…`;
+  posting = posting.then(async () => {
+    const r = await fetch(`/whatsapp/${user.glid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    const d = await r.json(); typing.remove();
+    if (!r.ok) { sysline("⚠ " + (d.detail || r.status)); $("#fresh").className = "fresh"; return; }
+    bubble(d.reply, "in"); knownEvents++;
+    await refreshMemory(true, `✔ whatsapp → ${user.role}.md in ${d.freshness_seconds}s`);
+    sysline(`🧠 VANI now knows this · ${d.freshness_seconds}s`, true);
+  });
+}
+$("#waSend").onclick = sendWhatsApp; $("#waInput").addEventListener("keydown", e => { if (e.key === "Enter") sendWhatsApp(); });
+
+/* ---------- Website ---------- */
+const PALETTE = ["#2e3192", "#ff6a00", "#0f766e", "#7c3aed", "#b45309", "#be123c", "#1d4ed8", "#065f46"];
+const initials = t => t.split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase();
+let seenQueue = [], flushTimer = null, observer = null;
+function queueSeen(label) {
+  if (seenQueue.includes(label)) return; seenQueue.push(label);
+  toast(`👁 captured: ${label}`);
+  clearTimeout(flushTimer); flushTimer = setTimeout(flushSeen, 3500); // batch scrolling into one event
+}
+function flushSeen() {
+  if (!seenQueue.length) return; const list = seenQueue.splice(0); const who = user.role === "buyer" ? "Buyer" : "Seller";
+  postEvent("web", `${who} browsed on ${user.role === "buyer" ? "indiamart.com" : "Lead Manager"}: ${list.join(", ")}`);
+}
+function act(summary) { clearTimeout(flushTimer); seenQueue = []; toast("📝 " + summary); postEvent("web", summary); }
+
+function renderSite(s) {
+  const site = $("#site"); const who = s.role === "buyer" ? "Buyer" : "Seller";
+  $("#url").textContent = `https://${s.site}/${s.role === "buyer" ? "search?q=" : "leads/manager"}`; $("#lblSite").textContent = s.site;
+  if (s.role === "buyer") {
+    site.innerHTML = `
+      <div class="im-head"><div class="im-logo">india<span>mart</span></div>
+        <div class="im-search"><input id="q" placeholder="Search products, suppliers…" /><button id="qBtn">Search</button></div>
+        <div class="im-user">Hi, <b>${s.name}</b> · ${s.city || ""}</div></div>
+      <div class="hero"><div><h3>Welcome back, ${s.name.split(" ")[0]}</h3><p>${s.buyleads.length ? "Your active requirement: <b>" + s.buyleads.join(", ") + "</b>" : "Continue where you left off"}</p></div><span class="tag">Verified suppliers</span></div>
+      <div class="sect">Picked for you <small>based on your recent searches</small></div>
+      <div class="grid">${s.items.map((it, i) => `
+        <div class="card" data-label="${it.title}"><span class="seen">👁 seen</span>
+          <div class="img" style="background:${PALETTE[i % PALETTE.length]}">${initials(it.title)}</div>
+          <div class="body"><h4>${it.title}</h4><div class="sub">${it.sub}</div><div class="meta">${it.meta}</div>
+          <div class="act"><button class="pri" data-act="price">Get Latest Price</button><button class="sec" data-act="call">Call Supplier</button></div></div></div>`).join("")}</div>`;
+    site.querySelectorAll(".card").forEach(c => {
+      c.onclick = e => { const a = e.target.dataset.act; const t = c.dataset.label;
+        if (a === "price") act(`${who} sent an enquiry on indiamart.com for ${t} (Get Latest Price)`);
+        else if (a === "call") act(`${who} clicked Call Supplier on indiamart.com for ${t}`);
+        else act(`${who} opened the ${t} page on indiamart.com`); };
+    });
+    const search = () => { const q = site.querySelector("#q").value.trim(); if (!q) return; $("#url").textContent = `https://${s.site}/search?q=${encodeURIComponent(q)}`; act(`${who} searched "${q}" on indiamart.com`); };
+    site.querySelector("#qBtn").onclick = search; site.querySelector("#q").addEventListener("keydown", e => { if (e.key === "Enter") search(); });
+  } else {
+    site.innerHTML = `
+      <div class="im-head"><div class="im-logo">india<span>mart</span> <span style="font-size:12px;font-weight:500;color:#555">Seller · Lead Manager</span></div>
+        <div class="im-search"><input id="q" placeholder="Search your enquiries…" /><button id="qBtn">Search</button></div>
+        <div class="im-user"><b>${s.name}</b> · ${s.city || ""}</div></div>
+      <div class="hero"><div><h3>${s.unread} unread enquiries</h3><p>You sell: <b>${(s.products || []).join(", ")}</b></p></div><span class="tag">Reply fast, win more</span></div>
+      <div class="sect">Enquiries received <small>newest first</small></div>
+      ${s.items.map(it => `
+        <div class="lead ${it.unread ? "unread" : ""}" data-label="${it.title} (${it.sub})"><span class="seen">👁 seen</span>
+          <div class="ic">${initials(it.title)}</div>
+          <div style="flex:1;min-width:0"><h4>${it.title}</h4><div class="sub">${it.sub}</div><div class="msgp">“${it.message}”</div>
+            <div class="act"><button class="pri" data-act="reply" style="background:var(--im-blue);color:#fff">Reply</button><button class="sec" data-act="call" style="background:#fff;color:var(--im-blue);border:1px solid var(--im-blue)">Call buyer</button></div></div>
+          <div class="meta">${it.meta}${it.unread ? " · <b style='color:#ff6a00'>new</b>" : ""}</div></div>`).join("")}<div style="height:24px"></div>`;
+    site.querySelectorAll(".lead").forEach(c => {
+      c.onclick = e => { const a = e.target.dataset.act; const t = c.dataset.label; c.classList.remove("unread");
+        if (a === "reply") act(`Seller replied from Lead Manager to the enquiry for ${t}`);
+        else if (a === "call") act(`Seller clicked Call buyer in Lead Manager for the enquiry ${t}`);
+        else act(`Seller opened and read the enquiry for ${t} in Lead Manager`); };
+    });
+    const search = () => { const q = site.querySelector("#q").value.trim(); if (q) act(`Seller searched "${q}" in Lead Manager`); };
+    site.querySelector("#qBtn").onclick = search; site.querySelector("#q").addEventListener("keydown", e => { if (e.key === "Enter") search(); });
+  }
+  // scroll capture: items that come into view AFTER load count as "browsed"
+  if (observer) observer.disconnect();
+  const initial = new Set(); let armed = false;
+  observer = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!armed) { if (en.isIntersecting) initial.add(en.target); return; }
+      if (en.isIntersecting && !initial.has(en.target) && !en.target.classList.contains("captured")) {
+        en.target._t = setTimeout(() => { en.target.classList.add("captured"); queueSeen(en.target.dataset.label); }, 900);
+      } else if (!en.isIntersecting) { clearTimeout(en.target._t); initial.delete(en.target); }
+    });
+  }, { root: site, threshold: 0.6 });
+  site.querySelectorAll("[data-label]").forEach(el => observer.observe(el));
+  setTimeout(() => { armed = true; }, 600);
+  site.scrollTop = 0;
+}
+
+/* ---------- the VANI call (Sarvam web widget, driven from the call phone) ---------- */
+let widget = null, callTimer = null, callT0 = 0, pollTimer = null, audioCtx = null, ringTimer = null;
+function ensureWidget() {
+  const cfg = window.SARVAM_EMBED;
+  if (!cfg || !cfg.apiKey) throw new Error("web/config.js has no Sarvam embed key");
+  if (widget && widget.getAttribute("user-id") === String(user.glid)) return widget;
+  $("#widgetSlot").innerHTML = ""; widget = document.createElement("sarvam-widget");
+  Object.entries({ "api-key": cfg.apiKey, "app-id": cfg.appId, "org-id": cfg.orgId, "workspace-id": cfg.workspaceId, "user-id": String(user.glid), "button-text": "Start", "position": "bottom-left" })
+    .forEach(([k, v]) => widget.setAttribute(k, v));
+  $("#widgetSlot").appendChild(widget); return widget;
+}
+async function loadWidgetScript() {
+  if (window.customElements.get("sarvam-widget")) return;
+  await new Promise((ok, bad) => { const s = document.createElement("script"); s.src = "https://unpkg.com/sarvam-convai-embed@1.0.19"; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
+}
+const wbtns = () => widget && widget.shadowRoot ? [...widget.shadowRoot.querySelectorAll("button")] : [];
+function widgetState() { if (!widget || !widget.shadowRoot) return "idle"; const t = widget.shadowRoot.textContent; if (widget.shadowRoot.querySelector('div[style*="220, 38, 38"]')) return "error"; if (t.includes("End Call")) return "connected"; if (t.includes("Connecting")) return "connecting"; return "idle"; }
+async function widgetStart() {
+  ensureWidget(); await sleep(150);
+  if (wbtns().length <= 1) { wbtns()[0] && wbtns()[0].click(); await sleep(150); }        // expand the floating button
+  const b = wbtns().find(x => x.textContent.includes("Start")); if (!b) throw new Error("widget start button not found"); b.click();
+}
+function widgetStop() { const b = wbtns().find(x => x.textContent.includes("End Call")); if (b) b.click(); }
+
+// live captions. Verified in sarvam-convai-embed@1.0.19 source: the widget logs the user's speech as
+// console.log("Transcript:", JSON.stringify(msg)) (server.event.transcription) and VANI's lines as
+// console.log("Text message:", msg) (server.media.text). We listen to both.
+const _log = console.log.bind(console);
+console.log = (...a) => {
+  try {
+    if (a[0] === "Transcript:") caption(typeof a[1] === "string" ? JSON.parse(a[1]) : a[1], "user");
+    else if (a[0] === "Text message:") caption(typeof a[1] === "string" ? JSON.parse(a[1]) : a[1], "agent");
+  } catch (e) {}
+  _log(...a);
+};
+function caption(m, who) {
+  if (!m || typeof m !== "object") return;
+  const text = m.content || m.text || m.transcript || (m.data && (m.data.text || m.data.content || m.data.transcript)); if (!text || typeof text !== "string") return;
+  const role = (m.role || m.speaker || m.source || "").toString().toLowerCase();
+  const isUser = /user|human|customer/.test(role) || (who === "user" && !/agent|assistant|bot/.test(role));
+  const c = $("#caption"); if (c.querySelector(".hint")) c.innerHTML = "";
+  const last = c.lastElementChild;
+  if (last && last.dataset.who === (isUser ? "u" : "a") && m.is_final === false) { last.innerHTML = `<b>${isUser ? user.name.split(" ")[0] : "VANI"}:</b> ${text}`; }
+  else { const el = document.createElement("div"); el.className = isUser ? "u" : "a"; el.dataset.who = isUser ? "u" : "a"; el.innerHTML = `<b>${isUser ? user.name.split(" ")[0] : "VANI"}:</b> ${text}`; c.appendChild(el); }
+  c.scrollTop = 1e6;
+}
+
+function ringtone(on) {
+  if (!on) { clearInterval(ringTimer); ringTimer = null; return; }
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+  const burst = () => { const t = audioCtx.currentTime; [0, 0.6].forEach(off => { [425, 450].forEach(f => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + off); g.gain.exponentialRampToValueAtTime(0.08, t + off + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.4); o.connect(g).connect(audioCtx.destination); o.start(t + off); o.stop(t + off + 0.45); }); }); };
+  burst(); ringTimer = setInterval(burst, 2000);
+}
+function showScr(id) { ["callIdle", "incoming", "incall", "callDone"].forEach(s => $("#" + s).hidden = s !== id); }
+
+$("#ring").onclick = async () => {
+  if (!user) return;
+  $("#incHint").textContent = ctx && ctx.greeting ? `VANI will say: “${ctx.greeting}”` : "";
+  showScr("incoming"); ringtone(true);
+  try { await loadWidgetScript(); } catch (e) { toast("Could not load the Sarvam widget script"); }
+};
+$("#decline").onclick = () => { ringtone(false); showScr("callIdle"); sysline("📵 Missed call from VANI"); };
+$("#accept").onclick = async () => {
+  ringtone(false); showScr("incall"); $("#incall").className = "scr callscr idle"; $("#callStatus").textContent = "Connecting…"; $("#timer").textContent = "00:00";
+  $("#caption").innerHTML = `<span class="hint">VANI loads ${user.role}.md before her first word…</span>`;
+  await fetch(`/active`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ glid: user.glid }) });
+  try { await widgetStart(); } catch (e) { $("#callStatus").textContent = "⚠ " + e.message; return; }
+  let connected = false;
+  for (let i = 0; i < 100; i++) {                       // wait up to ~15 s for Sarvam to connect
+    await sleep(150); const st = widgetState();
+    if (st === "connected") { connected = true; break; }
+    if (st === "error") { $("#callStatus").textContent = "⚠ Sarvam could not connect (check mic / embed key)"; return; }
+  }
+  if (!connected) { $("#callStatus").textContent = "⚠ no answer from Sarvam"; return; }
+  $("#incall").className = "scr callscr live"; $("#callStatus").textContent = "VANI · IndiaMART"; callT0 = Date.now();
+  $("#caption").innerHTML = `<span class="hint">Memory loaded. Listen…</span>`;
+  callTimer = setInterval(() => { const s = Math.floor((Date.now() - callT0) / 1000); $("#timer").textContent = `${String(s / 60 | 0).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; if (widgetState() !== "connected") endCall(false); }, 500);
+};
+$("#endBtn").onclick = () => endCall(true);
+$("#muteBtn").onclick = () => toast("Mute is visual only in this demo");
+$("#doneBack").onclick = () => showScr("callIdle");
+function endCall(byUser) {
+  clearInterval(callTimer); if (byUser) widgetStop();
+  showScr("callDone"); $("#doneDur").textContent = `Duration ${$("#timer").textContent}`;
+  $("#doneState").className = "st"; $("#doneState").textContent = "🧠 VANI is saving this call to memory…";
+  sysline(`📞 Call with VANI ended · ${$("#timer").textContent}`);
+  // the agent's on_end tool posts the call summary to /events — pick it up when it lands
+  let tries = 0; clearInterval(pollTimer); $("#fresh").className = "fresh busy"; $("#fresh").textContent = "waiting for call summary…";
+  pollTimer = setInterval(async () => {
+    tries++; const ev = await fetch(`/events/${user.glid}`).then(r => r.json());
+    if (ev.length > knownEvents) {
+      knownEvents = ev.length; clearInterval(pollTimer); pollTimer = null;
+      await refreshMemory(true, `✔ voice → ${user.role}.md`);
+      $("#doneState").className = "st ok"; $("#doneState").textContent = "✔ Saved. " + (ev[ev.length - 1].summary || "");
+    } else if (tries > 40) { clearInterval(pollTimer); pollTimer = null; $("#fresh").className = "fresh"; $("#fresh").textContent = "no call summary arrived"; $("#doneState").textContent = "No summary arrived (call too short, or nothing was said)."; }
+  }, 3000);
+}
+
+/* ---------- reset ---------- */
+$("#reset").onclick = async () => {
+  if (!user || !confirm(`Delete live events for ${user.name} and rebuild ${user.role}.md from the dataset?`)) return;
+  $("#fresh").className = "fresh busy"; $("#fresh").textContent = "rebuilding…";
+  await fetch(`/events/${user.glid}`, { method: "DELETE" }); await selectUser(user.glid); toast("Memory reset to dataset only");
+};
+
+// background: pick up events that arrive from elsewhere (dashboard test, another channel)
+setInterval(async () => { if (!user || pollTimer) return; const ev = await fetch(`/events/${user.glid}`).then(r => r.json()).catch(() => null); if (ev && ev.length > knownEvents) { knownEvents = ev.length; refreshMemory(true, "✔ new event from another channel"); } }, 6000);
+
+// deep link: /demo#95568576  (dev: #95568576&scr=incoming|incall|callDone shows a call screen; &mem opens the drawer)
+const hash = new URLSearchParams(location.hash.slice(1).replace(/^(\d+)/, "glid=$1"));
+selectUser(USERS.some(u => u.glid === Number(hash.get("glid"))) ? Number(hash.get("glid")) : USERS[0].glid).then(() => { if (hash.get("scr")) showScr(hash.get("scr")); if (hash.has("mem")) $("#brainBtn").click(); });
+</script>
+</body>
+</html>

@@ -260,29 +260,35 @@ class Event(BaseModel):
     time: str | None = None  # ISO; defaults to now
     meta: dict = Field(default_factory=dict)  # disposition, interaction_id, etc.
     language: str | None = None  # language the user spoke last on this channel (Sarvam name, e.g. Hindi / English)
+    outcome: str | None = None  # voice only: agent's call_outcome (resumed_and_helped / callback_fixed / ... / no_conversation)
+    callback_time: str | None = None  # voice only: "tomorrow 11 AM" if the user asked for a callback
+
+
+# Calls where nothing really happened. Their summaries ("the user gave an unclear response") must not become the
+# newest memory, otherwise the next opener continues from a non-conversation.
+SKIP_OUTCOMES = {"no_conversation", "wrong_person"}
 
 
 # ------------------------------------------------------------------ Sarvam call-end webhook
-def _summarise_transcript(turns: list[dict]) -> str:
+def _summarise_transcript(turns: list[dict], role: str = "seller") -> str:
     """2-line summary of a Sarvam transcript via sarvam-105b (reasoning OFF). Falls back to last user line."""
     lines = [f"{t.get('role', '?')}: {t.get('indic_text') or t.get('en_text', '')}" for t in turns if t]
     if not lines:
         return ""
     try:
-        import os
         from sarvamai import SarvamAI
         client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
         r = client.chat.completions(
             model="sarvam-105b", temperature=0.2, reasoning_effort=None, max_tokens=200,
             messages=[{"role": "user", "content":
-                       "Summarise this IndiaMART call between VANI (agent) and a seller (user) in 2 short English "
-                       "sentences: what was agreed, any price/quantity/time mentioned, and what the seller wants next. "
+                       f"Summarise this IndiaMART call between VANI (agent) and a {role} (user) in 2 short English "
+                       f"sentences: what was agreed, any price/quantity/time mentioned, and what the {role} wants next. "
                        "Facts only.\n\n" + "\n".join(lines)[-4000:]}],
         )
         return (r.choices[0].message.content or "").strip()
     except Exception:  # noqa: BLE001
         users = [l for l in lines if l.startswith("user:")]
-        return ("Seller said: " + users[-1][5:].strip()) if users else lines[-1]
+        return (f"{role.capitalize()} said: " + users[-1][5:].strip()) if users else lines[-1]
 
 
 @app.post("/webhook/sarvam")
@@ -301,14 +307,16 @@ def sarvam_webhook(payload: dict):
     summary = (oav.get("call_summary") or fav.get("call_summary") or "").strip()
     source = "call_summary"
     if not summary:
-        summary = _summarise_transcript(payload.get("interaction_transcript") or [])
+        summary = _summarise_transcript(payload.get("interaction_transcript") or [], role_of(glid))
         source = "transcript_llm"
     if not summary:
         return {"ok": False, "glid": glid, "skipped": "no summary and no transcript"}
     ev = Event(channel="voice", summary=summary, time=None, meta={
         "interaction_id": payload.get("interaction_id"), "duration": payload.get("duration"),
         "connectivity": payload.get("connectivity_status"), "summary_source": source,
-    }, language=oav.get("user_language") or fav.get("user_language"))
+    }, language=oav.get("user_language") or fav.get("user_language"),
+        outcome=oav.get("call_outcome") or fav.get("call_outcome"),
+        callback_time=oav.get("callback_time") or fav.get("callback_time"))
     r = post_event(glid, ev)
     r["summary_source"] = source
     return r
@@ -321,6 +329,87 @@ def list_events(glid: int):
     if not f.exists():
         return []
     return [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
+
+
+@app.delete("/events/{glid}")
+def reset_events(glid: int):
+    """Demo reset: drop the live events of this GLID and rebuild the memory from the dataset only."""
+    f = OUT_DIR / str(glid) / "events.jsonl"
+    if f.exists():
+        f.unlink()
+    r = build_context(glid)
+    return {"ok": True, "glid": glid, "opener": _parse_md(r["md"])["opener"]}
+
+
+# ------------------------------------------------------------------ demo page (/demo): website items + WhatsApp
+@app.get("/site/{glid}")
+def site_items(glid: int):
+    """What the emulated IndiaMART website shows this user. Buyer: the categories they searched (indiamart.com).
+    Seller: the enquiries they received (seller panel / Lead Manager). All from the dataset, nothing invented."""
+    _ensure_built(glid)
+    ev = json.loads((OUT_DIR / str(glid) / "events.json").read_text())
+    role = role_of(glid)
+    prof = ev["profile"]
+    if role == "buyer":
+        items = [{"kind": "category", "title": c["category"], "sub": f"{c['events']} recent actions",
+                  "meta": "Get quotes from verified suppliers"} for c in ev.get("top_categories", [])]
+        seen = {i["title"].lower() for i in items}
+        for a in ev.get("recent_activity", []):
+            kw = (a.get("keyword") or "").strip()
+            if kw and kw.lower() not in seen and len(items) < 8:
+                seen.add(kw.lower())
+                items.append({"kind": "product", "title": kw, "sub": f"{a['what']} · {a['date'][:10]}",
+                              "meta": f"seller {a.get('seller_glid') or '—'}"})
+        return {"glid": glid, "role": role, "name": prof.get("name"), "city": prof.get("city"),
+                "site": "indiamart.com", "items": items, "buyleads": ev.get("active_buyleads", [])}
+    items = [{"kind": "enquiry", "title": e["product"], "sub": f"{e.get('buyer_company') or 'Buyer'}, {e.get('buyer_city') or ''}",
+              "meta": e["date"][:16], "unread": bool(e.get("unread")), "message": (e.get("message") or "")[:140]}
+             for e in ev.get("enquiries", [])[:8]]
+    return {"glid": glid, "role": role, "name": prof.get("company"), "city": prof.get("city"), "site": "seller.indiamart.com",
+            "items": items, "products": prof.get("categories", []), "unread": ev.get("unread_enquiries", 0)}
+
+
+class WhatsAppMsg(BaseModel):
+    text: str
+    language: str | None = None
+
+
+WA_REPLY_PROMPT = """You are IndiaMART's WhatsApp assistant replying to a {role}. The {role} just wrote the message below.
+Reply in the SAME language and script as the message (Hinglish in Latin letters if they wrote Hinglish), in 1 or 2 short
+WhatsApp lines (under 35 words), no markdown, no lists. Acknowledge precisely what they said using the memory below,
+confirm it is noted, and say VANI will follow up by call if needed. Never invent prices, names or dates.
+
+MESSAGE: {text}
+
+MEMORY CARD:
+{card}
+"""
+
+
+@app.post("/whatsapp/{glid}")
+def whatsapp_message(glid: int, m: WhatsAppMsg):
+    """Emulated WhatsApp: the user's message becomes a live event (memory rebuilt), then a short bot reply is written
+    from the fresh memory. Returns the reply, the new opener/greeting and freshness seconds."""
+    role = role_of(glid)
+    who = "Buyer" if role == "buyer" else "Seller"
+    text = m.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="empty message")
+    r = post_event(glid, Event(channel="whatsapp", summary=f"{who} wrote on WhatsApp: {text}", language=m.language))
+    ctx = get_context(glid)
+    reply = ""
+    try:
+        from sarvamai import SarvamAI
+        client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
+        c = client.chat.completions(model="sarvam-105b", temperature=0.3, reasoning_effort=None, max_tokens=120,
+                                    messages=[{"role": "user", "content": WA_REPLY_PROMPT.format(role=role, text=text, card=ctx["call_card"])}])
+        reply = (c.choices[0].message.content or "").strip()
+    except Exception as e:  # noqa: BLE001
+        print("whatsapp reply LLM failed:", e)
+    if not reply:
+        reply = "Noted 👍 Aapki baat save kar li hai. VANI aapko call par iske baare mein update degi."
+    return {"ok": True, "glid": glid, "reply": reply, "freshness_seconds": r["freshness_seconds"],
+            "opener": ctx["opener"], "greeting": ctx["greeting"], "event": r["event"]}
 
 
 class CallRequest(BaseModel):
@@ -340,7 +429,7 @@ def call_me(req: CallRequest):
                             "Set SARVAM_AGENT_API_KEY / SARVAM_CONNECTION_ID / SARVAM_AGENT_NUMBER in .env.")
     import httpx
     body = {
-        "app_config": {"app_id": app_id, "app_version": int(os.getenv("SARVAM_APP_VERSION", "2")),
+        "app_config": {"app_id": app_id, "app_version": int(os.getenv("SARVAM_APP_VERSION", "10")),  # latest committed
                        "connection_config": {"connection_id": conn, "agent_phone_number": agent_no},
                        "agent_variables": {"glid": str(req.glid)}},
         "user_config": {"user_phone_number": req.phone},
@@ -367,15 +456,22 @@ def post_event(glid: int, ev: Event):
     """Append one new event and regenerate the memory file. Returns how long freshness took."""
     t0 = time.perf_counter()
     lang_changed = set_language(glid, ev.language)
+    skip = None
     if not ev.summary.strip():  # e.g. on_end fired before the call summary was extracted
+        skip = "empty summary"
+    elif (ev.outcome or "").strip() in SKIP_OUTCOMES:  # call dropped / wrong person: nothing worth remembering
+        skip = f"outcome {ev.outcome}"
+    if skip:
         if lang_changed:  # still regenerate, so the next greeting is in the new language
             build_context(glid)
-        return {"ok": False, "glid": glid, "skipped": "empty summary", "language_saved": lang_changed,
+        return {"ok": False, "glid": glid, "skipped": skip, "language_saved": lang_changed,
                 "freshness_seconds": round(time.perf_counter() - t0, 2)}
     d = OUT_DIR / str(glid)
     d.mkdir(parents=True, exist_ok=True)
-    rec = ev.model_dump()
-    rec["time"] = rec["time"] or datetime.now().strftime("%Y-%m-%d %H:%M")
+    rec = ev.model_dump(exclude_none=True)
+    rec["time"] = rec.get("time") or datetime.now().strftime("%Y-%m-%d %H:%M")
+    if ev.callback_time and ev.callback_time.strip():  # make the agreed callback explicit in the memory line
+        rec["summary"] = rec["summary"].rstrip(". ") + f". Callback agreed: {ev.callback_time.strip()}."
     with (d / "events.jsonl").open("a") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     try:
@@ -392,5 +488,12 @@ def post_event(glid: int, ev: Event):
     }
 
 
-# ------------------------------------------------------------------ demo web page (must be last: catches "/")
+# ------------------------------------------------------------------ demo web pages (mount must be last: catches "/")
+@app.get("/demo")
+def demo_page():
+    """Simplified showroom demo: phone (WhatsApp + VANI call) · desktop (IndiaMART website) · live memory file."""
+    from fastapi.responses import FileResponse
+    return FileResponse(str(ROOT / "web" / "demo.html"))
+
+
 app.mount("/", StaticFiles(directory=str(ROOT / "web"), html=True), name="web")
