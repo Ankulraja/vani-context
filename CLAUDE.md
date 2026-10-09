@@ -318,6 +318,11 @@ The user's widget test calls (speakers / 500 table chairs / helicopter / VIP dar
 A teammate (vishal.1@indiamart.com) is in the workspace and ran a dashboard test at 14:10 IST with glid=1234
 (unknown → API 404 → agent fell back to defaults "Rajesh / No memory loaded yet"). Expected behaviour; on
 Day 1 maybe return a friendly "new user" memory instead of 404.
+**v4 committed 14:20 IST:** prompt now has explicit seller-vs-buyer rules (Environment: what each role is and
+what never to ask; Objective: role vocabulary "aapko enquiry aayi hai" vs "aapne enquiry bheji thi"; step 2
+branches per role; step 3 = new requirement not in memory → note + ask quantity, never promise non-IndiaMART
+products). Reason: user felt seller and buyer calls sounded the same; cause was widget sessions all running
+seller 93557756 while the user role-played a buyer.
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends
