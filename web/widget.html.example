@@ -1,0 +1,4 @@
+<!-- Copy this file to web/widget.html and replace the contents with the Sarvam embed snippet:
+     indus.sarvam.ai/samvaad -> VANI IndiaMART -> Deploy -> Deploy with Code -> Embed -> copy.
+     It usually looks like a <script src="https://...sarvam.ai/...widget.js" data-agent-id="..."></script>
+     plus maybe a <div>. web/index.html injects whatever is in widget.html when "Chat with VANI" is pressed. -->

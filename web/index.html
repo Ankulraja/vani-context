@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VANI Memory Demo</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1c1e21; --muted:#6b7280; --line:#e5e7eb; --accent:#2e3192; --accent2:#ff6a00; --ok:#0a7a3d; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+  header { background:var(--accent); color:#fff; padding:14px 20px; display:flex; align-items:center; gap:12px; }
+  header h1 { font-size:18px; margin:0; font-weight:600; }
+  header span { opacity:.8; font-size:13px; }
+  main { max-width:1100px; margin:0 auto; padding:16px; display:grid; grid-template-columns:1.2fr 1fr; gap:16px; }
+  @media (max-width:860px){ main { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .card h2 { margin:0 0 10px; font-size:15px; color:var(--accent); }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  input, select, textarea { font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; }
+  input[type=text] { min-width:180px; }
+  textarea { width:100%; min-height:64px; }
+  button { font:inherit; padding:8px 14px; border:0; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; }
+  button.alt { background:var(--accent2); }
+  button.ghost { background:#eef0ff; color:var(--accent); }
+  button:disabled { opacity:.5; cursor:default; }
+  .muted { color:var(--muted); font-size:13px; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef0ff; color:var(--accent); font-size:12px; margin-right:6px; }
+  .pill.ok { background:#e6f6ec; color:var(--ok); }
+  #md { font-size:14px; }
+  #md h1 { font-size:17px; margin:4px 0 2px; } #md h2 { font-size:14px; margin:14px 0 4px; color:var(--accent); border-bottom:1px solid var(--line); }
+  #md ul { margin:4px 0; padding-left:18px; } #md li { margin:2px 0; } #md em { color:var(--muted); font-size:12px; }
+  .opener { background:#fff7ed; border-left:4px solid var(--accent2); padding:10px 12px; border-radius:6px; margin:8px 0; }
+  .events li { margin:6px 0; } .events time { color:var(--muted); font-size:12px; margin-right:6px; }
+  #widget-note { font-size:13px; color:var(--muted); }
+  pre { background:#f3f4f6; padding:8px; border-radius:6px; overflow:auto; font-size:12px; }
+  .status { font-size:13px; min-height:18px; }
+</style>
+</head>
+<body>
+<header><h1>VANI Memory Demo</h1><span>Global Context: one memory file, every channel</span></header>
+<main>
+  <!-- LEFT: who + memory -->
+  <section>
+    <div class="card">
+      <h2>1. Who is calling / chatting?</h2>
+      <div class="row">
+        <input id="who" type="text" placeholder="GLID (e.g. 95568576) or phone (+91…)" value="95568576" />
+        <button id="load">Load memory</button>
+        <button id="rebuild" class="ghost" title="Regenerate the file from data + live events">Rebuild</button>
+        <select id="quick">
+          <option value="">Quick pick…</option>
+          <option value="95568576">Seller · Alfa Enterprises (Delhi)</option>
+          <option value="93557756">Seller · Visionary Style (Surat, said stop)</option>
+          <option value="87677035">Seller · Anuradha Oil Mill (Kanpur)</option>
+          <option value="274238067">Buyer · Aarti Singh (bollards)</option>
+          <option value="59681744">Buyer · Ramesh (glass bells)</option>
+        </select>
+      </div>
+      <div id="status" class="status muted"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>2. What VANI already knows <span id="meta" class="muted"></span></h2>
+      <div id="openerBox" class="opener" hidden></div>
+      <div id="md" class="muted">Load a GLID to see the memory file.</div>
+    </div>
+  </section>
+
+  <!-- RIGHT: channels -->
+  <section>
+    <div class="card">
+      <h2>3. Talk to VANI</h2>
+      <div class="row">
+        <button id="chatBtn" class="alt">💬 Chat with VANI</button>
+        <button id="callBtn">📞 Call me</button>
+        <input id="phone" type="text" placeholder="+91 your number (for Call me)" />
+      </div>
+      <p id="widget-note">Chat opens the Sarvam web widget for the agent <b>VANI IndiaMART</b>. The agent fetches this
+        memory from our API before its first word.</p>
+      <div id="sarvam-widget-slot"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>4. Simulate activity on another channel</h2>
+      <div class="row">
+        <select id="chan"><option>whatsapp</option><option>app</option><option>chat</option><option>voice</option></select>
+        <input id="evtime" type="text" placeholder="time (optional)" style="min-width:120px" />
+      </div>
+      <textarea id="summary" placeholder="e.g. Seller replied on WhatsApp: HP 16GB pen drive at Rs 240/piece, call back tomorrow 11 AM"></textarea>
+      <div class="row"><button id="addEvent">Add event → refresh memory</button><span id="fresh" class="muted"></span></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>5. Latest events (all channels)</h2>
+      <ul id="events" class="events muted"><li>—</li></ul>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+let current = null;   // {glid, role, name, ...}
+
+function mdToHtml(md) {
+  const lines = md.split("\n"); let out = [], inList = false;
+  const inline = s => s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/_(.+?)_$/g, "<em>$1</em>").replace(/`(.+?)`/g, "<code>$1</code>");
+  for (let l of lines) {
+    if (l.startsWith("- ")) { if (!inList) { out.push("<ul>"); inList = true; } out.push("<li>" + inline(l.slice(2)) + "</li>"); continue; }
+    if (inList) { out.push("</ul>"); inList = false; }
+    if (l.startsWith("# ")) out.push("<h1>" + inline(l.slice(2)) + "</h1>");
+    else if (l.startsWith("## ")) out.push("<h2>" + inline(l.slice(3)) + "</h2>");
+    else if (l.trim()) out.push("<p>" + inline(l) + "</p>");
+  }
+  if (inList) out.push("</ul>");
+  return out.join("\n");
+}
+
+async function load(rebuild = false) {
+  const who = $("#who").value.trim(); if (!who) return;
+  const q = who.startsWith("+") || who.length > 10 ? `phone=${encodeURIComponent(who)}` : `glid=${who}`;
+  $("#status").textContent = "Loading…"; const t0 = performance.now();
+  const r = await fetch(`/context?${q}&rebuild=${rebuild}`); const d = await r.json();
+  if (!r.ok) { $("#status").textContent = "❌ " + (d.detail || r.status); return; }
+  current = d;
+  $("#status").innerHTML = `<span class="pill ok">${d.role}</span><b>${d.name}</b> · ${d.city || ""} · GLID ${d.glid} · ${(performance.now()-t0|0)} ms` +
+    (d.build_seconds ? ` (built in ${d.build_seconds}s, insight: ${d.insight_source})` : " (cached)");
+  $("#meta").textContent = `updated ${d.updated_at.replace("T"," ")}`;
+  $("#openerBox").hidden = false; $("#openerBox").innerHTML = `<b>VANI will open with:</b> ${d.opener}<br><span class="muted">Next: ${d.next_action} · Avoid: ${d.avoid}</span>`;
+  $("#md").classList.remove("muted"); $("#md").innerHTML = mdToHtml(d.context);
+  loadEvents(d.glid);
+}
+async function loadEvents(glid) {
+  const r = await fetch(`/events/${glid}`); const ev = await r.json();
+  $("#events").innerHTML = ev.length ? ev.slice().reverse().map(e => `<li><time>${e.time}</time><span class="pill">${e.channel}</span>${e.summary}</li>`).join("") : "<li>— none yet —</li>";
+}
+$("#load").onclick = () => load(false);
+$("#rebuild").onclick = () => load(true);
+$("#quick").onchange = e => { if (e.target.value) { $("#who").value = e.target.value; load(false); } };
+$("#who").addEventListener("keydown", e => { if (e.key === "Enter") load(false); });
+
+$("#addEvent").onclick = async () => {
+  if (!current) { alert("Load a GLID first"); return; }
+  const body = { channel: $("#chan").value, summary: $("#summary").value.trim(), time: $("#evtime").value.trim() || null };
+  if (!body.summary) return;
+  $("#fresh").textContent = "Refreshing memory…";
+  const r = await fetch(`/events/${current.glid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const d = await r.json();
+  $("#fresh").textContent = d.ok ? `✅ memory refreshed in ${d.freshness_seconds}s` : "❌ " + (d.detail || d.skipped);
+  $("#summary").value = ""; load(false);
+};
+
+$("#callBtn").onclick = async () => {
+  if (!current) { alert("Load a GLID first"); return; }
+  const phone = $("#phone").value.trim(); if (!phone) { alert("Enter your phone number"); return; }
+  $("#status").textContent = "Asking Sarvam to call…";
+  const r = await fetch(`/call`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ glid: current.glid, phone }) });
+  const d = await r.json(); $("#status").textContent = (r.ok ? "📞 " : "❌ ") + (d.message || d.detail || JSON.stringify(d));
+};
+
+$("#chatBtn").onclick = () => {
+  // The Sarvam embed snippet (from dashboard → Deploy → Deploy with Code → Embed) goes in web/widget.html.
+  // We load it on demand so the page works even before the snippet exists.
+  fetch("/widget.html").then(r => r.ok ? r.text() : Promise.reject()).then(html => {
+    const slot = $("#sarvam-widget-slot"); slot.innerHTML = html;
+    slot.querySelectorAll("script").forEach(old => { const s = document.createElement("script"); [...old.attributes].forEach(a => s.setAttribute(a.name, a.value)); s.text = old.text; old.replaceWith(s); });
+    $("#widget-note").innerHTML = `Widget loaded. The agent's <code>glid</code> default decides whose memory it loads (currently set via MCP). Chat, then press <b>Call me</b> to see VANI resume on the phone.`;
+  }).catch(() => { $("#widget-note").innerHTML = `⚠️ <b>web/widget.html</b> not found. Paste the Sarvam embed snippet (dashboard → Deploy → Deploy with Code → Embed) into that file.`; });
+};
+
+load(false);
+</script>
+</body>
+</html>

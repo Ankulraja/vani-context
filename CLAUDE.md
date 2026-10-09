@@ -310,6 +310,13 @@ else 404. `GET /context` returns `role`, `name` (buyer person name / seller comp
 Bollards to 11 sellers, active buy-lead "Concrete Cylindrical Bollards", 30 Sep phoned 4 sellers, WhatsApp
 seller replies). Backup buyer: 59681744 Ramesh, Global Print And Solution, Mumbai (paper bags / hand bells;
 IndiaMART connect calls "not interested"). Buyer data has no phone numbers either.
+**Demo web page (2026-10-09 13:00):** `web/index.html` served at `http://localhost:8000/` (StaticFiles mount, must
+stay the last route). Sections: 1 who (GLID or phone, quick-pick of the 5 tested GLIDs) → 2 memory file
+rendered + opener box → 3 "Chat with VANI" (injects `web/widget.html` = Sarvam embed snippet, user must paste it;
+`web/widget.html.example` explains) + "Call me" (`POST /call` → Sarvam Instant Outbound; returns 503 until
+`.env` has SARVAM_AGENT_API_KEY / SARVAM_CONNECTION_ID / SARVAM_AGENT_NUMBER, i.e. a Sarvam number exists)
+→ 4 simulate an event on another channel (`POST /events/{glid}`, shows freshness seconds) → 5 events list
+(`GET /events/{glid}`). Public via the tunnel too.
 Run API: `uvicorn app.api:app --port 8000` (log in `/tmp/vani_api.log` when started by Claude).
 **Live events** (`events.jsonl`) are rendered in a "## Latest across channels (live)" section right under
 the story, and the LLM prompt forces the opener to continue from the newest live event. Verified: after

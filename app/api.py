@@ -13,12 +13,14 @@ Then expose with ngrok so Sarvam can reach it:  ngrok http 8000
 from __future__ import annotations
 
 import json
+import os
 import time
 from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.builder.buyer_md import build_buyer_md
@@ -206,6 +208,44 @@ def sarvam_webhook(payload: dict):
     return r
 
 
+@app.get("/events/{glid}")
+def list_events(glid: int):
+    """Live events appended so far (newest last)."""
+    f = OUT_DIR / str(glid) / "events.jsonl"
+    if not f.exists():
+        return []
+    return [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
+
+
+class CallRequest(BaseModel):
+    glid: int
+    phone: str
+
+
+@app.post("/call")
+def call_me(req: CallRequest):
+    """Ask Sarvam to place an outbound call to `phone` with this GLID's memory (Instant Outbound API).
+    Needs a Sarvam phone number (connection) + API key — set SARVAM_AGENT_API_KEY, SARVAM_CONNECTION_ID,
+    SARVAM_AGENT_NUMBER in .env once the workspace has a number (event day). Until then returns 503."""
+    key, conn, agent_no = os.getenv("SARVAM_AGENT_API_KEY"), os.getenv("SARVAM_CONNECTION_ID"), os.getenv("SARVAM_AGENT_NUMBER")
+    app_id = os.getenv("SARVAM_APP_ID", "VANI-IndiaM-b67b20da-8a1b")
+    if not (key and conn and agent_no):
+        raise HTTPException(status_code=503, detail="Outbound not configured yet: workspace has no Sarvam phone number. "
+                            "Set SARVAM_AGENT_API_KEY / SARVAM_CONNECTION_ID / SARVAM_AGENT_NUMBER in .env.")
+    import httpx
+    body = {
+        "app_config": {"app_id": app_id, "app_version": int(os.getenv("SARVAM_APP_VERSION", "2")),
+                       "connection_config": {"connection_id": conn, "agent_phone_number": agent_no},
+                       "agent_variables": {"glid": str(req.glid)}},
+        "user_config": {"user_phone_number": req.phone},
+        "webhook_config": {"url": os.getenv("PUBLIC_URL", "").rstrip("/") + "/webhook/sarvam", "metadata": {"glid": req.glid}},
+    }
+    r = httpx.post("https://apps.sarvam.ai/api/outbounds/v1/calls", headers={"X-API-Key": key}, json=body, timeout=30)
+    if r.status_code >= 400:
+        raise HTTPException(status_code=502, detail=f"Sarvam said {r.status_code}: {r.text[:300]}")
+    return {"ok": True, "message": f"Sarvam is calling {req.phone} with memory of GLID {req.glid}", "sarvam": r.json()}
+
+
 class EventWithGlid(Event):
     glid: int
 
@@ -240,3 +280,7 @@ def post_event(glid: int, ev: Event):
         "insight_source": r["insight_source"],
         "opener": _parse_md(r["md"])["opener"],
     }
+
+
+# ------------------------------------------------------------------ demo web page (must be last: catches "/")
+app.mount("/", StaticFiles(directory=str(ROOT / "web"), html=True), name="web")
