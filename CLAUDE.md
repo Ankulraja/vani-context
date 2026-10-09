@@ -231,6 +231,14 @@ Design decisions:
   now **274238067 (buyer Aarti Singh)** for the user's next dashboard test. `send_chat` test passed: first
   line was "आपने बताया था कि VP Precon का quote एक हज़ार आठ सौ पचास रुपये per bollard बहुत ज़्यादा है…" (from a live
   voice event posted to `/events/274238067`).
+- **2026-10-09 11:15 IST: tunnel restarted** (old quick-tunnel URL died overnight). New URL
+  `https://surrounding-supports-boats-buffalo.trycloudflare.com`. Both tools recreated on it:
+  `load_user_memory` on_start id `b4cd36b1-…`, `save_call_to_memory` on_end (recreated). `glid` default
+  back to **95568576**. User deleted `context_files/95568576/seller.md` on purpose to watch the API build
+  it live during their dashboard test — do not pre-generate it.
+- **2026-10-09 ~11:30 IST user voice tests after tunnel restart:** seller 95568576 (file built live, OK) and
+  **buyer 59681744 Ramesh** (file built live; VANI opened with the 23 Sep glass hand bells enquiry). Buyer
+  path is verified by voice too. `glid` default currently **59681744**.
 - Remaining on the agent: voicemail message + call goal (playbook says required), commit v2, phone test
   (`verify_phone_number` → `place_test_call` with `app_variables={"glid": ...}`), web widget embed.
 
