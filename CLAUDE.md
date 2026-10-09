@@ -309,6 +309,24 @@ Design decisions:
 - **Real indiamart.com in the middle panel is NOT possible:** all IndiaMART hosts send `x-frame-options: sameorigin`.
   Proposed instead (user to confirm "go with A"): a Tampermonkey userscript / bookmarklet on the real site that posts
   searches, product views, Get Latest Price / Call Supplier clicks to `POST /events` with the active GLID.
+- **18:50 IST option 2 built: Chrome extension `extension/` (MV3, Load unpacked).** `rules.json` strips
+  `x-frame-options` / CSP on `*.indiamart.com` main+sub frames so `/demo` can iframe the real site; `capture.js`
+  content script (all frames) captures search (`?ss=`/`?q=`, form submit, Enter in a search box), `/proddetail/`
+  page opens (h1 + supplier + price), clicks on Get Latest Price / Contact Supplier / Call Supplier / Send Enquiry /
+  Shortlist / Reply / Call buyer, and 1-s dwell on product cards (batched); shows a black on-page badge; sends via
+  `chrome.runtime.sendMessage` → `background.js` → `GET /active` → `POST /events/{glid}` (channel web, meta.source
+  chrome-extension); also `postMessage({vani:"url"|"event"})` to the parent demo page. API now has CORS allow-all.
+  `/demo` website card has an **Emulated / Live indiamart.com** segmented toggle (localStorage `vani_site_mode`,
+  deep link `&live`), editable URL bar + ⌂ in live mode, listens for the frame's postMessages and polls `/events`.
+  Headless Google Chrome ignores `--load-extension` (removed in Chrome 137+), so testing uses Playwright Chromium
+  (`pip install playwright` in .venv, script `$CLAUDE_JOB_DIR/tmp/ext_test.py`). **Tested 19:05 IST: PASS** — with
+  the extension loaded, `/demo#…&live` rendered the real www.indiamart.com home inside the frame (title + h1 read
+  back), and a real tab on `dir.indiamart.com/search.mp?ss=pen+drive` produced the event
+  `Buyer searched "pen drive" on indiamart.com` in `events.jsonl` via background → `/events/{glid}`. Clicks and
+  product-page capture are not yet exercised (need a real mouse). Found and fixed: the hidden emulated panel's
+  dwell observer fired on layout shifts while in live mode → observer disconnected in live mode. Test events
+  removed from 274238067 (backup `_backups/274238067_before_exttest.jsonl`). Login inside the frame is untested
+  (third-party cookie rules may block it; the same extension works in a normal tab as fallback).
 - Still user-side: earphones for widget calls; one real mic call on `/demo` to confirm captions; listen to Chaitra
   on a full Hindi call (switch back to Ishita `01a0cf17-0b6e-…` + commit if it sounds off); git commit.
 

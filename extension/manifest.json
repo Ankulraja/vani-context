@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "VANI Context — IndiaMART activity capture",
+  "version": "0.1.0",
+  "description": "Demo helper: lets the VANI demo page show the real indiamart.com in a frame and sends the user's website actions (search, product views, enquiry clicks) to the VANI Context API so the memory file updates live.",
+  "permissions": ["declarativeNetRequest", "storage"],
+  "host_permissions": ["*://*.indiamart.com/*", "http://localhost:8000/*", "http://127.0.0.1:8000/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["*://*.indiamart.com/*"],
+      "js": ["capture.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [{ "id": "allow_frame", "enabled": true, "path": "rules.json" }]
+  },
+  "icons": {}
+}

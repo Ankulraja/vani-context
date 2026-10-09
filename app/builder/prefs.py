@@ -62,7 +62,10 @@ def set_language(glid: int, lang: str | None) -> bool:
 
 GREETING_RULE = """- "greeting": the very first line VANI speaks, before anything else, written in {language}{script}.
   Under 18 words. It greets the user by name ({name_hint}, exactly as given, no "ji" added), asks how they are, and names the latest topic in a
-  few words (e.g. the product or requirement). No prices, numbers, dates or account details. Ends with a question."""
+  few words (e.g. the product or requirement). The latest topic is the subject of the FIRST item of
+  "live_events_newest_first" when that list is non-empty (what the user just searched, opened, wrote or said);
+  only when it is empty, use the newest requirement from the history. No prices, numbers, dates or account details.
+  Ends with a question."""
 
 
 def greeting_rule(language: str, name_hint: str, role: str = "buyer") -> str:

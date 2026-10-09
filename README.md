@@ -53,6 +53,23 @@ Sarvam Voice Agent "VANI IndiaMART"  (Samvaad, agent id VANI-IndiaM-b67b20da-8a1
 | Website / Lead Manager | **Simulated** on the demo page with the user's real dataset items; clicks and scroll-views post web events. |
 | Data | Organiser dataset (5,000 sellers, 302 buyers) standing in for the Day-1 APIs. No invented users. |
 
+## Live indiamart.com in the demo (Chrome extension)
+
+The middle screen of `/demo` has two modes. **Emulated** shows the user's real dataset items in a look-alike page.
+**Live indiamart.com** shows the real website inside the frame and captures what the user does there:
+
+- searches (query), product page opens (title, supplier, price shown on the page),
+- clicks on Get Latest Price / Contact Supplier / Call Supplier / Send Enquiry / Shortlist / Reply / Call buyer,
+- product cards that stay in view for a second ("browsed: A, B, C", batched).
+
+Each action is posted to `POST /events/{glid}` as one plain line, the memory file is rebuilt, and VANI's next
+greeting changes. The GLID is the user selected on the demo page (`GET /active`).
+
+IndiaMART sends `x-frame-options: sameorigin`, so a small Chrome extension (folder `extension/`) removes that
+header for the frame and injects the capture script on every `*.indiamart.com` page, in tabs and in the frame.
+Install once: `chrome://extensions` → Developer mode → **Load unpacked** → pick the `extension/` folder.
+In production this script is simply part of IndiaMART's own frontend; the extension is the hackathon stand-in.
+
 ## Known limitations
 
 - The Sarvam web widget sends `user_identifier`, but the agent's on_start tool receives it empty. The demo page

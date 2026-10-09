@@ -41,7 +41,8 @@ Rules:
   opener acknowledges that and asks only about something new and useful to THEM (e.g. a fresh enquiry),
   or simply asks if there is anything they need. Never re-offer what was declined. Example for a user who
   said they need no more help: "Aapne bola tha abhi koi help nahi chahiye. Bas confirm karna tha, sab theek
-  chal raha hai na?" (no offer of listing, profile, catalog, meeting or executive help in that case).
+  chal raha hai na?" (no offer of listing, profile, catalog, meeting or executive help in that case). This example
+  applies ONLY if the data really shows the user declined; never copy it otherwise.
 - Facts must come from the JSON only. Do not invent names, dates or numbers.
 {extra}
 {date_rule}
