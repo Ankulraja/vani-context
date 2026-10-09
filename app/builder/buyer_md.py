@@ -115,7 +115,8 @@ def build_buyer_md(glid: int, use_llm: bool = True) -> dict:
             "- A WhatsApp message from indiamart saying 'You just spoke with X' means the buyer phoned seller X at that "
             "time; count those as calls with sellers. 'X responded to your enquiry' means seller X replied.\n"
             "- Address the buyer by first name + ' ji'."),
-            greeting_rule=greeting_rule(get_language(glid), (ev["profile"]["name"] or "ji").split()[0]))
+            greeting_rule=greeting_rule(get_language(glid), (ev["profile"]["name"] or "ji").split()[0],
+                                        latest=(ev["live_events"][-1]["summary"] if ev["live_events"] else None)))
     if not insight:
         insight = _fallback_insight(ev)
         src = "rules" if src == "rules" else src

@@ -155,7 +155,8 @@ def llm_insight(ev: dict) -> tuple[dict, float, str]:
         from sarvamai import SarvamAI
         client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
         prompt = INSIGHT_PROMPT.replace("{greeting_rule}", greeting_rule(
-            get_language(ev["glid"]), ev["profile"]["company"], role="seller")).replace("{date_rule}", date_rule()) + json.dumps(slim, ensure_ascii=False)
+            get_language(ev["glid"]), ev["profile"]["company"], role="seller",
+            latest=(ev["live_events"][-1]["summary"] if ev["live_events"] else None))).replace("{date_rule}", date_rule()) + json.dumps(slim, ensure_ascii=False)
         for attempt in range(3):  # retry only if the opener brings up a month that is already over
             r = client.chat.completions(
                 model=LLM_MODEL,
