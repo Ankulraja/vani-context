@@ -330,6 +330,9 @@ Sarvam playbook (opening line should say who is calling) — the user chose it; 
 **v6 committed 14:36 IST:** auto-translation produced "आप कैसी हैं?" (feminine); Hindi maps patched by hand to
 "नमस्ते {{user_name}} जी, आप कैसे हैं?" in all three `multilingual_audio*` maps. Re-patch after any English
 intro edit (editing the English regenerates the translations).
+**v7 committed 14:40 IST (user request, no "ji" in greeting):** English "Hello {{user_name}}, how are you?",
+Hindi maps patched to "नमस्ते {{user_name}}, आप कैसे हैं?". The prompt still addresses the user as
+"{{user_name}} ji" mid-call (speaking style rule) — ask the user if that should go too.
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends
