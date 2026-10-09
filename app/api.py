@@ -24,6 +24,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.builder.buyer_md import build_buyer_md
+from app.builder.call_card import build_call_card
+from app.builder.prefs import get_language, set_language
 from app.sources.seller import ROOT
 from app.builder.seller_md import OUT_DIR, build_seller_md
 from app.sources.buyer import _all_contexts as _buyer_contexts
@@ -71,9 +73,11 @@ def _md_path(glid: int) -> Path:
 
 def _parse_md(md: str) -> dict:
     """Pull the few fields the agent needs as separate variables out of the markdown."""
-    out = {"opener": "", "next_action": "", "avoid": "", "story": ""}
+    out = {"opener": "", "next_action": "", "avoid": "", "story": "", "greeting": ""}
     for line in md.splitlines():
-        if line.startswith("- **Opener (Hinglish):**"):
+        if line.startswith("- **Greeting:**"):
+            out["greeting"] = line.split("**", 2)[2].strip()
+        elif line.startswith("- **Opener (Hinglish):**"):
             out["opener"] = line.split("**", 2)[2].strip()
         elif line.startswith("- **Next best action:**"):
             out["next_action"] = line.split("**", 2)[2].strip()
@@ -124,7 +128,10 @@ def get_context(glid: int, rebuild: bool = False):
         "avoid": fields["avoid"],
         "story": fields["story"],
         "unread_enquiries": events.get("unread_enquiries", 0),
-        "context": md,  # full seller.md / buyer.md goes into the agent's prompt as {{user_context}}
+        "language": get_language(glid),  # language the user spoke last -> agent variable preferred_language
+        "greeting": fields["greeting"],  # personalised first line, in that language -> agent variable greeting
+        "call_card": build_call_card(md, events, role, glid, get_language(glid)),  # short memory -> {{user_context}}
+        "context": md,  # full seller.md / buyer.md (web page, other teams; agent reads parts via /history)
         "updated_at": datetime.fromtimestamp(_md_path(glid).stat().st_mtime).isoformat(timespec="seconds"),
         "build_seconds": r["seconds_total"],
         "insight_source": r["insight_source"],
@@ -195,6 +202,51 @@ def get_context_q(glid: int | None = None, phone: str | None = None, uid: str | 
     return get_context(glid, rebuild)
 
 
+# ------------------------------------------------------------------ mid-call: older history on demand
+HISTORY_PROMPT = """You help VANI, IndiaMART's voice agent, answer a question during a live call with a {role}.
+Use ONLY the memory file and raw data below. Answer in {language}{script}, in 1 or 2 short spoken sentences
+(under 40 words), no markdown, no lists. Speak TO the {role} as "aap" (second person), never "the {role}". Say prices and dates the way a person says them. If the answer is not
+in the data, say that this detail is not available right now and offer to note it. Never invent facts.
+
+QUESTION: {question}
+
+MEMORY FILE:
+{md}
+
+RAW DATA (JSON, trimmed):
+{raw}
+"""
+
+
+@app.get("/history")
+def get_history(glid: int, question: str = ""):
+    """Run tool for the agent: answers a question about the user's older history (not in the call card).
+    Returns a short spoken answer in the user's language; the agent reads `answer` out."""
+    t0 = time.perf_counter()
+    md = _ensure_built(glid)["md"]
+    role, language = role_of(glid), get_language(glid)
+    ev = json.loads((OUT_DIR / str(glid) / "events.json").read_text())
+    first = ["vani_calls", "vani_latest_transcript", "executive_calls", "whatsapp", "pns_calls", "indiamart_calls",
+             "recent_activity", "enquiries", "buyleads", "buyer_calls", "active_buyleads", "last_enquiry", "last_lead"]
+    ordered = {k: ev[k] for k in first if k in ev} | {k: v for k, v in ev.items() if k not in first and k != "replies"}
+    raw = json.dumps(ordered, ensure_ascii=False)[:12000]
+    script = " (Devanagari script, product and brand names in English letters)" if language == "Hindi" else ""
+    try:
+        from sarvamai import SarvamAI
+        client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
+        r = client.chat.completions(
+            model="sarvam-105b", temperature=0.2, reasoning_effort=None, max_tokens=250,
+            messages=[{"role": "user", "content": HISTORY_PROMPT.format(
+                role=role, language=language, script=script, question=question or "summarise the older history", md=md, raw=raw)}])
+        answer = (r.choices[0].message.content or "").strip()
+    except Exception as e:  # noqa: BLE001
+        answer = ""
+        print("history LLM failed:", e)
+    if not answer:  # fallback: the story line from the file
+        answer = _parse_md(md)["story"] or "Is detail ki jaankari abhi available nahi hai."
+    return {"glid": glid, "question": question, "answer": answer, "seconds": round(time.perf_counter() - t0, 2)}
+
+
 @app.get("/context/{glid}/seller.md", response_class=PlainTextResponse)
 @app.get("/context/{glid}/buyer.md", response_class=PlainTextResponse)
 @app.get("/context/{glid}/md", response_class=PlainTextResponse)
@@ -207,6 +259,7 @@ class Event(BaseModel):
     summary: str = Field(..., examples=["Seller asked to call back after Diwali about the Barmer pen drive enquiry"])
     time: str | None = None  # ISO; defaults to now
     meta: dict = Field(default_factory=dict)  # disposition, interaction_id, etc.
+    language: str | None = None  # language the user spoke last on this channel (Sarvam name, e.g. Hindi / English)
 
 
 # ------------------------------------------------------------------ Sarvam call-end webhook
@@ -255,7 +308,7 @@ def sarvam_webhook(payload: dict):
     ev = Event(channel="voice", summary=summary, time=None, meta={
         "interaction_id": payload.get("interaction_id"), "duration": payload.get("duration"),
         "connectivity": payload.get("connectivity_status"), "summary_source": source,
-    })
+    }, language=oav.get("user_language") or fav.get("user_language"))
     r = post_event(glid, ev)
     r["summary_source"] = source
     return r
@@ -313,8 +366,12 @@ def post_event_q(ev: EventWithGlid):
 def post_event(glid: int, ev: Event):
     """Append one new event and regenerate the memory file. Returns how long freshness took."""
     t0 = time.perf_counter()
+    lang_changed = set_language(glid, ev.language)
     if not ev.summary.strip():  # e.g. on_end fired before the call summary was extracted
-        return {"ok": False, "glid": glid, "skipped": "empty summary", "freshness_seconds": 0.0}
+        if lang_changed:  # still regenerate, so the next greeting is in the new language
+            build_context(glid)
+        return {"ok": False, "glid": glid, "skipped": "empty summary", "language_saved": lang_changed,
+                "freshness_seconds": round(time.perf_counter() - t0, 2)}
     d = OUT_DIR / str(glid)
     d.mkdir(parents=True, exist_ok=True)
     rec = ev.model_dump()

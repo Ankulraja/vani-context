@@ -19,6 +19,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from app.builder.prefs import fallback_greeting, get_language, greeting_rule
 from app.sources.seller import ROOT, get_seller_events
 
 load_dotenv(ROOT / ".env")
@@ -105,6 +106,7 @@ Below is the seller's recent activity as JSON. Write ONLY a JSON object with the
   kiya tha") and then asks one short question to continue. Never say the agent is doing something "right now".
 - "next_action": one line, English, the most useful thing VANI can help with on this call.
 - "avoid": one line, English, what VANI must not do or repeat, based on past calls (e.g. objections, hang-ups).
+{greeting_rule}
 Rules:
 - "live_events_newest_first" are the NEWEST things that happened, on other channels (voice call, WhatsApp,
   chat, app), after the rest of the data. The FIRST item is the newest. If the list is non-empty, the opener
@@ -133,13 +135,15 @@ def llm_insight(ev: dict) -> tuple[dict, float, str]:
             temperature=0.2,
             reasoning_effort=None,  # MUST be explicit: default "thinking" eats all tokens and returns empty content
             max_tokens=800,
-            messages=[{"role": "user", "content": INSIGHT_PROMPT + json.dumps(slim, ensure_ascii=False)}],
+            messages=[{"role": "user", "content": INSIGHT_PROMPT.replace("{greeting_rule}", greeting_rule(
+                get_language(ev["glid"]), ev["profile"]["company"])) + json.dumps(slim, ensure_ascii=False)}],
         )
         text = r.choices[0].message.content
         text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
         data = json.loads(text[text.find("{"): text.rfind("}") + 1])
         for k in ("story", "opener", "next_action", "avoid"):
             data.setdefault(k, "")
+        data["greeting"] = data.get("greeting") or fallback_greeting(ev["profile"]["company"], get_language(ev["glid"]))
         return data, time.perf_counter() - t0, "llm"
     except Exception as e:  # noqa: BLE001 — any failure -> deterministic fallback
         return _fallback_insight(ev, str(e)), time.perf_counter() - t0, "fallback"
@@ -155,6 +159,7 @@ def _fallback_insight(ev: dict, err: str) -> dict:
         "opener": opener,
         "next_action": "Read out the unread enquiries and help the seller reply.",
         "avoid": "Do not repeat the paid-services pitch if the seller declined before.",
+        "greeting": fallback_greeting(p["company"], get_language(ev["glid"])),
         "_note": f"LLM unavailable: {err[:80]}",
     }
 
@@ -183,6 +188,8 @@ _Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} IST · data as of 
 {f['flags']}
 
 ## For the next conversation
+- **Language (spoke last):** {get_language(ev['glid'])}
+- **Greeting:** {insight.get('greeting', '')}
 - **Opener (Hinglish):** {insight['opener']}
 - **Next best action:** {insight['next_action']}
 - **Avoid:** {insight['avoid']}

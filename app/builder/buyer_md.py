@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 
 from app.builder.insight import llm_insight
+from app.builder.prefs import fallback_greeting, get_language, greeting_rule
 from app.builder.seller_md import OUT_DIR, _day, _yn
 from app.sources.buyer import get_buyer_events
 
@@ -66,7 +67,8 @@ def _fallback_insight(ev: dict) -> dict:
               if last else f"{name} ji, IndiaMART pe aapki recent requirement ke baare mein baat karni thi.")
     return {"story": f"The buyer has {len(ev['recent_activity'])} recent actions on IndiaMART.",
             "opener": opener, "next_action": "Ask whether the latest requirement is still open and connect a seller.",
-            "avoid": "Do not ask for details already in the memory."}
+            "avoid": "Do not ask for details already in the memory.",
+            "greeting": fallback_greeting(name.split()[0], get_language(ev["glid"]))}
 
 
 def render_md(ev: dict, insight: dict, src: str) -> str:
@@ -91,6 +93,8 @@ _Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} IST · data as of 
 {f['flags']}
 
 ## For the next conversation
+- **Language (spoke last):** {get_language(ev['glid'])}
+- **Greeting:** {insight.get('greeting', '')}
 - **Opener (Hinglish):** {insight['opener']}
 - **Next best action:** {insight['next_action']}
 - **Avoid:** {insight['avoid']}
@@ -108,10 +112,12 @@ def build_buyer_md(glid: int, use_llm: bool = True) -> dict:
         insight, t_llm, src = llm_insight(slim, "buyer", extra=(
             "- A WhatsApp message from indiamart saying 'You just spoke with X' means the buyer phoned seller X at that "
             "time; count those as calls with sellers. 'X responded to your enquiry' means seller X replied.\n"
-            "- Address the buyer by first name + ' ji'."))
+            "- Address the buyer by first name + ' ji'."),
+            greeting_rule=greeting_rule(get_language(glid), (ev["profile"]["name"] or "ji").split()[0]))
     if not insight:
         insight = _fallback_insight(ev)
         src = "rules" if src == "rules" else src
+    insight["greeting"] = insight.get("greeting") or _fallback_insight(ev)["greeting"]
     md = render_md(ev, insight, src)
     out = OUT_DIR / str(glid)
     out.mkdir(parents=True, exist_ok=True)

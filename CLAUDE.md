@@ -8,7 +8,7 @@ re-reading the hackathon PDF and the earlier chat. Keep it updated when the plan
 - The user is new to Python, AI/LLMs and voice bots. Explain in **simple, short English**. Avoid
   jargon; when a term is needed, define it in one line.
 - **Since 2026-10-08 night: Claude does the work itself** (writes files, runs scripts, configures
-  the agent via MCP). Tell the user in short Hinglish what was done and what was found. Do not hand
+  the agent via MCP). Tell the user in short simple English what was done and what was found. Do not hand
   them step lists any more unless something is only possible on their side (login, mic test, commit).
 - **Always update CLAUDE.md** after each piece of work (state, findings, next step).
 - Prefer tables and short bullet lists over long paragraphs.
@@ -16,7 +16,7 @@ re-reading the hackathon PDF and the earlier chat. Keep it updated when the plan
 - Never print or commit the Sarvam API key. It lives in `.env` (git-ignored).
 - The user is **Ankul Patel**, email `ankul.patel@indiamart.com`. The Claude Code login may show a
   different IndiaMART email; ignore it. Sarvam account / MCP login / Org ID = Ankul's email.
-- Since 2026-10-08 the user wants replies in **Hinglish** (Hindi words, Roman script, simple).
+- Since 2026-10-09 ~16:00 IST the user wants replies in **simple English** again (was Hinglish before).
   Code, file names and commands stay in English.
 
 ## The hackathon (facts from the deck, 31 pages)
@@ -349,6 +349,24 @@ the API as "active GLID", API uses it when uid is empty; (c) newer embed SDK wit
 every Load memory. `GET /context` uses the active GLID only when the `uid` param is present but unusable (= agent
 call); page calls (no uid) and real uids are unaffected. No agent change needed. Verified by `send_chat` on v8:
 active=274238067 → VANI opened with Aarti Singh's VP Precon bollard quote. Limit: one on-screen user at a time.
+**v9 committed 16:25 IST (draft now v10): call card + history tool + language memory + personalised greeting.**
+- `GET /context` now also returns `call_card` (~1.2 KB, built by rules in `app/builder/call_card.py`: who, story,
+  2 newest live events, open items, warnings, next/avoid), `greeting` and `language`. The agent saves
+  `call_card` → `user_context` (full .md stays in `context` for the web page / other uses).
+- `GET /history?glid=&question=` (run tool `get_more_history`, id 5e5ab452-…, also listed in state `tool_names`;
+  a run tool must be in `tool_names` before the prompt may say `tool:get_more_history`). sarvam-105b answers in
+  1-2 spoken sentences in the user's language from the full .md + events.json (~0.6-0.8 s). resp_template
+  `{{answer}}`. Prompt step 3: say a hold line, then call the tool in the same turn. Verified in send_chat:
+  "थोड़ा समय दीजिए, मैं details check कर लेती हूँ। आप बस line पर बने रहिए।" → tool → answer spoken.
+- Language memory: post-call variable `user_language` (enum of Sarvam language names + unknown) → on_end tool
+  `save_call_to_memory` (id 512af0bd-…) posts `language` → `app/builder/prefs.py` writes
+  `context_files/<glid>/prefs.json` and rebuilds (even when the summary is empty). on_start tool
+  `load_user_memory` (id cf0895d9-…) saves `language` → `preferred_language`; prompt says reply in it.
+  Initial platform language stays Hindi (workspace can't set it per call, no code hooks); LID switches if the
+  user speaks another language. Not yet verified by a real voice call.
+- Greeting: intro is now `{{greeting}}` in English + all multilingual maps. The insight LLM writes it in the saved
+  language (Hindi = Devanagari with product names in English, neutral "आप कैसे हैं"), with the latest topic, no
+  numbers. Default `greeting` = "Hello ji, how are you?" (= memory did not load).
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends

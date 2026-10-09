@@ -27,6 +27,7 @@ Below is the {role}'s recent activity as JSON. Write ONLY a JSON object with the
   something "right now".
 - "next_action": one line, English, the most useful thing VANI can help with on this call.
 - "avoid": one line, English, what VANI must not do or repeat, based on past interactions.
+{greeting_rule}
 Rules:
 - "live_events_newest_first" are the NEWEST things that happened, on other channels (voice call, WhatsApp,
   chat, app), after the rest of the data. The FIRST item is the newest. If the list is non-empty, the opener
@@ -44,13 +45,13 @@ Rules:
 """
 
 
-def llm_insight(slim: dict, role: str, extra: str = "") -> tuple[dict, float, str]:
+def llm_insight(slim: dict, role: str, extra: str = "", greeting_rule: str = "") -> tuple[dict, float, str]:
     """Returns (insight, seconds, source) where source is 'llm' or 'error:<msg>'."""
     t0 = time.perf_counter()
     try:
         from sarvamai import SarvamAI
         client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
-        prompt = PROMPT.format(role=role, role_upper=role.upper(), extra=extra) + json.dumps(slim, ensure_ascii=False)
+        prompt = PROMPT.format(role=role, role_upper=role.upper(), extra=extra, greeting_rule=greeting_rule) + json.dumps(slim, ensure_ascii=False)
         r = client.chat.completions(model=LLM_MODEL, temperature=0.2, reasoning_effort=None, max_tokens=800,
                                     messages=[{"role": "user", "content": prompt}])
         text = r.choices[0].message.content or ""

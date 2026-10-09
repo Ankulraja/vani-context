@@ -128,7 +128,7 @@ async function load(rebuild = false) {
   $("#status").innerHTML = `<span class="pill ok">${d.role}</span><b>${d.name}</b> · ${d.city || ""} · GLID ${d.glid} · ${(performance.now()-t0|0)} ms` +
     (d.build_seconds ? ` (built in ${d.build_seconds}s, insight: ${d.insight_source})` : " (cached)");
   $("#meta").textContent = `updated ${d.updated_at.replace("T"," ")}`;
-  $("#openerBox").hidden = false; $("#openerBox").innerHTML = `<b>VANI will open with:</b> ${d.opener}<br><span class="muted">Next: ${d.next_action} · Avoid: ${d.avoid}</span>`;
+  $("#openerBox").hidden = false; $("#openerBox").innerHTML = `<b>Greeting (${d.language}):</b> ${d.greeting}<br><b>Then VANI says:</b> ${d.opener}<br><span class="muted">Next: ${d.next_action} · Avoid: ${d.avoid}</span>`;
   $("#md").classList.remove("muted"); $("#md").innerHTML = mdToHtml(d.context);
   loadEvents(d.glid);
 }
