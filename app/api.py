@@ -131,14 +131,38 @@ def get_context(glid: int, rebuild: bool = False):
     }
 
 
+def resolve_uid(uid: str) -> int | None:
+    """Sarvam 'User Identifier': a GLID (web widget user-id) or a caller phone number (inbound call).
+    Returns a GLID or None if it is neither."""
+    digits = "".join(ch for ch in str(uid) if ch.isdigit())
+    if not digits:
+        return None
+    if len(digits) <= 9 or (len(digits) == 10 and not str(uid).startswith("+")):
+        try:
+            g = int(digits)
+            role_of(g)
+            return g
+        except HTTPException:
+            pass
+    try:
+        return glid_from_phone(digits)
+    except HTTPException:
+        return None
+
+
 @app.get("/context")
-def get_context_q(glid: int | None = None, phone: str | None = None, rebuild: bool = False):
-    """Same as /context/{glid} but with ?glid= or ?phone= — easier to bind to agent variables in Sarvam tools.
-    Inbound calls only know the caller's number, so ?phone= resolves it to a GLID first."""
+def get_context_q(glid: int | None = None, phone: str | None = None, uid: str | None = None, rebuild: bool = False):
+    """Same as /context/{glid} but with ?glid= / ?phone= / ?uid= — easy to bind to agent variables in Sarvam tools.
+    Priority: uid (Sarvam User Identifier: widget user-id = GLID, or inbound caller number) → phone → glid.
+    A uid that resolves to nothing falls back to glid (the agent's default), so a demo never dies."""
+    if uid and not str(uid).startswith("user_"):  # widget default is user_<timestamp> = anonymous
+        g = resolve_uid(uid)
+        if g is not None:
+            glid = g
     if glid is None and phone:
         glid = glid_from_phone(phone)
     if glid is None:
-        raise HTTPException(status_code=400, detail="pass glid or phone")
+        raise HTTPException(status_code=400, detail="pass glid, phone or uid")
     return get_context(glid, rebuild)
 
 

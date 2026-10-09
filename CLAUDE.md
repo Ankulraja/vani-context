@@ -300,6 +300,15 @@ Design decisions:
 | `app/builder/buyer_md.py` | `build_buyer_md(glid)` → `context_files/<glid>/buyer.md` (~34 lines). Hint to LLM: WhatsApp "You just spoke with X" = buyer phoned seller X. | 1.7 s |
 | `app/api.py` | FastAPI. `GET /context/{glid}` → flat JSON (`name`, `company`, `city`, `opener`, `next_action`, `avoid`, `story`, `unread_enquiries`, `context`=full seller.md, `updated_at`, `build_seconds`); `?rebuild=true` forces regeneration. `GET /context/{glid}/seller.md` raw file. `POST /events/{glid}` body `{channel, summary, time?, meta?}` → appends to `context_files/<glid>/events.jsonl`, rebuilds, returns `freshness_seconds` + new opener. `GET /health`. | cached GET 0 s; POST→fresh file **~1.8 s** |
 
+**Sarvam User Identifier → GLID (2026-10-09 13:45):** `GET /context?uid=…` (`resolve_uid`): a GLID (web widget
+`user-id`) or a caller number (inbound) → GLID; anonymous `user_<ts>` or unknown → falls back to `?glid=`
+(agent default). on_start tool `load_user_memory` (id 4c1175ce-…, draft v3) now sends
+`glid={{glid}}&uid={{user_identifier}}` and also saves `glid` back from the response.
+**Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
+(interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
+/ logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends
+`user_identifier = user-id`, so the page sets `user-id = GLID`. Needs an **embed-scoped API key** in
+`web/config.js` (git-ignored; template `web/config.js.example`). Text chat is NOT available in this widget.
 **Phone → GLID (inbound):** `GET /context?phone=+91XXXXXXXXXX` → `glid_from_phone()` reads
 `data/phone_to_glid.json` (demo map, last-10-digit match; dataset has no numbers). Add the team's numbers there.
 Day 1: replace with the IndiaMART user-lookup API. Unknown number → 404.

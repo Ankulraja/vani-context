@@ -97,6 +97,7 @@
   </section>
 </main>
 
+<script src="/config.js" onerror="void 0"></script>
 <script>
 const $ = s => document.querySelector(s);
 let current = null;   // {glid, role, name, ...}
@@ -157,14 +158,23 @@ $("#callBtn").onclick = async () => {
   const d = await r.json(); $("#status").textContent = (r.ok ? "📞 " : "❌ ") + (d.message || d.detail || JSON.stringify(d));
 };
 
-$("#chatBtn").onclick = () => {
-  // The Sarvam embed snippet (from dashboard → Deploy → Deploy with Code → Embed) goes in web/widget.html.
-  // We load it on demand so the page works even before the snippet exists.
-  fetch("/widget.html").then(r => r.ok ? r.text() : Promise.reject()).then(html => {
-    const slot = $("#sarvam-widget-slot"); slot.innerHTML = html;
-    slot.querySelectorAll("script").forEach(old => { const s = document.createElement("script"); [...old.attributes].forEach(a => s.setAttribute(a.name, a.value)); s.text = old.text; old.replaceWith(s); });
-    $("#widget-note").innerHTML = `Widget loaded. The agent's <code>glid</code> default decides whose memory it loads (currently set via MCP). Chat, then press <b>Call me</b> to see VANI resume on the phone.`;
-  }).catch(() => { $("#widget-note").innerHTML = `⚠️ <b>web/widget.html</b> not found. Paste the Sarvam embed snippet (dashboard → Deploy → Deploy with Code → Embed) into that file.`; });
+$("#chatBtn").onclick = async () => {
+  if (!current) { alert("Load a GLID first"); return; }
+  // Sarvam web widget (voice in the browser). Keys come from web/config.js (git-ignored):
+  //   window.SARVAM_EMBED = { apiKey: "<embed-scoped key>", orgId: "...", workspaceId: "...", appId: "..." }
+  const cfg = window.SARVAM_EMBED;
+  if (!cfg || !cfg.apiKey) { $("#widget-note").innerHTML = "⚠️ <b>web/config.js</b> missing or has no apiKey. Copy web/config.js.example → web/config.js and paste the embed-scoped key from the Sarvam dashboard."; return; }
+  if (!window.customElements.get("sarvam-widget")) {
+    await new Promise((ok, bad) => { const s = document.createElement("script"); s.src = "https://unpkg.com/sarvam-convai-embed@1.0.19"; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
+  }
+  const slot = $("#sarvam-widget-slot"); slot.innerHTML = "";
+  const w = document.createElement("sarvam-widget");
+  // user-id = GLID → Sarvam passes it to our API as "User Identifier", so this user's memory is loaded.
+  Object.entries({ "api-key": cfg.apiKey, "app-id": cfg.appId, "org-id": cfg.orgId, "workspace-id": cfg.workspaceId,
+    "user-id": String(current.glid), "button-text": `Talk to VANI as ${current.name}`, "button-color": "#2e3192", "position": "bottom-right" })
+    .forEach(([k, v]) => w.setAttribute(k, v));
+  slot.appendChild(w);
+  $("#widget-note").innerHTML = `Widget loaded for <b>${current.name}</b> (GLID ${current.glid}). Press the floating button bottom-right, allow the mic, and talk. VANI fetches this memory before her first word. After the call, press <b>Load memory</b> to see the new event.`;
 };
 
 load(false);
