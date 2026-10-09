@@ -304,6 +304,10 @@ Design decisions:
 `user-id`) or a caller number (inbound) → GLID; anonymous `user_<ts>` or unknown → falls back to `?glid=`
 (agent default). on_start tool `load_user_memory` (id 4c1175ce-…, draft v3) now sends
 `glid={{glid}}&uid={{user_identifier}}` and also saves `glid` back from the response.
+Verified in a `send_chat` test: Sarvam called `GET /context?glid=93557756&uid=` — the variable name was
+accepted but the value was EMPTY in the text-chat runtime (no identifier there). Still to verify with the
+web widget (sets user-id) and a phone call (caller number). If it stays empty, candidates to try are
+`user_id`, `caller_number`, `phone_number`, or ask Sarvam staff at the event.
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends
