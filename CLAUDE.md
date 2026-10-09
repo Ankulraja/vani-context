@@ -249,7 +249,7 @@ Design decisions:
   extracted). `evaluation_config` criterion "Conversation resumed" = call_outcome in
   [resumed_and_helped, callback_fixed]. Shared LLM prompt now forbids an opener that contradicts "avoid"
   (verified on 93557756: "Aapne bola tha ki executive aa chuke hain, abhi koi aur help chahiye kya?").
-- Remaining on the agent: commit v2 (then deployments can pin it) (playbook says required), commit v2, phone test
+- **Agent v2 committed 2026-10-09 12:35 IST.** Draft is now v3. (playbook says required), commit v2, phone test
   (`verify_phone_number` → `place_test_call` with `app_variables={"glid": ...}`), web widget embed.
 
 ## Dataset findings (2026-10-08 night)
@@ -292,6 +292,9 @@ Design decisions:
 | `app/builder/buyer_md.py` | `build_buyer_md(glid)` → `context_files/<glid>/buyer.md` (~34 lines). Hint to LLM: WhatsApp "You just spoke with X" = buyer phoned seller X. | 1.7 s |
 | `app/api.py` | FastAPI. `GET /context/{glid}` → flat JSON (`name`, `company`, `city`, `opener`, `next_action`, `avoid`, `story`, `unread_enquiries`, `context`=full seller.md, `updated_at`, `build_seconds`); `?rebuild=true` forces regeneration. `GET /context/{glid}/seller.md` raw file. `POST /events/{glid}` body `{channel, summary, time?, meta?}` → appends to `context_files/<glid>/events.jsonl`, rebuilds, returns `freshness_seconds` + new opener. `GET /health`. | cached GET 0 s; POST→fresh file **~1.8 s** |
 
+**Phone → GLID (inbound):** `GET /context?phone=+91XXXXXXXXXX` → `glid_from_phone()` reads
+`data/phone_to_glid.json` (demo map, last-10-digit match; dataset has no numbers). Add the team's numbers there.
+Day 1: replace with the IndiaMART user-lookup API. Unknown number → 404.
 **Role detection:** `role_of(glid)` = seller if in `gc_seller_profile.csv`, else buyer if in the getContext export,
 else 404. `GET /context` returns `role`, `name` (buyer person name / seller company), builds the right file.
 `GET /context/{glid}/md` returns whichever file exists. `POST /events` rebuilds the right file too.

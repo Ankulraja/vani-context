@@ -22,6 +22,7 @@ from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from app.builder.buyer_md import build_buyer_md
+from app.sources.seller import ROOT
 from app.builder.seller_md import OUT_DIR, build_seller_md
 from app.sources.buyer import _all_contexts as _buyer_contexts
 from app.sources.seller import _csv as _seller_csv
@@ -38,6 +39,24 @@ def role_of(glid: int) -> str:
     if glid in _buyer_contexts():
         return "buyer"
     raise HTTPException(status_code=404, detail=f"GLID {glid} not found in seller or buyer data")
+
+
+PHONE_MAP = ROOT / "data" / "phone_to_glid.json"
+
+
+def glid_from_phone(phone: str) -> int:
+    """Caller number -> GLID. Dataset has no numbers, so a small JSON map stands in for the IndiaMART
+    user-lookup API. Matches on the last 10 digits so +91 / 0 prefixes do not matter."""
+    digits = "".join(ch for ch in str(phone) if ch.isdigit())
+    if len(digits) < 10:
+        raise HTTPException(status_code=400, detail=f"phone {phone!r} too short")
+    table = json.loads(PHONE_MAP.read_text()) if PHONE_MAP.exists() else {}
+    for k, v in table.items():
+        if k.startswith("_"):
+            continue
+        if "".join(ch for ch in k if ch.isdigit())[-10:] == digits[-10:]:
+            return int(v)
+    raise HTTPException(status_code=404, detail=f"no GLID mapped for phone ending {digits[-4:]}")
 
 
 def build_context(glid: int) -> dict:
@@ -111,8 +130,13 @@ def get_context(glid: int, rebuild: bool = False):
 
 
 @app.get("/context")
-def get_context_q(glid: int, rebuild: bool = False):
-    """Same as /context/{glid} but with ?glid= — easier to bind to an agent variable in Sarvam tools."""
+def get_context_q(glid: int | None = None, phone: str | None = None, rebuild: bool = False):
+    """Same as /context/{glid} but with ?glid= or ?phone= — easier to bind to agent variables in Sarvam tools.
+    Inbound calls only know the caller's number, so ?phone= resolves it to a GLID first."""
+    if glid is None and phone:
+        glid = glid_from_phone(phone)
+    if glid is None:
+        raise HTTPException(status_code=400, detail="pass glid or phone")
     return get_context(glid, rebuild)
 
 

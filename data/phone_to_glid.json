@@ -1,0 +1,4 @@
+{
+  "_comment": "Demo mapping: caller phone (E.164, digits only) -> GLID. The dataset has no phone numbers; on Day 1 replace with the IndiaMART user-lookup API. Add your own numbers here.",
+  "919999999999": 95568576
+}
