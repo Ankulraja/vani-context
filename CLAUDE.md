@@ -315,6 +315,9 @@ user-id, because v2's on_start tool had no uid param. **v3 committed 14:05 IST**
 draft is now v4. After any tool/prompt change that must reach the widget: `agents commit`.
 The user's widget test calls (speakers / 500 table chairs / helicopter / VIP darshan) polluted
 `context_files/93557756/events.jsonl`; cleaned 14:06, backup in `/tmp/events_93557756_backup_*.jsonl`.
+A teammate (vishal.1@indiamart.com) is in the workspace and ran a dashboard test at 14:10 IST with glid=1234
+(unknown → API 404 → agent fell back to defaults "Rajesh / No memory loaded yet"). Expected behaviour; on
+Day 1 maybe return a friendly "new user" memory instead of 404.
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends

@@ -35,7 +35,9 @@ Rules:
 - Judge mood from the MOST RECENT outcome, not older ones.
 - The opener must never contradict "avoid": if the user declined help, a pitch, a meeting or more calls, the
   opener acknowledges that and asks only about something new and useful to THEM (e.g. a fresh enquiry),
-  or simply asks if there is anything they need. Never re-offer what was declined.
+  or simply asks if there is anything they need. Never re-offer what was declined. Example for a user who
+  said they need no more help: "Aapne bola tha abhi koi help nahi chahiye. Bas confirm karna tha, sab theek
+  chal raha hai na?" (no offer of listing, profile, catalog, meeting or executive help in that case).
 - Facts must come from the JSON only. Do not invent names, dates or numbers.
 {extra}
 {role_upper} JSON:
