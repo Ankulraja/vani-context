@@ -323,6 +323,10 @@ what never to ask; Objective: role vocabulary "aapko enquiry aayi hai" vs "aapne
 branches per role; step 3 = new requirement not in memory → note + ask quantity, never promise non-IndiaMART
 products). Reason: user felt seller and buyer calls sounded the same; cause was widget sessions all running
 seller 93557756 while the user role-played a buyer.
+**v5 committed 14:35 IST (user request):** greeting is now "Hello {{user_name}} ji, how are you?" (English
+source, auto-translated); VANI does NOT introduce itself unless asked ("kaun bol raha hai?" → "VANI from
+IndiaMART" in one line). Step 1 treats any normal reply as identity confirmed. Note: this departs from the
+Sarvam playbook (opening line should say who is calling) — the user chose it; revisit if judges dislike it.
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends
