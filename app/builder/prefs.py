@@ -68,7 +68,8 @@ GREETING_RULE = """- "greeting": the very first line VANI speaks, before anythin
   Ends with a question."""
 
 
-def greeting_rule(language: str, name_hint: str, role: str = "buyer") -> str:
+def greeting_rule(language: str, name_hint: str, role: str = "buyer", latest: str | None = None) -> str:
+    """`latest` = the newest live event line, if any; it is spelled out so the greeting names THAT topic."""
     example = ("नमस्ते Alfa Enterprises, आप कैसे हैं? आपको HP Pen Drive की enquiry आई थी, उसी के बारे में बात करनी थी, अभी समय है?"
                if role == "seller" else
                "नमस्ते Aarti, आप कैसे हैं? आपके RCC bollards के quotes के बारे में बात करनी थी, अभी समय है?")
@@ -77,7 +78,10 @@ def greeting_rule(language: str, name_hint: str, role: str = "buyer") -> str:
                   f" letters. Example: {example} Always the neutral आप कैसे हैं, never कैसी.)"),
         "English": " (simple Indian English)",
     }.get(language, f" ({language} script)")
-    return GREETING_RULE.format(language=language, script=script, name_hint=name_hint)
+    rule = GREETING_RULE.format(language=language, script=script, name_hint=name_hint)
+    if latest:
+        rule += f'\n  LATEST TOPIC FOR THE GREETING (the newest thing the user did, on another channel): "{latest[:160]}". The greeting names this topic, not an older one.'
+    return rule
 
 
 def clean_greeting(greeting: str, name: str) -> str:
