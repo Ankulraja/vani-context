@@ -249,7 +249,15 @@ Design decisions:
   extracted). `evaluation_config` criterion "Conversation resumed" = call_outcome in
   [resumed_and_helped, callback_fixed]. Shared LLM prompt now forbids an opener that contradicts "avoid"
   (verified on 93557756: "Aapne bola tha ki executive aa chuke hain, abhi koi aur help chahiye kya?").
-- **Agent v2 committed 2026-10-09 12:35 IST.** Draft is now v3. (playbook says required), commit v2, phone test
+- **Agent v2 committed 2026-10-09 12:35 IST.** Draft is now v3.
+- **Telephony (checked 12:36):** workspace has **no connections / numbers** (`telephony list_connections`
+  = 0). So inbound ("user calls VANI") needs a number bought in the dashboard or given by Sarvam at the
+  event. **Outbound test call works without a number:** `verify_phone_number(phone)` → user gets OTP →
+  `verify_phone_number(phone, otp)` → `place_test_call(app_id, phone_numbers=[...], app_version=2,
+  app_variables={"glid": "..."})`. Spends credits, rings a real phone. For inbound later: deployment
+  with `webhook_config.url=<TUNNEL>/webhook/sarvam`; on_start tool should pass the caller number to
+  `/context?phone=` (Sarvam call-context variable name for caller number still to confirm in the tool
+  picker, labelled "User Identifier"). (playbook says required), commit v2, phone test
   (`verify_phone_number` → `place_test_call` with `app_variables={"glid": ...}`), web widget embed.
 
 ## Dataset findings (2026-10-08 night)
