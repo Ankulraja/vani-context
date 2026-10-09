@@ -308,6 +308,13 @@ Verified in a `send_chat` test: Sarvam called `GET /context?glid=93557756&uid=` 
 accepted but the value was EMPTY in the text-chat runtime (no identifier there). Still to verify with the
 web widget (sets user-id) and a phone call (caller number). If it stays empty, candidates to try are
 `user_id`, `caller_number`, `phone_number`, or ask Sarvam staff at the event.
+**IMPORTANT: the web widget (and any deployment/campaign) runs the latest COMMITTED version, not the draft.**
+Analytics (`analytics report interactions`, filter needs key `field` not `column`) showed every widget session
+at 13:42–13:56 IST ran app_version 2 with glid=93557756 (v2's frozen default) regardless of the page's
+user-id, because v2's on_start tool had no uid param. **v3 committed 14:05 IST** (uid param + glid save-back);
+draft is now v4. After any tool/prompt change that must reach the widget: `agents commit`.
+The user's widget test calls (speakers / 500 table chairs / helicopter / VIP darshan) polluted
+`context_files/93557756/events.jsonl`; cleaned 14:06, backup in `/tmp/events_93557756_backup_*.jsonl`.
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends
