@@ -243,7 +243,13 @@ Design decisions:
   (22 VANI attempts, told VANI on 18 Sep to stop calling, already met the executive). VANI recalled the
   executive conversation and did NOT pitch a meeting. Good "business impact" demo: memory stops the
   23rd pitch. Sheets to validate: gc_bot_calls (21 rows), gc_bot_call_turns attempts 296884 / 369610.
-- Remaining on the agent: voicemail message + call goal (playbook says required), commit v2, phone test
+- **2026-10-09 12:30 IST agent finish:** voicemail set via `configure_voicemail` (English copy, detection on).
+  Output variables added: `call_outcome` (enum resumed_and_helped / callback_fixed / not_interested /
+  do_not_call / wrong_person / no_conversation, post-call extracted) and `callback_time` (post-call
+  extracted). `evaluation_config` criterion "Conversation resumed" = call_outcome in
+  [resumed_and_helped, callback_fixed]. Shared LLM prompt now forbids an opener that contradicts "avoid"
+  (verified on 93557756: "Aapne bola tha ki executive aa chuke hain, abhi koi aur help chahiye kya?").
+- Remaining on the agent: commit v2 (then deployments can pin it) (playbook says required), commit v2, phone test
   (`verify_phone_number` → `place_test_call` with `app_variables={"glid": ...}`), web widget embed.
 
 ## Dataset findings (2026-10-08 night)

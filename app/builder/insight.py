@@ -33,6 +33,9 @@ Rules:
   MUST continue from that first item (what the {role} said or agreed there), and the story must mention it.
   This is how VANI resumes a conversation across channels.
 - Judge mood from the MOST RECENT outcome, not older ones.
+- The opener must never contradict "avoid": if the user declined help, a pitch, a meeting or more calls, the
+  opener acknowledges that and asks only about something new and useful to THEM (e.g. a fresh enquiry),
+  or simply asks if there is anything they need. Never re-offer what was declined.
 - Facts must come from the JSON only. Do not invent names, dates or numbers.
 {extra}
 {role_upper} JSON:
