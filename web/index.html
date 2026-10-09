@@ -34,6 +34,9 @@
   #widget-note { font-size:13px; color:var(--muted); }
   pre { background:#f3f4f6; padding:8px; border-radius:6px; overflow:auto; font-size:12px; }
   .status { font-size:13px; min-height:18px; }
+  .cardtitle { font-size:14px; margin:12px 0 4px; color:var(--accent); }
+  pre.callcard { white-space:pre-wrap; word-break:break-word; font-size:13px; line-height:1.45; background:#f5f7ff; border:1px solid var(--line); }
+  details summary { cursor:pointer; margin:12px 0 4px; font-size:14px; color:var(--accent); }
 </style>
 </head>
 <body>
@@ -62,7 +65,11 @@
     <div class="card" style="margin-top:16px">
       <h2>2. What VANI already knows <span id="meta" class="muted"></span></h2>
       <div id="openerBox" class="opener" hidden></div>
-      <div id="md" class="muted">Load a GLID to see the memory file.</div>
+      <h3 class="cardtitle">Call card <span class="muted">(the short memory VANI gets at call start)</span> <span id="cardSize" class="muted"></span></h3>
+      <pre id="callCard" class="callcard muted">Load a GLID to see the call card.</pre>
+      <details id="fullMd"><summary>Full memory file <span id="mdSize" class="muted"></span> <span class="muted">(VANI reads parts of it through get_more_history)</span></summary>
+        <div id="md" class="muted">Load a GLID to see the memory file.</div>
+      </details>
     </div>
   </section>
 
@@ -130,6 +137,8 @@ async function load(rebuild = false) {
   $("#meta").textContent = `updated ${d.updated_at.replace("T"," ")}`;
   $("#openerBox").hidden = false; $("#openerBox").innerHTML = `<b>Greeting (${d.language}):</b> ${d.greeting}<br><b>Then VANI says:</b> ${d.opener}<br><span class="muted">Next: ${d.next_action} · Avoid: ${d.avoid}</span>`;
   $("#md").classList.remove("muted"); $("#md").innerHTML = mdToHtml(d.context);
+  $("#callCard").classList.remove("muted"); $("#callCard").textContent = d.call_card || "(no call card)";
+  $("#cardSize").textContent = `· ${(d.call_card || "").length} chars`; $("#mdSize").textContent = `· ${d.context.length} chars`;
   loadEvents(d.glid);
 }
 async function loadEvents(glid) {
