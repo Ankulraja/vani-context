@@ -239,6 +239,10 @@ Design decisions:
 - **2026-10-09 ~11:30 IST user voice tests after tunnel restart:** seller 95568576 (file built live, OK) and
   **buyer 59681744 Ramesh** (file built live; VANI opened with the 23 Sep glass hand bells enquiry). Buyer
   path is verified by voice too. `glid` default currently **59681744**.
+- **2026-10-09 ~12:10 IST hard-case voice test passed: seller 93557756 Visionary Style Enterprise, Surat**
+  (22 VANI attempts, told VANI on 18 Sep to stop calling, already met the executive). VANI recalled the
+  executive conversation and did NOT pitch a meeting. Good "business impact" demo: memory stops the
+  23rd pitch. Sheets to validate: gc_bot_calls (21 rows), gc_bot_call_turns attempts 296884 / 369610.
 - Remaining on the agent: voicemail message + call goal (playbook says required), commit v2, phone test
   (`verify_phone_number` → `place_test_call` with `app_variables={"glid": ...}`), web widget embed.
 
