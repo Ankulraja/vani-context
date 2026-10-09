@@ -333,6 +333,11 @@ intro edit (editing the English regenerates the translations).
 **v7 committed 14:40 IST (user request, no "ji" in greeting):** English "Hello {{user_name}}, how are you?",
 Hindi maps patched to "नमस्ते {{user_name}}, आप कैसे हैं?". The prompt still addresses the user as
 "{{user_name}} ji" mid-call (speaking style rule) — ask the user if that should go too.
+**v8 committed 15:45 IST:** tools recreated on tunnel `occasional-advisor-combination-profit` —
+`load_user_memory` id 9aac9410-…, `save_call_to_memory` id 4975fb77-…. Fallback defaults changed so a
+failed memory fetch is obvious: `user_name` = "ji" (greeting becomes "Hello ji…"), `user_context` =
+"MEMORY NOT LOADED…". If VANI ever says "Hello ji" → the on_start tool could not reach the API (tunnel
+down / URL changed).
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends
@@ -392,7 +397,10 @@ Hackathon deck PDF: `~/Desktop/Voice_AI_Hackathon_2.0_Deck_Revised - Final.pptx.
 
 ## Next steps (in order)
 
-2026-10-09 14:40 IST: user asked to stop the server + tunnel; both killed. User runs them himself now.
+2026-10-09 15:40 IST: user restarted the API himself but NOT the tunnel → agent fell back to defaults
+("Rajesh"). Claude restarted cloudflared: new URL `https://occasional-advisor-combination-profit.trycloudflare.com`,
+tools re-pointed (see agent state). **Every tunnel restart = re-point both tools + commit.** Consider ngrok with a
+free static domain for the event so the URL stops changing.
 Background processes Claude started on 2026-10-08 (may be dead after a reboot): `uvicorn app.api:app --port 8000`
 (log `/tmp/vani_api.log`) and `cloudflared tunnel --url http://localhost:8000` (log `/tmp/cloudflared.log`,
 URL in `/tmp/vani_public_url.txt`). Restart both, then re-point the two agent tools at the new URL.
