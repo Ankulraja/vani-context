@@ -118,6 +118,7 @@ def build_buyer_md(glid: int, use_llm: bool = True) -> dict:
         insight = _fallback_insight(ev)
         src = "rules" if src == "rules" else src
     insight["greeting"] = insight.get("greeting") or _fallback_insight(ev)["greeting"]
+    insight["opener"] = insight.get("opener") or _fallback_insight(ev)["opener"]
     md = render_md(ev, insight, src)
     out = OUT_DIR / str(glid)
     out.mkdir(parents=True, exist_ok=True)

@@ -367,6 +367,13 @@ active=274238067 → VANI opened with Aarti Singh's VP Precon bollard quote. Lim
 - Greeting: intro is now `{{greeting}}` in English + all multilingual maps. The insight LLM writes it in the saved
   language (Hindi = Devanagari with product names in English, neutral "आप कैसे हैं"), with the latest topic, no
   numbers. Default `greeting` = "Hello ji, how are you?" (= memory did not load).
+**Stale-opener fix 16:35 IST (API only, no agent change):** Alfa 95568576's opener kept offering the old
+"August meeting" (the LLM had no today's date, and earlier voice summaries repeated it). Now `prefs.date_rule()` tells
+both insight prompts today's date and that past meetings/callbacks are never offered; the live-event rule has an
+exception for past-dated items; `stale_month()` checks the opener for a month that is already over and retries
+(max 3), then falls back to the rule-based opener. Seller opener prompt also now uses seller vocabulary
+("aapko X ki enquiry aayi thi"); before it said "aapko Samsung memory cards chahiye" to the seller. Build time is
+~1.3-2 s, up to ~4.6 s when a retry happens.
 **Web widget:** package `sarvam-convai-embed@1.0.19` = `<sarvam-widget>` custom element, **voice only**
 (interaction_type "call" hardcoded), attributes api-key / app-id / org-id / workspace-id / user-id / button-*
 / logo-url / position; no agent-variables (docs describe a newer SDK with `agentVariables`). It sends

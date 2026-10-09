@@ -19,7 +19,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from app.builder.prefs import fallback_greeting, get_language, greeting_rule
+from app.builder.prefs import date_rule, fallback_greeting, get_language, greeting_rule, stale_feedback, stale_month
 from app.sources.seller import ROOT, get_seller_events
 
 load_dotenv(ROOT / ".env")
@@ -102,8 +102,10 @@ Below is the seller's recent activity as JSON. Write ONLY a JSON object with the
 - "story": 2 sentences, English, what this seller has been doing and what matters right now. No fluff.
 - "opener": the first line VANI should say on the NEXT conversation, after the seller confirms their name.
   Hinglish in Roman script, under 25 words. It refers to the single most recent concrete thing (an unread
-  enquiry, a fixed meeting, a quote, a callback that was promised) in PAST tense ("aapne bola tha", "humne tay
-  kiya tha") and then asks one short question to continue. Never say the agent is doing something "right now".
+  enquiry, an upcoming meeting, a quote, an upcoming callback) in PAST tense and then asks one short question
+  to continue. The seller SELLS these products; enquiries and requirements come FROM buyers TO the seller.
+  So say "aapko <product> ki enquiry aayi thi", "<city> ke buyer ne <product> ka rate pucha tha", "aapne rate
+  bataya tha". Never say the seller needs, wants or is buying a product. Never say the agent is doing something "right now".
 - "next_action": one line, English, the most useful thing VANI can help with on this call.
 - "avoid": one line, English, what VANI must not do or repeat, based on past calls (e.g. objections, hang-ups).
 {greeting_rule}
@@ -111,10 +113,13 @@ Rules:
 - "live_events_newest_first" are the NEWEST things that happened, on other channels (voice call, WhatsApp,
   chat, app), after the rest of the data. The FIRST item is the newest. If the list is non-empty, the opener
   MUST continue from that first item (what the seller said or agreed there), and the story must mention it.
+  EXCEPTION: if that item is only about a date that is already past (an old meeting or callback, see the
+  date rule below), do not build the opener on it; use the freshest open item instead.
   This is how VANI resumes a conversation across channels.
 - Judge the seller's mood from the MOST RECENT VANI call outcome, not older ones (a later "Meeting Fixed"
   outweighs earlier "Not Interested").
 - Facts must come from the JSON only. Do not invent names, dates or numbers.
+{date_rule}
 
 SELLER JSON:
 """
@@ -130,17 +135,25 @@ def llm_insight(ev: dict) -> tuple[dict, float, str]:
     try:
         from sarvamai import SarvamAI
         client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
-        r = client.chat.completions(
-            model=LLM_MODEL,
-            temperature=0.2,
-            reasoning_effort=None,  # MUST be explicit: default "thinking" eats all tokens and returns empty content
-            max_tokens=800,
-            messages=[{"role": "user", "content": INSIGHT_PROMPT.replace("{greeting_rule}", greeting_rule(
-                get_language(ev["glid"]), ev["profile"]["company"])) + json.dumps(slim, ensure_ascii=False)}],
-        )
-        text = r.choices[0].message.content
-        text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
-        data = json.loads(text[text.find("{"): text.rfind("}") + 1])
+        prompt = INSIGHT_PROMPT.replace("{greeting_rule}", greeting_rule(
+            get_language(ev["glid"]), ev["profile"]["company"])).replace("{date_rule}", date_rule()) + json.dumps(slim, ensure_ascii=False)
+        for attempt in range(3):  # retry only if the opener brings up a month that is already over
+            r = client.chat.completions(
+                model=LLM_MODEL,
+                temperature=0.2,
+                reasoning_effort=None,  # MUST be explicit: default "thinking" eats all tokens and returns empty content
+                max_tokens=800,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = r.choices[0].message.content
+            text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
+            data = json.loads(text[text.find("{"): text.rfind("}") + 1])
+            month = stale_month(data.get("opener", ""))
+            if not month:
+                break
+            prompt += stale_feedback(month)
+        if stale_month(data.get("opener", "")):  # still stale: rule-based opener on the freshest open item
+            data["opener"] = _fallback_insight(ev, "stale opener")["opener"]
         for k in ("story", "opener", "next_action", "avoid"):
             data.setdefault(k, "")
         data["greeting"] = data.get("greeting") or fallback_greeting(ev["profile"]["company"], get_language(ev["glid"]))

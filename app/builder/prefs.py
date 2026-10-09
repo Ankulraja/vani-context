@@ -77,3 +77,33 @@ def fallback_greeting(name: str, language: str) -> str:
     if language == "English":
         return f"Hello {name}, how are you?"
     return f"नमस्ते {name}, आप कैसे हैं?"
+
+
+def date_rule() -> str:
+    """Tells the insight LLM what 'today' is, so past meetings/callbacks are not offered again as if upcoming."""
+    today = datetime.now().strftime("%d %B %Y")
+    return (f"- Today is {today}. Any meeting, callback, delivery or date mentioned in the data or the live events that falls\n"
+            "  before today is in the PAST: it already happened or was missed. Never offer to fix, confirm or schedule it\n"
+            "  again, and never present it as upcoming. The opener does NOT mention a past meeting or callback at all;\n"
+            "  it is built on the freshest open item instead (unread enquiries, a new requirement, a recent quote). The\n"
+            "  story may say the past meeting happened or was missed, in one short clause.")
+
+
+_MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october",
+           "november", "december"]
+
+
+def stale_month(text: str) -> str | None:
+    """A month name in `text` that is already over this year (e.g. 'August' in October), else None.
+    Used to catch openers that bring up an old meeting or callback."""
+    low = (text or "").lower()
+    now = datetime.now().month
+    for i, m in enumerate(_MONTHS, start=1):
+        if i < now and (m in low or m[:3] + " " in low):
+            return m.capitalize()
+    return None
+
+
+def stale_feedback(month: str) -> str:
+    return (f"\n\nCORRECTION: your previous opener mentioned {month}, which is already over. Write the JSON again. "
+            f"The opener must not mention {month} or any past meeting or callback; build it on the freshest open item.")
