@@ -389,6 +389,7 @@ Hackathon deck PDF: `~/Desktop/Voice_AI_Hackathon_2.0_Deck_Revised - Final.pptx.
 
 ## Next steps (in order)
 
+2026-10-09 14:40 IST: user asked to stop the server + tunnel; both killed. User runs them himself now.
 Background processes Claude started on 2026-10-08 (may be dead after a reboot): `uvicorn app.api:app --port 8000`
 (log `/tmp/vani_api.log`) and `cloudflared tunnel --url http://localhost:8000` (log `/tmp/cloudflared.log`,
 URL in `/tmp/vani_public_url.txt`). Restart both, then re-point the two agent tools at the new URL.
