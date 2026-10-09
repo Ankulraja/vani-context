@@ -6,6 +6,7 @@ so the agent can switch to them directly. Hinglish counts as Hindi (the Hindi vo
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
 
 from app.sources.seller import ROOT
@@ -64,13 +65,26 @@ GREETING_RULE = """- "greeting": the very first line VANI speaks, before anythin
   few words (e.g. the product or requirement). No prices, numbers, dates or account details. Ends with a question."""
 
 
-def greeting_rule(language: str, name_hint: str) -> str:
+def greeting_rule(language: str, name_hint: str, role: str = "buyer") -> str:
+    example = ("नमस्ते Alfa Enterprises, आप कैसे हैं? आपको HP Pen Drive की enquiry आई थी, उसी के बारे में बात करनी थी, अभी समय है?"
+               if role == "seller" else
+               "नमस्ते Aarti, आप कैसे हैं? आपके RCC bollards के quotes के बारे में बात करनी थी, अभी समय है?")
     script = {
         "Hindi": (" (IMPORTANT: Devanagari script, NOT Roman, unlike the opener; product and brand names stay in English"
-                  " letters. Example: नमस्ते Aarti, आप कैसे हैं? आपके RCC bollards के quotes के बारे में बात करनी थी, अभी समय है? Always the neutral आप कैसे हैं, never कैसी.)"),
+                  f" letters. Example: {example} Always the neutral आप कैसे हैं, never कैसी.)"),
         "English": " (simple Indian English)",
     }.get(language, f" ({language} script)")
     return GREETING_RULE.format(language=language, script=script, name_hint=name_hint)
+
+
+def clean_greeting(greeting: str, name: str) -> str:
+    """Code-level guard for the LLM greeting (seen in analytics: 'नमस्ते आरती ji, आप कैसी हैं?'):
+    neutral 'कैसे हैं', no 'ji'/'जी' glued to the name, no double spaces."""
+    g = (greeting or "").strip()
+    g = g.replace("कैसी हैं", "कैसे हैं").replace("कैसी हो", "कैसे हैं")
+    g = re.sub(r"\s+(ji|जी)\s*([,!?.])", r"\2", g)  # "आरती ji," -> "आरती,"
+    g = re.sub(r"\s+(ji|जी)\s+", " ", g)
+    return re.sub(r"\s{2,}", " ", g)
 
 
 def fallback_greeting(name: str, language: str) -> str:

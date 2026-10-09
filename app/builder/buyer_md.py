@@ -9,8 +9,8 @@ import time
 from datetime import datetime
 
 from app.builder.insight import llm_insight
-from app.builder.prefs import fallback_greeting, get_language, greeting_rule
-from app.builder.seller_md import OUT_DIR, _day, _yn
+from app.builder.prefs import clean_greeting, fallback_greeting, get_language, greeting_rule
+from app.builder.seller_md import OUT_DIR, _day, _yn, recent_calls_line
 from app.sources.buyer import get_buyer_events
 
 
@@ -55,6 +55,8 @@ def render_facts(ev: dict) -> dict[str, str]:
              + (f" · WIP ticket: {t['wip_type']}" if t["wip_type"] else "")]
     live = [f"- 🔄 {e.get('time', '')} via **{e.get('channel', 'event')}**: {e.get('summary', '')[:160]}"
             for e in reversed(ev["live_events"][-3:])]
+    if recent_calls_line(ev["live_events"]):
+        flags.append(recent_calls_line(ev["live_events"]))
     return {"who": "\n".join(who), "recent": "\n".join(recent), "conv": "\n".join(conv),
             "flags": "\n".join(flags), "live": "\n".join(live)}
 
@@ -117,7 +119,7 @@ def build_buyer_md(glid: int, use_llm: bool = True) -> dict:
     if not insight:
         insight = _fallback_insight(ev)
         src = "rules" if src == "rules" else src
-    insight["greeting"] = insight.get("greeting") or _fallback_insight(ev)["greeting"]
+    insight["greeting"] = clean_greeting(insight.get("greeting") or _fallback_insight(ev)["greeting"], ev["profile"]["name"] or "")
     insight["opener"] = insight.get("opener") or _fallback_insight(ev)["opener"]
     md = render_md(ev, insight, src)
     out = OUT_DIR / str(glid)

@@ -19,7 +19,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from app.builder.prefs import date_rule, fallback_greeting, get_language, greeting_rule, stale_feedback, stale_month
+from app.builder.prefs import clean_greeting, date_rule, fallback_greeting, get_language, greeting_rule, stale_feedback, stale_month
 from app.sources.seller import ROOT, get_seller_events
 
 load_dotenv(ROOT / ".env")
@@ -91,9 +91,28 @@ def render_facts(ev: dict) -> dict[str, str]:
     ]
     live = [f"- 🔄 {e.get('time', '')} via **{e.get('channel', 'event')}**: {e.get('summary', '')[:160]}"
             for e in reversed(ev["live_events"][-3:])]
+    if recent_calls_line(ev["live_events"]):
+        flags.append(recent_calls_line(ev["live_events"]))
 
     return {"who": "\n".join(who), "recent": "\n".join(recent), "conv": "\n".join(conv),
             "flags": "\n".join(flags), "live": "\n".join(live)}
+
+
+def recent_calls_line(live_events: list[dict]) -> str:
+    """'- Recent VANI calls (live): 9 Oct 17:28 resumed_and_helped · 9 Oct 16:34 callback_fixed'
+    Outcome only, newest first, so repeated calls never bury the real activity in the file."""
+    calls = [e for e in live_events if e.get("channel") == "voice"][-3:]
+    if not calls:
+        return ""
+    bits = []
+    for e in reversed(calls):
+        t = (e.get("time") or "")[:16]
+        try:
+            t = _day(t)[:-6]  # day + month only
+        except ValueError:
+            pass
+        bits.append(f"{t} {e.get('outcome') or 'summary noted'}")
+    return "- Recent VANI calls (live): " + " · ".join(bits)
 
 
 # ---------------------------------------------------------------- insight (LLM)
@@ -136,7 +155,7 @@ def llm_insight(ev: dict) -> tuple[dict, float, str]:
         from sarvamai import SarvamAI
         client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
         prompt = INSIGHT_PROMPT.replace("{greeting_rule}", greeting_rule(
-            get_language(ev["glid"]), ev["profile"]["company"])).replace("{date_rule}", date_rule()) + json.dumps(slim, ensure_ascii=False)
+            get_language(ev["glid"]), ev["profile"]["company"], role="seller")).replace("{date_rule}", date_rule()) + json.dumps(slim, ensure_ascii=False)
         for attempt in range(3):  # retry only if the opener brings up a month that is already over
             r = client.chat.completions(
                 model=LLM_MODEL,
@@ -156,10 +175,21 @@ def llm_insight(ev: dict) -> tuple[dict, float, str]:
             data["opener"] = _fallback_insight(ev, "stale opener")["opener"]
         for k in ("story", "opener", "next_action", "avoid"):
             data.setdefault(k, "")
-        data["greeting"] = data.get("greeting") or fallback_greeting(ev["profile"]["company"], get_language(ev["glid"]))
+        data["greeting"] = clean_greeting(data.get("greeting") or _seller_fallback_greeting(ev), ev["profile"]["company"])
         return data, time.perf_counter() - t0, "llm"
     except Exception as e:  # noqa: BLE001 — any failure -> deterministic fallback
         return _fallback_insight(ev, str(e)), time.perf_counter() - t0, "fallback"
+
+
+def _seller_fallback_greeting(ev: dict) -> str:
+    """Greeting with the latest enquiry product, used when the LLM leaves the greeting out."""
+    name, lang = ev["profile"]["company"], get_language(ev["glid"])
+    last = ev["enquiries"][0] if ev["enquiries"] else None
+    if not last:
+        return fallback_greeting(name, lang)
+    if lang == "English":
+        return f"Hello {name}, how are you? I wanted to talk about the {last['product']} enquiry you received, is this a good time?"
+    return f"नमस्ते {name}, आप कैसे हैं? आपको {last['product']} की enquiry आई थी, उसी के बारे में बात करनी थी, अभी समय है?"
 
 
 def _fallback_insight(ev: dict, err: str) -> dict:
@@ -172,7 +202,7 @@ def _fallback_insight(ev: dict, err: str) -> dict:
         "opener": opener,
         "next_action": "Read out the unread enquiries and help the seller reply.",
         "avoid": "Do not repeat the paid-services pitch if the seller declined before.",
-        "greeting": fallback_greeting(p["company"], get_language(ev["glid"])),
+        "greeting": _seller_fallback_greeting(ev),
         "_note": f"LLM unavailable: {err[:80]}",
     }
 
