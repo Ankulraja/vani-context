@@ -8,7 +8,7 @@
   :root {
     /* design language: warm light canvas, white rounded cards, black primary, soft grey text */
     --stage:#f1f1ee; --card:#ffffff; --card2:#f6f6f4; --ink:#111214; --muted:#6f7278; --line:#e6e6e2; --black:#111214;
-    --im-blue:#2e3192; --im-orange:#ff6a00;
+    --im-blue:#2e3192; --im-orange:#ff6a00; --im-teal:#1d8480; --wa-green:#25d366;
     /* WhatsApp dark theme */
     --wa-head:#202c33; --wa-bg:#0b141a; --wa-in:#202c33; --wa-out:#005c4b; --wa-ink:#e9edef; --wa-muted:#8696a0; --wa-accent:#00a884; --wa-tick:#53bdeb;
     --ok:#22c55e; --paper:#fbfbfd; --paper-ink:#1c1e21; --paper-muted:#6b7280; --paper-line:#e5e7eb;
@@ -68,11 +68,17 @@
   .wa-head .t { line-height:1.15; flex:1; min-width:0; } .wa-head .t .n { font-weight:600; font-size:15px; display:flex; align-items:center; gap:4px; }
   .wa-head .t small { display:block; font-size:11px; color:var(--wa-muted); }
   .wa-head .ic { color:var(--wa-ink); font-size:16px; opacity:.85; margin-left:6px; }
+  .wa-head .refresh { background:transparent; padding:4px; border-radius:50%; display:flex; }
+  .wa-head .refresh:hover { background:rgba(255,255,255,.1); } .wa-head .refresh.spin svg { animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
   .tick { width:16px; height:16px; flex-shrink:0; }
   .chat { flex:1; overflow:auto; padding:10px 10px 6px; display:flex; flex-direction:column; gap:6px;
           background-color:var(--wa-bg);
           /* WhatsApp's default dark wallpaper tile (same file WhatsApp Web uses), dimmed like the real app */
           background-image:linear-gradient(rgba(11,20,26,.72), rgba(11,20,26,.72)), url("/wa-bg.png"); background-size:auto, 400px auto; }
+  .msg .pic { display:block; width:100%; max-width:230px; border-radius:7px; margin:-2px 0 6px; background:#fff; object-fit:cover; max-height:180px; }
+  .phone, .phone * { scrollbar-width:none; } .phone ::-webkit-scrollbar, .phone::-webkit-scrollbar { display:none; width:0; height:0; }   /* no scrollbars anywhere inside the phones */
+  .msg a { color:#53bdeb; text-decoration:underline; word-break:break-all; }
   .msg { max-width:84%; padding:7px 9px 5px; border-radius:10px; font-size:13px; line-height:1.35; box-shadow:0 1px 1px rgba(0,0,0,.3); position:relative; word-break:break-word; color:var(--wa-ink); }
   .msg.in { background:var(--wa-in); align-self:flex-start; border-top-left-radius:2px; }
   .msg.out { background:var(--wa-out); align-self:flex-end; border-top-right-radius:2px; }
@@ -98,9 +104,26 @@
   .callscr h2 { margin:4px 0 2px; font-size:22px; font-weight:600; }
   .callscr .sub { color:#aab3c8; font-size:13px; }
   .callscr .timer { font-variant-numeric:tabular-nums; font-size:15px; color:#cfd6e6; margin-top:6px; }
-  .callbtns { margin-top:auto; margin-bottom:40px; display:flex; gap:56px; }
-  .cbtn { width:64px; height:64px; border-radius:50%; font-size:26px; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px rgba(0,0,0,.4); }
-  .cbtn.acc { background:var(--ok); animation:bounce 1s infinite; } .cbtn.dec { background:#ef4444; } .cbtn.mute { background:#374151; font-size:20px; }
+  .callbtns { margin-top:auto; margin-bottom:34px; display:flex; gap:56px; }
+  .cbtn { width:66px; height:66px; border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px rgba(0,0,0,.4); }
+  .cbtn svg { width:30px; height:30px; fill:#fff; }
+  .cbtn.acc { background:#34c759; animation:bounce 1s infinite; } .cbtn.dec { background:#ff3b30; }
+  .cbtn.dec:active, .cbtn.acc:active { transform:scale(.94); }
+  /* in-call keypad like a real phone: 3 x 2 round translucent keys + a red end key */
+  /* the screen is 276 x 596 px: keep the live-call stack compact so the grid + end key always fit */
+  #incall { padding-top:62px; }   /* notch (top 22 px + 26 px tall) stays clear of the avatar */
+  #incall .big { width:58px; height:58px; font-size:24px; margin-bottom:6px; }
+  #incall h2 { font-size:17px; margin:2px 0 0; } #incall .sub { font-size:12px; } #incall .timer { font-size:13px; margin-top:2px; }
+  #incall .wave { height:34px; margin:18px 0 0; } #incall .wave i { max-height:30px; }
+  #incall .caption { display:none; }   /* no live transcript on the phone (user request); captions still land in the console */
+  .keys { margin-top:auto; display:grid; grid-template-columns:repeat(3, 64px); gap:6px 18px; justify-content:center; margin-bottom:8px; flex:none; }
+  .key { display:flex; flex-direction:column; align-items:center; gap:3px; background:transparent; color:#e5e9f2; font-size:10px; letter-spacing:.2px; padding:0; }
+  .key i { width:50px; height:50px; border-radius:50%; background:rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; transition:background .15s; }
+  .key i svg { width:23px; height:23px; fill:#fff; }
+  .key:active i { background:rgba(255,255,255,.28); }
+  .key.on i { background:#fff; } .key.on i svg { fill:#111827; }
+  .key.dummy { opacity:.55; cursor:default; }
+  .endrow { margin-bottom:16px; display:flex; justify-content:center; flex:none; } .endrow .cbtn { width:56px; height:56px; } .endrow .cbtn svg { width:26px; height:26px; }
   @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
   .wave { display:flex; gap:4px; align-items:center; height:34px; margin:14px 0 4px; }
   .wave i { width:5px; border-radius:3px; background:var(--im-orange); animation:wave 1s ease-in-out infinite; height:10px; }
@@ -128,28 +151,124 @@
   .chrome .dots i { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:5px; } .chrome .dots i:nth-child(1){background:#ff5f57} .chrome .dots i:nth-child(2){background:#febc2e} .chrome .dots i:nth-child(3){background:#28c840}
   .url { flex:1; background:#fff; border-radius:16px; padding:4px 12px; font-size:12px; color:#555; border:1px solid #e0e0e0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font:inherit; font-size:12px; outline:none; }
   .url:focus { border-color:#999; }
-  .chrome .nav { background:transparent; color:#666; font-size:15px; padding:0 4px; }
+  .chrome .nav { background:transparent; color:#444; font-size:17px; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; }
+  .chrome .nav:hover:not(:disabled) { background:#e6e6e2; } .chrome .nav:disabled { color:#c4c4c0; cursor:default; } .chrome .nav[hidden] { display:none; }
   .site { flex:1; min-height:0; overflow:auto; scroll-behavior:smooth; }
-  .live { flex:1; min-height:0; border:0; width:100%; background:#fff; }
+  iframe.live { flex:1; min-height:0; border:0; width:100%; background:#fff; }
+  .callscr.oncall .wave i { animation-play-state:running; }
   .seg { margin-left:auto; display:flex; background:var(--card2); border-radius:999px; padding:3px; }
   .seg button { height:28px; padding:0 12px; border-radius:999px; background:transparent; color:var(--muted); font-size:12px; font-weight:600; }
   .seg button.on { background:var(--black); color:#fff; }
   .hint { font-size:11px; color:var(--muted); margin:6px 4px 0; }
-  .im-head { position:sticky; top:0; z-index:3; background:#fff; border-bottom:1px solid #eee; padding:10px 18px; display:flex; align-items:center; gap:16px; }
-  .im-logo { font-weight:800; font-size:20px; letter-spacing:-.5px; color:var(--im-blue); } .im-logo span { color:var(--im-orange); }
-  .im-search { flex:1; display:flex; border:2px solid var(--im-blue); border-radius:6px; overflow:hidden; max-width:560px; }
-  .im-search input { flex:1; border:0; padding:8px 12px; font:inherit; font-size:13px; }
-  .im-search button { background:var(--im-blue); color:#fff; padding:0 16px; }
-  .im-user { font-size:12px; color:#444; margin-left:auto; white-space:nowrap; } .im-user b { color:var(--im-blue); }
-  .hero { margin:16px 18px 6px; padding:18px 20px; border-radius:10px; background:linear-gradient(90deg,#eef0ff,#fff4ec); display:flex; align-items:center; justify-content:space-between; }
+  .im-head { position:sticky; top:0; z-index:3; background:#fff; border-bottom:1px solid #e3e3e3; height:56px; padding:0 18px; display:flex; align-items:center; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .im-logo img { height:30px; display:block; }
+  .im-loc { display:flex; align-items:center; gap:4px; height:38px; padding:0 12px; border:1px solid #d6d6d6; border-radius:4px; font-size:13px; color:#161a22; white-space:nowrap; }
+  .im-nav { margin-left:auto; display:flex; gap:18px; font-size:11px; color:#4b5563; white-space:nowrap; }
+  .im-nav span { display:flex; flex-direction:column; align-items:center; gap:2px; } .im-nav i { font-style:normal; font-size:16px; }
+  .im-best { height:38px; padding:0 14px; border:1px solid var(--im-teal); color:var(--im-teal); border-radius:4px; font-size:13px; font-weight:600; background:#fff; white-space:nowrap; }
+  .site { background:#e9eaea; container-type:inline-size; }
+  .im-search { flex:1 1 200px; min-width:160px; }
+  @container (max-width: 820px) { .im-nav span:not(.im-user) { display:none; } .im-best { display:none; } }
+  @container (max-width: 640px) { .im-loc { display:none; } }
+  .im-search { flex:1; display:flex; border:1px solid #c9c9c9; border-radius:4px; overflow:hidden; max-width:520px; height:38px; background:#fff; }
+  .im-search:focus-within { border-color:var(--im-teal); }
+  .im-search input { flex:1; border:0; padding:0 12px; font:inherit; font-size:13px; min-width:0; }
+  .im-search button { background:var(--im-teal); color:#fff; padding:0 16px; font-size:15px; }
+  .im-user { font-size:12px; color:#4b5563; white-space:nowrap; } .im-user b { color:#161a22; }
+  .hero { margin:14px 18px 6px; padding:16px 20px; border-radius:8px; background:#fff; border:1px solid #e3e3e3; display:flex; align-items:center; justify-content:space-between; }
   .hero h3 { margin:0; font-size:17px; color:#1c1e21; } .hero p { margin:4px 0 0; font-size:12px; color:#555; }
-  .hero .tag { background:var(--im-orange); color:#fff; font-size:11px; padding:4px 10px; border-radius:999px; }
+  .hero .tag { background:var(--im-teal); color:#fff; font-size:11px; padding:4px 10px; border-radius:4px; }
   .sect { margin:14px 18px 6px; font-size:13px; font-weight:600; color:#333; display:flex; align-items:center; gap:8px; }
   .sect small { font-weight:400; color:#777; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:14px; padding:4px 18px 24px; }
-  .card { border:1px solid #e6e6e6; border-radius:10px; overflow:hidden; background:#fff; transition:box-shadow .2s, transform .2s; cursor:pointer; position:relative; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, 252px); justify-content:center; gap:14px; padding:4px 18px 24px; }
+  .card { width:252px; height:396px; display:flex; flex-direction:column; border:1px solid #e3e3e3; border-radius:6px; overflow:hidden; background:#fff; transition:box-shadow .2s, transform .2s; cursor:pointer; position:relative; }
+  .card h4 { height:36px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .card .price { height:20px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .card .seller { height:50px; overflow:hidden; } .card .seller b { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .card .body { display:flex; flex-direction:column; flex:1; min-height:0; }
+  /* home page, modelled on www.indiamart.com */
+  .im-hero { background:linear-gradient(180deg,#2d2f8f 0%,#3a3fa8 100%); color:#fff; padding:28px 24px 22px; position:relative; overflow:hidden; }
+  .im-hero:before { content:""; position:absolute; right:-120px; top:-160px; width:520px; height:520px; border-radius:50%; border:1px solid rgba(255,255,255,.12); }
+  .im-hero h1 { margin:0; font-size:24px; font-weight:400; letter-spacing:-.2px; } .im-hero h1 b { font-weight:800; }
+  .im-hero p { margin:8px 0 0; font-size:13px; color:#d9dbff; }
+  .im-hero .pills { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+  .im-hero .pill { background:#fff; color:#2e3192; border-radius:999px; padding:9px 16px; font-size:13px; font-weight:600; white-space:nowrap; }
+  .im-hero .pill.green { color:#1d8480; } .im-hero .pill.orange { color:#e86a0c; }
+  .im-stats { background:#262a7d; color:#fff; display:flex; gap:28px; padding:12px 24px; font-size:11px; letter-spacing:.3px; flex-wrap:wrap; }
+  .im-stats b { font-size:17px; margin-right:6px; font-weight:800; }
+  .im-trend { background:linear-gradient(180deg,#3a3fa8 0%,#8d90d9 60%,#e9eaea 100%); padding:18px 18px 10px; }
+  .im-trend h2, .im-row h2 { margin:0 0 12px; font-size:18px; font-weight:800; color:#fff; } .im-row h2 { color:#161a22; }
+  .im-trend .tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
+  .tile { background:#fff; border-radius:8px; padding:16px 10px 14px; text-align:center; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.12); transition:transform .15s, box-shadow .15s; position:relative; min-height:128px; }
+  .tile:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.18); }
+  .tile .ph { width:64px; height:64px; border-radius:50%; margin:0 auto 10px; background:#f1f1f1 center/cover no-repeat; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:20px; overflow:hidden; }
+  .tile .ph img { width:100%; height:100%; object-fit:cover; }
+  .tile h5 { margin:0; font-size:13px; font-weight:700; color:#161a22; line-height:1.25; } .tile small { display:block; color:#777; font-size:11px; margin-top:3px; }
+  .im-row { background:#fff; margin:12px 18px 0; padding:14px 16px 16px; border-radius:8px; border:1px solid #e3e3e3; }
+  .im-row .rh { display:flex; align-items:center; } .im-row .rh h2 { margin:0; } .im-row .rh a { margin-left:auto; font-size:12px; color:#2e3192; cursor:pointer; font-weight:600; }
+  .im-row .strip { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px; margin-top:12px; }
+  .pc { border:1px solid #e3e3e3; border-radius:8px; overflow:hidden; cursor:pointer; background:#fff; position:relative; height:222px; display:flex; flex-direction:column; }
+  .pc:hover { box-shadow:0 6px 16px rgba(0,0,0,.12); }
+  .pc .pimg { height:140px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; } .pc .pimg img { width:100%; height:100%; object-fit:cover; }
+  .pc .pname { margin:8px 10px 0; height:33px; font-size:12.5px; font-weight:700; color:#161a22; text-align:center; line-height:1.3; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .pc .pprice { margin-top:auto; font-size:11px; color:#1d8480; font-weight:600; text-align:center; padding:4px 0 8px; }
+  .pc.sk .pimg { background:linear-gradient(90deg,#f2f2f2,#fafafa,#f2f2f2); background-size:200% 100%; animation:sk 1.2s infinite; }
+  @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  /* product detail page (PDP) */
+  .pdp { margin:12px 18px 24px; }
+  .pdp .crumb { font-size:12px; color:#666; margin:2px 0 10px; } .pdp .crumb a { color:#2e3192; cursor:pointer; } .pdp .crumb a:hover { text-decoration:underline; }
+  .pdp .top { display:flex; gap:18px; background:#fff; border:1px solid #e3e3e3; border-radius:8px; padding:18px; flex-wrap:wrap; }
+  .pdp .gal { flex:0 0 300px; } .pdp .gal .main { width:300px; height:300px; border:1px solid #eee; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#fff; font-size:48px; font-weight:800; color:#fff; }
+  .pdp .gal .main img { width:100%; height:100%; object-fit:contain; }
+  .pdp .info { flex:1 1 300px; min-width:0; }
+  .pdp h1 { margin:0 0 6px; font-size:20px; line-height:1.3; color:#161a22; }
+  .pdp .bigprice { font-size:22px; font-weight:800; color:#161a22; } .pdp .bigprice small { font-size:13px; font-weight:500; color:#666; }
+  .pdp .moq { font-size:12px; color:#666; margin:2px 0 12px; }
+  .pdp table { border-collapse:collapse; width:100%; max-width:420px; font-size:12.5px; margin-bottom:14px; }
+  .pdp td { padding:6px 8px; border-bottom:1px solid #f0f0f0; } .pdp td:first-child { color:#666; width:45%; } .pdp tr:nth-child(odd) td { background:#fafafa; }
+  .pdp .sup { border:1px solid #e3e3e3; border-radius:8px; padding:12px 14px; background:#fbfbfb; margin-bottom:14px; }
+  .pdp .sup b { font-size:14px; } .pdp .sup .l { font-size:12px; color:#555; margin-top:3px; } .pdp .sup .star { color:#f59e0b; }
+  .pdp .cta { display:flex; gap:8px; flex-wrap:wrap; max-width:460px; }
+  .pdp .cta button { height:40px; border-radius:6px; font-size:13.5px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:7px; padding:0 14px; }
+  .pdp .cta .pri { flex:1 0 100%; background:#3b8d80; color:#fff; } .pdp .cta .wa { flex:1; background:#fff; color:#161a22; border:1px solid #3b8d80; } .pdp .cta .call { flex:1; background:#3b8d80; color:#fff; }
+  .pdp .cta svg { width:17px; height:17px; }
+  /* your recent activity */
+  .im-act { margin:12px 18px 0; background:#fff; border:1px solid #e3e3e3; border-radius:8px; padding:14px 16px; }
+  .im-act .rh { display:flex; align-items:center; gap:8px; } .im-act h2 { margin:0; font-size:16px; color:#161a22; } .im-act .rh small { color:#777; font-size:11px; }
+  .im-act .cols { display:grid; grid-template-columns:minmax(200px, 1fr) 2fr; gap:16px; margin-top:10px; }
+  .im-act h6 { margin:0 0 8px; font-size:12px; color:#666; font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+  .im-act .chips { display:flex; flex-wrap:wrap; gap:6px; } .im-act .chip { border:1px solid #d6d6d6; border-radius:999px; padding:5px 11px; font-size:12px; cursor:pointer; background:#fff; color:#161a22; } .im-act .chip:hover { border-color:#3b8d80; color:#3b8d80; }
+  .im-act .chip small { color:#999; margin-left:5px; font-size:10px; }
+  .im-act .mini { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+  .im-act .mc { flex:0 0 120px; border:1px solid #e3e3e3; border-radius:6px; overflow:hidden; cursor:pointer; background:#fff; }
+  .im-act .mc:hover { box-shadow:0 4px 12px rgba(0,0,0,.12); }
+  .im-act .mc .i { height:84px; display:flex; align-items:center; justify-content:center; overflow:hidden; } .im-act .mc .i img { width:100%; height:100%; object-fit:cover; }
+  .im-act .mc .t { font-size:11px; font-weight:600; padding:6px 8px 2px; line-height:1.25; height:32px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .im-act .mc .p { font-size:11px; color:#3b8d80; font-weight:600; padding:0 8px 7px; }
+  .im-act .empty { font-size:12px; color:#888; }
+  .im-foot { margin:16px 18px 24px; padding:14px 16px; background:#fff; border-radius:8px; border:1px solid #e3e3e3; display:flex; align-items:center; gap:14px; }
+  .im-foot .lens { flex:1; background:linear-gradient(90deg,#2e3192,#4a50c4); color:#fff; border-radius:8px; padding:14px 16px; }
+  .im-foot .lens b { display:block; font-size:15px; } .im-foot .lens span { font-size:11px; color:#d9dbff; }
+  .card .act { margin-top:auto; gap:6px; flex-wrap:wrap; }
+  .card .act button { flex:1 1 0; min-width:0; height:34px; padding:0 6px; border-radius:6px; font-size:12.5px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; white-space:nowrap; box-shadow:none; }
+  .card .act .pri { flex:1 0 100%; }
+  .card .act .call, .card .act .pri { background:#3b8d80; color:#fff; border:1px solid #3b8d80; }
+  .card .act .call:hover, .card .act .pri:hover { background:#2f7a6e; }
+  .card .act .wa { background:#fff; color:#161a22; border:1px solid #3b8d80; } .card .act .wa:hover { background:#f2faf8; }
+  .card .act svg { width:15px; height:15px; flex:none; }
+  .card .act button:disabled { opacity:.5; cursor:not-allowed; }
   .card:hover { box-shadow:0 8px 24px rgba(0,0,0,.1); transform:translateY(-2px); }
-  .card .img { height:118px; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:800; color:#fff; letter-spacing:1px; }
+  .card.focus { outline:2px solid var(--im-teal); box-shadow:0 8px 24px rgba(29,132,128,.3); }
+  .card .img { height:150px; flex:0 0 150px; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:800; color:#fff; letter-spacing:1px; }
+  .card .img img { width:100%; height:100%; object-fit:contain; background:#fff; }
+  .card .img.real { background:#fff; border-bottom:1px solid #eee; }
+  .card .price { font-size:14px; font-weight:700; color:#1c1e21; margin-top:3px; }
+  .card .price small { font-weight:500; color:#666; }
+  .card .seller { font-size:12px; color:#333; margin-top:3px; }
+  .card .seller .star { color:#f59e0b; } .card .seller .city { color:#777; }
+  .card .gst { display:inline-block; font-size:10px; color:#0f766e; border:1px solid #99d6cb; border-radius:4px; padding:0 4px; margin-left:4px; vertical-align:middle; }
+  .sect .back { margin-left:auto; font-size:12px; color:var(--im-blue); cursor:pointer; font-weight:500; }
+  .grid .note { grid-column:1/-1; color:#777; font-size:13px; padding:20px 4px; }
   .card .body { padding:10px 12px 12px; }
   .card h4 { margin:0 0 2px; font-size:14px; line-height:1.3; color:#1c1e21; }
   .card .sub { font-size:12px; color:#666; } .card .meta { font-size:11px; color:#999; margin-top:2px; }
@@ -175,6 +294,7 @@
   .mem-head .file { font-size:17px; font-weight:600; letter-spacing:-.2px; }
   .mem-head .path { font-size:12px; color:var(--muted); font-family:ui-monospace,Menlo,monospace; }
   .mem-head .x { margin-left:auto; width:36px; height:36px; border-radius:50%; background:var(--card2); color:var(--muted); font-size:16px; }
+  .helpnote { margin:22px 26px 26px; font-size:13px; line-height:1.5; color:#cfd6e6; }
   .openbox { margin:0 14px; padding:12px 14px; border-radius:16px; background:var(--black); color:#fff; font-size:13px; }
   .openbox .k { font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; color:#9ca3af; font-weight:600; }
   .openbox .g { font-size:14px; margin:4px 0 4px; } .openbox .o { color:#cfd3da; }
@@ -211,7 +331,7 @@
       <div class="scr" id="waScr">
         <div class="wa-head"><span class="back">‹</span><div class="avatar"><img src="/im-logo.png" alt="IndiaMART" /></div>
           <div class="t"><div class="n">IndiaMART <svg class="tick" viewBox="0 0 24 24" aria-label="verified"><path fill="#53bdeb" d="M22.5 12.5c0-1.3-.8-2.4-2-2.9.3-.5.5-1.1.5-1.7 0-1.9-1.5-3.4-3.4-3.4-.6 0-1.2.2-1.7.5-.5-1.2-1.6-2-2.9-2s-2.4.8-2.9 2c-.5-.3-1.1-.5-1.7-.5-1.9 0-3.4 1.5-3.4 3.4 0 .6.2 1.2.5 1.7-1.2.5-2 1.6-2 2.9s.8 2.4 2 2.9c-.3.5-.5 1.1-.5 1.7 0 1.9 1.5 3.4 3.4 3.4.6 0 1.2-.2 1.7-.5.5 1.2 1.6 2 2.9 2s2.4-.8 2.9-2c.5.3 1.1.5 1.7.5 1.9 0 3.4-1.5 3.4-3.4 0-.6-.2-1.2-.5-1.7 1.2-.5 2-1.6 2-2.9z"/><path fill="#0b141a" d="M10.2 16.3l-3.5-3.5 1.4-1.4 2.1 2.1 5.3-5.3 1.4 1.4z"/></svg></div><small>online</small></div>
-          <span class="ic">📞</span><span class="ic">⋮</span></div>
+          <button class="ic refresh" id="waRefresh" title="Refresh messages"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button><span class="ic">📞</span><span class="ic">⋮</span></div>
         <div class="chat" id="chat"></div>
         <div class="composer"><input id="waInput" placeholder="Type a message" autocomplete="off" /><button id="waSend">➤</button></div>
       </div>
@@ -223,7 +343,7 @@
     <div class="label" style="flex-direction:row;align-items:center;gap:12px"><div><div class="t"><span class="ico">🖥</span>Website</div><b id="lblSite"></b></div>
       <div class="seg" id="modeSeg"><button data-mode="emu" class="on">Emulated</button><button data-mode="live">Live indiamart.com</button></div></div>
     <div class="monitor"><div class="browser">
-      <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><button class="nav" id="navHome" title="Home" hidden>⌂</button><input class="url" id="url" value="https://www.indiamart.com" readonly /></div>
+      <div class="chrome"><button class="nav" id="navBack" title="Back" disabled>←</button><button class="nav" id="navFwd" title="Forward" disabled>→</button><button class="nav" id="navHome" title="Home" hidden>⌂</button><input class="url" id="url" value="https://www.indiamart.com" readonly /></div>
       <div class="site" id="site"></div>
       <iframe class="live" id="live" hidden referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
     </div>
@@ -238,22 +358,31 @@
     <div class="phone"><div class="notch"></div><div class="screen">
       <div class="scr callscr idle" id="callIdle">
         <div class="big">V</div>
-        <h2>VANI</h2><div class="sub">IndiaMART voice assistant</div>
-        <div class="knows"><div class="k">VANI will open with</div><div class="g" id="idleGreet">…</div><div class="o" id="idleOpener"></div><div class="src" id="idleSrc"></div></div>
-        <button class="ringbtn" id="ring">☎ VANI calls <span id="ringName">…</span></button>
+        <h2>VANI</h2><div class="sub">IndiaMART helpline · voice assistant</div>
+        <div class="helpnote">Need help with an enquiry, a quote or a supplier?<br>Call VANI, or VANI will call you when you need help.</div>
+        <button class="ringbtn" id="dial">📞 Call VANI</button>
+        <div class="sub" id="lastCall" style="font-size:11px;margin-top:14px;padding:0 18px"></div>
       </div>
       <div class="scr callscr ringing" id="incoming" hidden>
         <div class="big">V</div>
-        <h2>VANI</h2><div class="sub">IndiaMART · incoming call</div>
+        <h2>VANI</h2><div class="sub">IndiaMART is calling you…</div>
         <div class="sub" style="margin-top:20px;font-size:12px;color:#ffb27a;padding:0 18px" id="incHint"></div>
-        <div class="callbtns"><button class="cbtn dec" id="decline">✕</button><button class="cbtn acc" id="accept">📞</button></div>
+        <div class="callbtns"><button class="cbtn dec" id="decline" title="Decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .4-.23.74-.56.9-.98.5-1.87 1.12-2.66 1.85-.18.18-.43.29-.7.29-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.29-.79-.73-1.68-1.35-2.66-1.85a.998.998 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg></button><button class="cbtn acc" id="accept" title="Answer"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg></button></div>
       </div>
       <div class="scr callscr idle" id="incall" hidden>
         <div class="big">V</div>
         <h2>VANI</h2><div class="sub" id="callStatus">Connecting…</div><div class="timer" id="timer">00:00</div>
         <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="caption" id="caption"><span class="hint">Connecting to Sarvam…</span></div>
-        <div class="callbtns"><button class="cbtn mute" id="muteBtn">🎙</button><button class="cbtn dec" id="endBtn">📵</button></div>
+        <div class="keys">
+          <button class="key" id="muteBtn"><i><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></i>mute</button>
+          <button class="key dummy"><i><svg viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="6" cy="11" r="2"/><circle cx="12" cy="11" r="2"/><circle cx="18" cy="11" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="12" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><circle cx="12" cy="22" r="1.6"/></svg></i>keypad</button>
+          <button class="key dummy"><i><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06A9 9 0 0 0 14 3.23z"/></svg></i>speaker</button>
+          <button class="key dummy"><i><svg viewBox="0 0 24 24"><path d="M19 13h-2v-2h2V9h2v2h2v2h-2v2h-2v-2zM4 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0zm-2 8c0-2.67 4-4 6-4s6 1.33 6 4v1H2v-1z"/></svg></i>add call</button>
+          <button class="key dummy"><i><svg viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg></i>video</button>
+          <button class="key dummy"><i><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z"/></svg></i>contacts</button>
+        </div>
+        <div class="endrow"><button class="cbtn dec" id="endBtn" title="End call"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .4-.23.74-.56.9-.98.5-1.87 1.12-2.66 1.85-.18.18-.43.29-.7.29-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.29-.79-.73-1.68-1.35-2.66-1.85a.998.998 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg></button></div>
       </div>
       <div class="scr callscr idle" id="callDone" hidden>
         <div class="big">V</div>
@@ -312,15 +441,12 @@ function renderMemory(d, flash = false, note = "") {
   $("#fileName").textContent = `${d.role}.md`;
   $("#filePath").textContent = `context_files/${d.glid}/${d.role}.md · ${d.context.length} chars`;
   $("#greet").textContent = d.greeting || "—"; $("#opener").textContent = d.opener || "";
-  $("#idleGreet").textContent = d.greeting || "—"; $("#idleOpener").textContent = d.opener || "";
-  const live = (d.context.split("## Latest across channels")[1] || "").split("##")[0].split("\n").map(s => s.trim()).filter(s => s.startsWith("- "));
-  $("#idleSrc").textContent = live.length ? "from: " + live[0].replace(/^- 🔄 /, "").replace(/\*\*/g, "").slice(0, 110) + "…" : `from the ${d.role}'s IndiaMART history (${d.role}.md)`;
   const md = $("#md"); md.innerHTML = mdToHtml(d.context);
   md.querySelectorAll("h2").forEach(h => { if (h.textContent.startsWith("Latest across channels")) { h.classList.add("live"); const ul = h.nextElementSibling; if (ul && ul.tagName === "UL") ul.classList.add("live"); } });
   lastRefresh = Date.now();
   const m = note && note.match(/in ([\d.]+)s/); if (m) lastBuildSeconds = m[1]; else if (d.build_seconds) lastBuildSeconds = d.build_seconds;
   const f = $("#fresh"); f.className = "fresh" + (flash ? " hot" : ""); f.textContent = note || (d.build_seconds ? `rebuilt in ${d.build_seconds}s` : "cached");
-  if (flash) { md.classList.add("flash"); setTimeout(() => md.classList.remove("flash"), 1500); md.scrollTop = 0; $("#idleGreet").parentElement.animate([{ background: "rgba(34,197,94,.35)" }, { background: "rgba(255,255,255,.06)" }], { duration: 1500 }); }
+  if (flash) { md.classList.add("flash"); setTimeout(() => md.classList.remove("flash"), 1500); md.scrollTop = 0; }
 }
 setInterval(() => { if (!lastRefresh || $("#fresh").classList.contains("busy")) return; const s = Math.round((Date.now() - lastRefresh) / 1000); if (s > 8) { $("#fresh").classList.remove("hot"); $("#fresh").textContent = `updated ${s < 60 ? s + " s" : Math.round(s / 60) + " min"} ago` + (lastBuildSeconds ? ` · freshness ${lastBuildSeconds}s` : ""); } }, 2000);
 
@@ -328,11 +454,11 @@ async function refreshMemory(flash, note) {
   const r = await fetch(`/context?glid=${user.glid}`); const d = await r.json();
   if (r.ok) renderMemory(d, flash, note);
 }
-function postEvent(channel, summary) {
+function postEvent(channel, summary, meta = {}) {
   // one rebuild at a time, so two quick website actions do not race
   posting = posting.then(async () => {
     const f = $("#fresh"); f.className = "fresh busy"; f.textContent = `writing ${user.role}.md…`;
-    const r = await fetch(`/events/${user.glid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channel, summary }) });
+    const r = await fetch(`/events/${user.glid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channel, summary, meta }) });
     const d = await r.json();
     if (d.ok) { knownEvents++; await refreshMemory(true, `✔ ${channel} → ${user.role}.md in ${d.freshness_seconds}s`); }
     else { f.className = "fresh"; f.textContent = "not saved: " + (d.detail || d.skipped); }
@@ -350,30 +476,32 @@ function renderUsers() {
 }
 async function selectUser(glid) {
   user = USERS.find(u => u.glid === glid); renderUsers();
-  $("#ringName").textContent = user.name.split(" ")[0]; $("#lblPhone").textContent = user.name; $("#lblCall").textContent = user.name; $("#fresh").className = "fresh busy"; $("#fresh").textContent = "loading…";
+  $("#lblPhone").textContent = user.name; $("#lblCall").textContent = user.name; $("#fresh").className = "fresh busy"; $("#fresh").textContent = "loading…";
   $("#chat").innerHTML = `<div class="sys">Today</div><div class="sys">${user.role === "buyer" ? "Hi " + user.name + "! This is IndiaMART. Tell us what you need." : "Hi " + user.name + "! IndiaMART here. Reply to buyers or tell us your rates."}</div>`;
   showScr("callIdle");
   fetch(`/active`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ glid }) }); // so the VANI call loads THIS user
-  const [c, s, e] = await Promise.all([fetch(`/context?glid=${glid}`).then(r => r.json()), fetch(`/site/${glid}`).then(r => r.json()), fetch(`/events/${glid}`).then(r => r.json())]);
+  const [c, s, e, w] = await Promise.all([fetch(`/context?glid=${glid}`).then(r => r.json()), fetch(`/site/${glid}`).then(r => r.json()), fetch(`/events/${glid}`).then(r => r.json()), fetch(`/whatsapp/${glid}`).then(r => r.json()).catch(() => [])]);
   knownEvents = e.length; renderMemory(c, false); renderSite(s);
+  waKnown = (w || []).length;
+  (w || []).forEach(t => bubble((t.image ? `<img class="pic" src="${t.image}" alt="">` : "") + linkify(esc(t.text)).replace(/\n/g, "<br>"), t.from === "user" ? "out" : "in"));  // chat so far survives a reload
   if (mode === "live") loadLive();
 }
 
 /* ---------- WhatsApp ---------- */
 function bubble(text, dir, extra = "") { const el = document.createElement("div"); el.className = "msg " + dir; el.innerHTML = `${text}<span class="meta">${now()}${dir === "out" ? '<span class="ticks">✓✓</span>' : ""}</span>${extra}`; $("#chat").appendChild(el); $("#chat").scrollTop = 1e6; return el; }
 function sysline(text, ok = false) { const el = document.createElement("div"); el.className = "sys" + (ok ? " ok" : ""); el.textContent = text; $("#chat").appendChild(el); $("#chat").scrollTop = 1e6; }
-async function sendWhatsApp() {
+async function sendWhatsApp(media) {
   const text = $("#waInput").value.trim(); if (!text || !user) return;
-  $("#waInput").value = ""; bubble(text, "out");
+  $("#waInput").value = ""; bubble((media && media.image ? `<img class="pic" src="${media.image}" alt="">` : "") + esc(text), "out");
   const typing = document.createElement("div"); typing.className = "typing"; typing.innerHTML = "<i></i><i></i><i></i>"; $("#chat").appendChild(typing); $("#chat").scrollTop = 1e6;
   $("#fresh").className = "fresh busy"; $("#fresh").textContent = `whatsapp → ${user.role}.md…`;
   posting = posting.then(async () => {
-    const r = await fetch(`/whatsapp/${user.glid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    const r = await fetch(`/whatsapp/${user.glid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, image: media && media.image || null, product: media && media.product || null }) });
     const d = await r.json(); typing.remove();
     if (!r.ok) { sysline("⚠ " + (d.detail || r.status)); $("#fresh").className = "fresh"; return; }
-    bubble(d.reply, "in"); knownEvents++;
-    await refreshMemory(true, `✔ whatsapp → ${user.role}.md in ${d.freshness_seconds}s`);
-    sysline(`🧠 VANI now knows this · ${d.freshness_seconds}s`, true);
+    bubble(linkify(esc(d.reply)).replace(/\n/g, "<br>"), "in"); knownEvents++;
+    await refreshMemory(true, `✔ whatsapp → ${user.role}.md in ${d.freshness_seconds}s`);  // freshness shows in the top badge only
+    if (d.needs_call) setTimeout(() => vaniCalls({ source: "whatsapp", label: "your WhatsApp message", topic: `the WhatsApp message "${text.slice(0, 80)}"`, reason: `on WhatsApp the ${user.role} just wrote: "${text}"` }), 2500);
   });
 }
 $("#waSend").onclick = sendWhatsApp; $("#waInput").addEventListener("keydown", e => { if (e.key === "Enter") sendWhatsApp(); });
@@ -384,42 +512,235 @@ const initials = t => t.split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").t
 let seenQueue = [], flushTimer = null, observer = null;
 function queueSeen(label) {
   if (seenQueue.includes(label)) return; seenQueue.push(label);
-  toast(`👁 captured: ${label}`);
   clearTimeout(flushTimer); flushTimer = setTimeout(flushSeen, 3500); // batch scrolling into one event
 }
 function flushSeen() {
   if (!seenQueue.length) return; const list = seenQueue.splice(0); const who = user.role === "buyer" ? "Buyer" : "Seller";
   postEvent("web", `${who} browsed on ${user.role === "buyer" ? "indiamart.com" : "Lead Manager"}: ${list.join(", ")}`);
 }
-function act(summary) { clearTimeout(flushTimer); seenQueue = []; toast("📝 " + summary); postEvent("web", summary); }
+function act(summary, meta) { clearTimeout(flushTimer); seenQueue = []; return postEvent("web", summary, meta); }  // no toast: the memory badge/drawer shows the result
 
+// Product card → WhatsApp (left phone): the buyer's message is sent to the IndiaMART WhatsApp chat, which becomes a live event.
+function productToWhatsApp(it) {
+  const bits = [it.title, it.company ? `from ${it.company}${it.city ? ", " + it.city : ""}` : "", it.price ? `(${it.price_text})` : ""].filter(Boolean).join(" ");
+  $("#waInput").value = `Hi, I am interested in ${bits}. Please share the best price and delivery time.`;
+  toast("💬 Sent to WhatsApp"); sendWhatsApp({ image: it.image || null, product: it.title });
+}
+// Product card → call (right phone): save the click as a live event first (so VANI's memory has it), then ring.
+const callBusy = () => !$("#incoming").hidden || !$("#incall").hidden || (typeof widgetState === "function" && widgetState() === "connected");
+async function productCall(it, summary) {
+  if (callBusy()) { toast("📞 A call is already in progress"); return; }
+  await act(summary, { kind: "call_now", product: it });  // memory rebuilt with this product before VANI loads it
+  const where = it.company ? ` from ${it.company}${it.city ? ", " + it.city : ""}` : "";
+  userCalls({ source: "product", product: it, label: labelOf(it), topic: labelOf(it), reason: `the user is calling about ${it.title}${where}${it.price ? " (" + it.price_text + ")" : ""}` });
+}
+const ICON = {
+  call: '<svg viewBox="0 0 24 24" fill="#fff" style="pointer-events:none"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg>',
+  wa: '<svg viewBox="0 0 24 24" style="pointer-events:none"><circle cx="12" cy="12" r="11" fill="#25d366"/><path fill="#fff" d="M12 5.5a6.5 6.5 0 0 0-5.6 9.8L5.5 18.5l3.3-.9A6.5 6.5 0 1 0 12 5.5zm0 1.2a5.3 5.3 0 1 1-2.7 9.9l-.2-.1-1.9.5.5-1.8-.1-.2A5.3 5.3 0 0 1 12 6.7zm-2.2 2.6c-.1 0-.3 0-.5.2-.2.2-.7.7-.7 1.6s.7 1.9.8 2c.1.1 1.4 2.2 3.5 3 1.7.7 2.1.5 2.5.5.4 0 1.2-.5 1.4-1 .2-.5.2-.9.1-1l-.4-.2-1.4-.7c-.2-.1-.3-.1-.5.1l-.6.8c-.1.1-.2.2-.4.1-.2-.1-.8-.3-1.6-1-.6-.5-1-1.2-1.1-1.4-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.4l-.6-1.5c-.2-.4-.3-.3-.5-.3h-.4z"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="#fff" style="pointer-events:none"><path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2zm3 5v2h10V8H7zm0 4v2h7v-2H7z"/></svg>',
+};
+// browser-style history for the emulated site: home / results entries; ← → walk the stack without pushing
+let navStack = [], navPos = -1, navSilent = false, navPaint = {};
+function navPush(entry) { if (navSilent) return; navStack = navStack.slice(0, navPos + 1); navStack.push(entry); navPos = navStack.length - 1; navUpdate(); }
+function navReset() { navStack = []; navPos = -1; navUpdate(); }
+function navUpdate() { $("#navBack").disabled = navPos <= 0; $("#navFwd").disabled = navPos >= navStack.length - 1; }
+function navGo(delta) {
+  const i = navPos + delta; if (i < 0 || i >= navStack.length || mode === "live") return;
+  navPos = i; const e = navStack[i]; navSilent = true;
+  try { if (e.type === "results" && navPaint.results) navPaint.results(e.q, e.focusId); else if (e.type === "product" && navPaint.product) navPaint.product(e.x, e.q); else if (navPaint.home) navPaint.home(); } finally { navSilent = false; }
+  navUpdate();
+}
+$("#navBack").onclick = () => navGo(-1); $("#navFwd").onclick = () => navGo(1);
+// URLs in WhatsApp text -> short clickable links (domain/path, no tracking tags)
+const linkify = html => html.replace(/https?:\/\/[^\s<"]+/g, u => { const clean = u.split("?")[0].replace(/[.,)]+$/, ""); let label = clean.replace(/^https?:\/\//, ""); if (label.length > 42) label = label.slice(0, 40) + "…"; return `<a href="${clean}" target="_blank" rel="noopener">${label}</a>`; });
+const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function armObserver(site) {
+  // scroll capture: items that come into view AFTER load count as "browsed"
+  if (observer) observer.disconnect();
+  const initial = new Set(); let armed = false;
+  observer = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!armed) { if (en.isIntersecting) initial.add(en.target); return; }
+      if (en.isIntersecting && !initial.has(en.target) && !en.target.classList.contains("captured")) {
+        en.target._t = setTimeout(() => { en.target.classList.add("captured"); queueSeen(en.target.dataset.label); }, 900);
+      } else if (!en.isIntersecting) { clearTimeout(en.target._t); initial.delete(en.target); }
+    });
+  }, { root: site, threshold: 0.6 });
+  site.querySelectorAll("[data-label]").forEach(el => observer.observe(el));
+  setTimeout(() => { armed = true; }, 600);
+}
 let lastSite = null;
 function renderSite(s) {
   lastSite = s;
   const site = $("#site"); const who = s.role === "buyer" ? "Buyer" : "Seller";
   if (mode === "live") { $("#lblSite").textContent = "live · " + new URL(liveHome()).hostname; return; }  // emulated panel is hidden
-  $("#url").textContent = `https://${s.site}/${s.role === "buyer" ? "search?q=" : "leads/manager"}`; $("#lblSite").textContent = s.site;
+  $("#url").value = `https://${s.site}/${s.role === "buyer" ? "search?q=" : "leads/manager"}`; $("#lblSite").textContent = s.site;
   if (s.role === "buyer") {
     site.innerHTML = `
-      <div class="im-head"><div class="im-logo">india<span>mart</span></div>
-        <div class="im-search"><input id="q" placeholder="Search products, suppliers…" /><button id="qBtn">Search</button></div>
-        <div class="im-user">Hi, <b>${s.name}</b> · ${s.city || ""}</div></div>
-      <div class="hero"><div><h3>Welcome back, ${s.name.split(" ")[0]}</h3><p>${s.buyleads.length ? "Your active requirement: <b>" + s.buyleads.join(", ") + "</b>" : "Continue where you left off"}</p></div><span class="tag">Verified suppliers</span></div>
-      <div class="sect">Picked for you <small>based on your recent searches</small></div>
-      <div class="grid">${s.items.map((it, i) => `
-        <div class="card" data-label="${it.title}"><span class="seen">👁 seen</span>
-          <div class="img" style="background:${PALETTE[i % PALETTE.length]}">${initials(it.title)}</div>
-          <div class="body"><h4>${it.title}</h4><div class="sub">${it.sub}</div><div class="meta">${it.meta}</div>
-          <div class="act"><button class="pri" data-act="price">Get Latest Price</button><button class="sec" data-act="call">Call Supplier</button></div></div></div>`).join("")}</div>`;
-    site.querySelectorAll(".card").forEach(c => {
-      c.onclick = e => { const a = e.target.dataset.act; const t = c.dataset.label;
-        if (a === "price") act(`${who} sent an enquiry on indiamart.com for ${t} (Get Latest Price)`);
-        else if (a === "call") act(`${who} clicked Call Supplier on indiamart.com for ${t}`);
-        else act(`${who} opened the ${t} page on indiamart.com`); };
-    });
-    const search = () => { const q = site.querySelector("#q").value.trim(); if (!q) return; $("#url").textContent = `https://${s.site}/search?q=${encodeURIComponent(q)}`; act(`${who} searched "${q}" on indiamart.com`); };
+      <div class="im-head"><div class="im-logo"><img src="/im-wordmark.png" alt="IndiaMART"></div>
+        <div class="im-loc">📍 ${esc(s.city || "All India")}</div>
+        <div class="im-search"><input id="q" placeholder="Enter product / service to search" /><button id="qBtn" title="Search">🔍</button></div>
+        <button class="im-best">Get Best Price</button>
+        <div class="im-nav"><span><i>🚢</i>Exporters</span><span><i>🏷</i>Sell</span><span><i>❔</i>Help</span><span><i>✉</i>Messages</span><span class="im-user"><i>👤</i><b>${esc(s.name.split(" ")[0])}</b></span></div></div>
+      <div id="siteBody"></div>`;
+    const cardHtml = (it, i) => `
+        <div class="card" data-label="${esc(it.title)}" data-i="${i}"><span class="seen">👁 seen</span>
+          ${it.image ? `<div class="img real"><img src="${it.image}" alt="" loading="lazy" onerror="this.parentNode.textContent='${initials(it.title)}';this.parentNode.classList.remove('real');this.parentNode.style.background='${PALETTE[i % PALETTE.length]}'"></div>`
+                     : `<div class="img" style="background:${PALETTE[i % PALETTE.length]}">${initials(it.title)}</div>`}
+          <div class="body"><h4>${esc(it.title)}</h4>
+          ${it.price_text ? `<div class="price">${esc(it.price_text)}${it.moq ? ` <small>· MOQ ${esc(it.moq)}</small>` : ""}</div>` : `<div class="sub">${esc(it.sub || "")}</div>`}
+          ${it.company ? `<div class="seller"><b>${esc(it.company)}</b>${it.gst_verified ? '<span class="gst">GST</span>' : ""}<br><span class="city">${esc(it.city || "")}${it.member_since ? " · " + esc(it.member_since) : ""}</span>${it.rating ? ` <span class="star">★</span> ${it.rating}${it.rating_count ? ` (${it.rating_count})` : ""}` : ""}</div>` : `<div class="meta">${esc(it.meta || "")}</div>`}
+          <div class="act"><button class="pri" data-act="price">${ICON.chat}Get Latest Price</button><button class="wa" data-act="wa">${ICON.wa}WhatsApp</button><button class="call" data-act="call">${ICON.call}Call Now</button></div></div></div>`;
+    let curQ = "";
+    const whereOf = it => it.company ? ` from ${it.company}, ${it.city || ""}`.replace(/, $/, "") : "";
+    const priceOf = it => it.price_text && it.price ? ` (${it.price_text})` : "";
+    const ctaClick = (a, it) => {
+      const t = it.title, where = whereOf(it), price = priceOf(it);
+      if (a === "price") { act(`${who} sent an enquiry on indiamart.com for ${t}${where}${price} (Get Latest Price)`, { kind: "enquiry", product: it })
+        .then(() => setTimeout(() => vaniCalls({ source: "enquiry", product: it, label: `your enquiry for ${t}`, topic: `the enquiry for ${t}${where}`, reason: `the ${who.toLowerCase()} just sent an enquiry (Get Latest Price) for ${t}${where}${price} and is waiting for quotes` }), 1500)); }
+      else if (a === "wa") productToWhatsApp(it);
+      else if (a === "call") productCall(it, `${who} clicked Call on indiamart.com for ${t}${where}${price}`);
+      else return false;
+      return true;
+    };
+    const openProduct = (it, q) => {       // a product view goes to memory with the product details, then the PDP opens
+      if (it.company) act(`${who} opened the product page ${it.title}${whereOf(it)}${priceOf(it)} on indiamart.com`, { kind: "view", q: q || curQ, product: it });
+      paintProduct(it, q || curQ);
+    };
+    const wire = items => {
+      site.querySelectorAll(".card").forEach(c => {
+        const it = items[+c.dataset.i];
+        c.onclick = e => { if (!ctaClick(e.target.dataset.act, it)) { if (it.company) openProduct(it, curQ); else { site.querySelector("#q").value = it.title; search(); } } };
+      });
+      armObserver(site);
+    };
+    const paintProduct = (x, q) => {
+      navPush({ type: "product", x, q });
+      $("#url").value = x.url || `https://www.indiamart.com/proddetail/${(x.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${x.display_id || ""}.html`;
+      const specs = (x.specs || []).map(sp => sp.split(": ")).filter(a => a.length === 2);
+      site.querySelector("#siteBody").innerHTML = `
+        <div class="pdp">
+          <div class="crumb"><a data-nav="home">Home</a> › ${q ? `<a data-nav="results">${esc(q)}</a> › ` : ""}${esc(x.title)}</div>
+          <div class="top">
+            <div class="gal"><div class="main" style="background:${x.image ? "#fff" : PALETTE[0]}">${x.image ? `<img src="${x.image}" alt="">` : initials(x.title)}</div></div>
+            <div class="info">
+              <h1>${esc(x.title)}</h1>
+              <div class="bigprice">${esc(x.price_text || "Ask Price")}${x.moq ? ` <small>· MOQ ${esc(x.moq)}</small>` : ""}</div>
+              <div class="moq">${x.category ? "Category: " + esc(x.category) : ""}${x.display_id ? " · Product ID " + esc(x.display_id) : ""}</div>
+              ${specs.length ? `<table>${specs.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</table>` : ""}
+              <div class="sup"><b>${esc(x.company || "Supplier")}</b>${x.gst_verified ? ' <span class="gst" style="margin-left:8px">GST</span>' : ""}
+                <div class="l">${esc([x.city, x.state].filter(Boolean).join(", "))}${x.member_since ? " · " + esc(x.member_since) + " on IndiaMART" : ""}</div>
+                <div class="l">${x.rating ? `<span class="star">★</span> ${x.rating}${x.rating_count ? ` (${x.rating_count} reviews)` : ""}` : ""}</div></div>
+              <div class="cta"><button class="pri" data-act="price">${ICON.chat}Get Latest Price</button><button class="wa" data-act="wa">${ICON.wa}WhatsApp</button><button class="call" data-act="call">${ICON.call}Call Now</button></div>
+            </div></div></div>`;
+      const body = site.querySelector("#siteBody");
+      body.querySelectorAll(".cta button").forEach(b => { b.onclick = () => ctaClick(b.dataset.act, x); });
+      body.querySelector('[data-nav="home"]').onclick = paintPicked;
+      const rl = body.querySelector('[data-nav="results"]'); if (rl) rl.onclick = () => paintResults(q);
+      site.scrollTop = 0;
+    };
+    const first = s.name.split(" ")[0];
+    const req = s.buyleads.length ? s.buyleads[0] : (s.items[0] ? s.items[0].title : "");
+    const paintPicked = () => {
+      navPush({ type: "home" });
+      $("#url").value = "https://www.indiamart.com/";
+      // near-duplicate user categories (RCC Bollard / Road Bollard / Concrete Bollard…) collapse to one tile each
+      const STOP = new Set(["precast", "round", "spun", "pipes", "size", "nature", "flexible", "road", "sider", "cast", "iron", "concrete"]);
+      const key = t => t.toLowerCase().replace(/[^a-z ]/g, " ").split(/\s+/).filter(w => w.length > 3 && !STOP.has(w)).map(w => w.replace(/s$/, ""));
+      const cats = []; const used = new Set();
+      for (const it of s.items) { const k = key(it.title); if (k.some(w => used.has(w)) || !k.length) continue; k.forEach(w => used.add(w)); cats.push(it); if (cats.length === 3) break; }
+      if (!cats.length && s.items.length) cats.push(s.items[0]);
+      site.querySelector("#siteBody").innerHTML = `
+        <div class="im-hero"><h1>India's Largest Online <b>B2B Marketplace</b></h1>
+          <p>Welcome back, ${esc(first)}. ${req ? "Your active requirement: <b style='color:#fff'>" + esc(req) + "</b>" : "Connecting 21 Cr+ Buyers with Trusted Sellers"}</p>
+          <div class="pills"><span class="pill" data-act="post">📄 Post Requirement →</span><span class="pill green" data-act="quotes">📊 View my quotes →</span><span class="pill orange">👤 ${esc(first)}</span></div></div>
+        <div class="im-stats"><span><b>21Cr+</b>BUYERS</span><span><b>84L+</b>SELLERS</span><span><b>12Cr+</b>PRODUCTS &amp; SERVICES</span><span><b>30 Years</b>EMPOWERING BUSINESSES</span></div>
+        <div class="im-act" id="activity"><div class="rh"><h2>Your recent activity</h2><small>· loaded from ${first}'s memory</small></div><div class="empty">Loading…</div></div>
+        <div class="im-trend"><h2>Picked for you <small style="font-weight:400;font-size:12px;color:#eef">· based on your recent searches</small></h2>
+          <div class="tiles">${cats.map((it, i) => `<div class="tile" data-label="${esc(it.title)}" data-q="${esc(it.title)}"><span class="seen">👁 seen</span><div class="ph" style="background-color:${PALETTE[i % PALETTE.length]}">${initials(it.title)}</div><h5>${esc(it.title)}</h5><small>${esc(it.sub)}</small></div>`).join("")}</div>
+          <h2 style="margin-top:16px">Trending on IndiaMART</h2><div class="tiles" id="trendTiles">${[0,1,2,3,4,5].map(() => '<div class="tile"><div class="ph"></div><h5>&nbsp;</h5></div>').join("")}</div></div>
+        <div id="rows"></div>
+        <div class="im-foot"><div class="lens"><b>⚡ Find Products Instantly</b><span>Upload any product image and discover matching items from verified suppliers across India.</span></div></div>`;
+      const body = site.querySelector("#siteBody");
+      body.querySelectorAll(".tile").forEach(t => { t.onclick = () => { site.querySelector("#q").value = t.dataset.q; search(); }; });
+      (async () => {                                  // recent searches + products viewed, from the live events in memory
+        let ev = []; try { ev = await fetch(`/events/${user.glid}`).then(r => r.json()); } catch (e) {}
+        if (lastSite !== s) return;
+        const web = ev.filter(e => e.channel === "web").reverse();
+        const seenQ = new Set(), seenP = new Set(); const searches = [], views = [];
+        for (const e of web) { const m = e.meta || {};
+          if (m.kind === "search" && m.q && !seenQ.has(m.q.toLowerCase()) && searches.length < 8) { seenQ.add(m.q.toLowerCase()); searches.push({ q: m.q, time: e.time }); }
+          if ((m.kind === "view" || m.kind === "enquiry") && m.product && !seenP.has(m.product.display_id || m.product.title) && views.length < 8) { seenP.add(m.product.display_id || m.product.title); views.push({ p: m.product, q: m.q, kind: m.kind }); } }
+        const box = body.querySelector("#activity"); if (!box) return;
+        const when = t => t ? t.slice(11, 16) : "";
+        if (!searches.length && !views.length) {
+          const lines = web.slice(0, 4).map(e => `<div class="empty">· ${esc(e.summary)}</div>`).join("");
+          box.innerHTML = `<div class="rh"><h2>Your recent activity</h2><small>· loaded from ${first}'s memory</small></div>${lines || '<div class="empty">No website activity yet. Search a product or open one, and it will appear here (and in VANI\'s memory).</div>'}`; return;
+        }
+        box.innerHTML = `<div class="rh"><h2>Your recent activity</h2><small>· loaded from ${first}'s memory · ${web.length} website events</small></div>
+          <div class="cols"><div><h6>Recent searches</h6><div class="chips">${searches.map(x => `<span class="chip" data-q="${esc(x.q)}">🔍 ${esc(x.q)}<small>${when(x.time)}</small></span>`).join("") || '<span class="empty">none yet</span>'}</div></div>
+          <div><h6>Products you viewed</h6><div class="mini">${views.map((v, i) => `<div class="mc" data-i="${i}"><div class="i">${v.p.image ? `<img src="${v.p.image}" alt="">` : initials(v.p.title)}</div><div class="t">${esc(v.p.title)}</div><div class="p">${esc(v.p.price_text || "")}${v.kind === "enquiry" ? " · enquiry sent" : ""}</div></div>`).join("") || '<span class="empty">none yet</span>'}</div></div></div>`;
+        box.querySelectorAll(".chip").forEach(c => { c.onclick = () => { site.querySelector("#q").value = c.dataset.q; search(); }; });
+        box.querySelectorAll(".mc").forEach(c => { c.onclick = () => paintProduct(views[+c.dataset.i].p, views[+c.dataset.i].q); });
+      })();
+      body.querySelector('[data-act="post"]').onclick = () => act(`${who} opened Post Requirement on indiamart.com`, { kind: "dashboard", action: "post_requirement" })
+        .then(() => setTimeout(() => vaniCalls({ source: "dashboard", label: "posting your requirement", topic: "posting a requirement on indiamart.com", reason: `the ${who.toLowerCase()} just opened Post Requirement on indiamart.com and may need help posting it` }), 1500));
+      body.querySelector('[data-act="quotes"]').onclick = () => act(`${who} opened their quotes on indiamart.com${req ? " for " + req : ""}`);
+      armObserver(site);
+      // real images + real product rows for the user's own categories (live indiamart.com search, cached on the server)
+      const rowCats = cats.slice(0, 1);                   // one row for the user's own category…
+      const skeleton = () => [0, 1, 2, 3, 4, 5].map(() => '<div class="pc sk"><div class="pimg"></div><div class="pname">&nbsp;</div></div>').join("");
+      body.querySelector("#rows").innerHTML = rowCats.map(it => `<div class="im-row" data-cat="${esc(it.title)}"><div class="rh"><h2>${esc(it.title)}</h2><a data-q="${esc(it.title)}">View all →</a></div>
+        <div class="strip">${skeleton()}</div></div>`).join("") + `<div id="indRows"></div>`;
+      body.querySelectorAll(".im-row .rh a").forEach(a => { a.onclick = () => { site.querySelector("#q").value = a.dataset.q; search(); }; });
+      // …then the real "Trending on IndiaMART" tiles and "Explore by Industry" rows from www.indiamart.com (different industries)
+      (async () => {
+        let f; try { f = await fetch("/home-feed").then(r => r.json()); } catch (e) { return; }
+        if (!f.trending || lastSite !== s) return;
+        const mine = new Set(cats.map(c => c.title.toLowerCase()));
+        const trend = f.trending.filter(t => !mine.has(t.name.toLowerCase())).slice(0, 6);
+        body.querySelector("#trendTiles").innerHTML = trend.map(t => `<div class="tile" data-label="${esc(t.name)}" data-q="${esc(t.name)}"><span class="seen">👁 seen</span><div class="ph"><img src="${t.image}" alt=""></div><h5>${esc(t.name)}</h5></div>`).join("");
+        body.querySelectorAll("#trendTiles .tile").forEach(t => { t.onclick = () => { site.querySelector("#q").value = t.dataset.q; search(); }; });
+        body.querySelector("#indRows").innerHTML = (f.industries || []).slice(0, 3).map(ind => `<div class="im-row"><div class="rh"><h2>${esc(ind.industry)}</h2></div>
+          <div class="strip">${ind.products.slice(0, 6).map(p => `<div class="pc" data-label="${esc(p.name)}" data-q="${esc(p.name)}"><div class="pimg"><img src="${p.image}" alt="" loading="lazy"></div><div class="pname">${esc(p.name)}</div><div class="pprice">View suppliers →</div></div>`).join("")}</div></div>`).join("");
+        body.querySelectorAll("#indRows .pc").forEach(c => { c.onclick = () => { site.querySelector("#q").value = c.dataset.q; search(); }; });
+        armObserver(site);
+      })();
+      cats.forEach(async (it, i) => {
+        let d; try { d = await fetch(`/search?q=${encodeURIComponent(it.title)}&limit=6`).then(r => r.json()); } catch (e) { return; }
+        if (!d.items || !d.items.length || lastSite !== s) return;
+        const img = d.items.find(x => x.image); const tile = body.querySelector(`.tile[data-q="${CSS.escape(it.title)}"] .ph`);
+        if (img && tile) tile.innerHTML = `<img src="${img.image}" alt="">`;
+        const row = body.querySelector(`.im-row[data-cat="${CSS.escape(it.title)}"]`); if (!row) return;
+        row.querySelector(".strip").innerHTML = d.items.slice(0, 6).map((x, j) => `<div class="pc" data-label="${esc(x.title)}" data-j="${j}">
+            <div class="pimg">${x.image ? `<img src="${x.image}" alt="" loading="lazy">` : initials(x.title)}</div><div class="pname">${esc(x.title)}</div><div class="pprice">${esc(x.price_text)}</div></div>`).join("");
+        row.querySelectorAll(".pc").forEach(c => { c.onclick = () => openProduct(d.items[+c.dataset.j], it.title); });
+        armObserver(site);
+      });
+    };
+    const paintResults = async (q, focusId) => {
+      curQ = q; navPush({ type: "results", q, focusId });
+      $("#url").value = `https://dir.indiamart.com/search.mp?ss=${encodeURIComponent(q).replace(/%20/g, "+")}`;
+      const body = site.querySelector("#siteBody");
+      body.innerHTML = `<div class="sect">Results for “${esc(q)}” <small>loading from indiamart.com…</small></div><div class="grid"><div class="note">Searching the real indiamart.com…</div></div>`;
+      let r, d;
+      try { r = await fetch(`/search?q=${encodeURIComponent(q)}`); d = await r.json(); } catch (e) { d = { detail: String(e) }; }
+      if (!r || !r.ok || !d.items) { body.querySelector(".grid").innerHTML = `<div class="note">Could not load indiamart.com results: ${esc(d.detail || "unknown error")}</div>`; return; }
+      body.innerHTML = `<div class="sect">Results for “${esc(q)}” <small>${d.items.length} real listings from indiamart.com${d.cached ? "" : ` · ${d.fetched_in}s`}</small><span class="back" id="backPicked">← Picked for you</span></div>
+        <div class="grid">${d.items.length ? d.items.map(cardHtml).join("") : '<div class="note">No listings found.</div>'}</div>`;
+      body.querySelector("#backPicked").onclick = paintPicked;
+      wire(d.items);
+      if (focusId) { const j = d.items.findIndex(x => x.display_id === focusId); const el = body.querySelectorAll(".card")[j];
+        if (el) { el.classList.add("focus"); el.scrollIntoView({ block: "center" }); setTimeout(() => el.classList.remove("focus"), 2500); } }
+    };
+    navPaint = { home: paintPicked, results: paintResults, product: paintProduct }; navReset();
+    paintPicked();
+    const search = () => { const q = site.querySelector("#q").value.trim(); if (!q) return; act(`${who} searched "${q}" on indiamart.com`, { kind: "search", q }); paintResults(q); };
     site.querySelector("#qBtn").onclick = search; site.querySelector("#q").addEventListener("keydown", e => { if (e.key === "Enter") search(); });
+    site.scrollTop = 0;
+    return;
   } else {
+    navPaint = {}; navReset();
     site.innerHTML = `
       <div class="im-head"><div class="im-logo">india<span>mart</span> <span style="font-size:12px;font-weight:500;color:#555">Seller · Lead Manager</span></div>
         <div class="im-search"><input id="q" placeholder="Search your enquiries…" /><button id="qBtn">Search</button></div>
@@ -441,19 +762,7 @@ function renderSite(s) {
     const search = () => { const q = site.querySelector("#q").value.trim(); if (q) act(`Seller searched "${q}" in Lead Manager`); };
     site.querySelector("#qBtn").onclick = search; site.querySelector("#q").addEventListener("keydown", e => { if (e.key === "Enter") search(); });
   }
-  // scroll capture: items that come into view AFTER load count as "browsed"
-  if (observer) observer.disconnect();
-  const initial = new Set(); let armed = false;
-  observer = new IntersectionObserver(entries => {
-    entries.forEach(en => {
-      if (!armed) { if (en.isIntersecting) initial.add(en.target); return; }
-      if (en.isIntersecting && !initial.has(en.target) && !en.target.classList.contains("captured")) {
-        en.target._t = setTimeout(() => { en.target.classList.add("captured"); queueSeen(en.target.dataset.label); }, 900);
-      } else if (!en.isIntersecting) { clearTimeout(en.target._t); initial.delete(en.target); }
-    });
-  }, { root: site, threshold: 0.6 });
-  site.querySelectorAll("[data-label]").forEach(el => observer.observe(el));
-  setTimeout(() => { armed = true; }, 600);
+  armObserver(site);
   site.scrollTop = 0;
 }
 
@@ -504,42 +813,124 @@ function caption(m, who) {
   c.scrollTop = 1e6;
 }
 
-function ringtone(on) {
-  if (!on) { clearInterval(ringTimer); ringTimer = null; return; }
-  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
-  const burst = () => { const t = audioCtx.currentTime; [0, 0.6].forEach(off => { [425, 450].forEach(f => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + off); g.gain.exponentialRampToValueAtTime(0.08, t + off + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.4); o.connect(g).connect(audioCtx.destination); o.start(t + off); o.stop(t + off + 0.45); }); }); };
+// ringback = a real network recording (web/ringback.ogg, 400+450 Hz cadence used by Indian and UK networks); the incoming ring stays synthesised
+let ringbackEl = null;
+function ringtone(on, kind = "ring") {
+  clearInterval(ringTimer); ringTimer = null;
+  if (ringbackEl) { ringbackEl.pause(); ringbackEl.currentTime = 0; }
+  if (!on) return;
+  if (kind === "ringback") {
+    ringbackEl = ringbackEl || Object.assign(new Audio("/ringback.ogg"), { loop: true, volume: 0.55, preload: "auto" });
+    ringbackEl.play().catch(() => {}); return;
+  }
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); } catch (e) { return; }
+  const vol = kind === "ringback" ? 0.045 : 0.08;     // ringback = what the caller hears while the other side rings (Indian 400/450 Hz, double burst every 2 s)
+  const freqs = kind === "ringback" ? [400, 450] : [425, 450];
+  const burst = () => { const t = audioCtx.currentTime; [0, 0.6].forEach(off => { freqs.forEach(f => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + off); g.gain.exponentialRampToValueAtTime(vol, t + off + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.4); o.connect(g).connect(audioCtx.destination); o.start(t + off); o.stop(t + off + 0.45); }); }); };
   burst(); ringTimer = setInterval(burst, 2000);
+}
+function pickupClick() {                                   // short click when VANI answers
+  try { const t = audioCtx.currentTime; const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 900; g.gain.setValueAtTime(0.06, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08); o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t + 0.09); } catch (e) {}
 }
 function showScr(id) { ["callIdle", "incoming", "incall", "callDone"].forEach(s => $("#" + s).hidden = s !== id); }
 
-$("#ring").onclick = async () => {
-  if (!user) return;
-  $("#incHint").textContent = ctx && ctx.greeting ? `VANI will say: “${ctx.greeting}”` : "";
+// ---- two call flows. callCtx = why this call happens; the API turns it into VANI's opening lines (POST /active {call}).
+let callCtx = null;
+const firstName = () => user.name.split(" ")[0];
+const labelOf = it => `${it.title}${it.company ? " from " + it.company : ""}`;
+async function setCallIntent(intent) {
+  const r = await fetch("/active", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ glid: user.glid, call: intent }) });
+  return r.json();
+}
+// Flow A — IndiaMART calls the user: an activity raised a help flag (enquiry, WhatsApp help request, dashboard action).
+async function vaniCalls(intent) {
+  if (!user || callBusy()) return false;
+  callCtx = { direction: "outbound", ...intent };
+  const d = await setCallIntent(callCtx);                               // VANI's reason-specific opening line (~1 s)
+  if (!user || callBusy() || lastSite && lastSite.glid !== user.glid) return false;
+  $("#incHint").innerHTML = `About <b style="color:#fff">${esc(intent.label || "your recent activity")}</b>` + (d.call && d.call.greeting ? `<div style="margin-top:10px;color:#cfd6e6">“${esc(d.call.greeting)}”</div>` : "");
   showScr("incoming"); ringtone(true);
   try { await loadWidgetScript(); } catch (e) { toast("Could not load the Sarvam widget script"); }
+  return true;
+}
+// Flow B — the user calls IndiaMART: about one product (Call Now) or the helpline (dial button).
+async function userCalls(intent) {
+  if (!user) return; if (callBusy()) { toast("📞 A call is already in progress"); return; }
+  callCtx = { direction: "inbound", ...intent }; dialT0 = Date.now();
+  showScr("incall"); $("#incall").className = "scr callscr idle ringing"; $("#callStatus").textContent = "Calling IndiaMART… ringing"; $("#timer").textContent = "00:00";
+  $("#caption").innerHTML = `<span class="hint">${intent.product ? "Calling about " + esc(intent.label) + "…" : "Dialling the IndiaMART helpline…"}</span>`;
+  ringtone(true, "ringback");                                          // the caller hears it ring while VANI "picks up" (= Sarvam connects, 2-3 s)
+  await setCallIntent(callCtx);
+  postEvent("voice", intent.product ? `${who()} called VANI about ${intent.topic || intent.label}` : `${who()} called the IndiaMART helpline (VANI)`, { kind: "user_call", source: intent.source, product: intent.product || null });
+  try { await loadWidgetScript(); } catch (e) {}
+  await connectCall();
+}
+const who = () => user.role === "buyer" ? "Buyer" : "Seller";
+$("#dial").onclick = () => userCalls({ source: "dialer", label: "IndiaMART helpline", topic: "the IndiaMART helpline", reason: "the user called the IndiaMART helpline" });
+$("#decline").onclick = () => {
+  ringtone(false); showScr("callIdle"); sysline("📵 Missed call from VANI");
+  if (callCtx) { postEvent("voice", `VANI called ${firstName()} about ${callCtx.topic || callCtx.label || "a recent activity"}; no answer`, { kind: "vani_call", missed: true, source: callCtx.source }); $("#lastCall").textContent = `📵 Missed: VANI called about ${callCtx.label || "your activity"}`; fetch("/active/call", { method: "DELETE" }); callCtx = null; }
 };
-$("#decline").onclick = () => { ringtone(false); showScr("callIdle"); sysline("📵 Missed call from VANI"); };
 $("#accept").onclick = async () => {
   ringtone(false); showScr("incall"); $("#incall").className = "scr callscr idle"; $("#callStatus").textContent = "Connecting…"; $("#timer").textContent = "00:00";
   $("#caption").innerHTML = `<span class="hint">VANI loads ${user.role}.md before her first word…</span>`;
-  await fetch(`/active`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ glid: user.glid }) });
-  try { await widgetStart(); } catch (e) { $("#callStatus").textContent = "⚠ " + e.message; return; }
+  if (callCtx) postEvent("voice", `VANI called ${firstName()} about ${callCtx.topic || callCtx.label || "a recent activity"}; ${firstName()} picked up`, { kind: "vani_call", source: callCtx.source, product: callCtx.product || null });
+  await connectCall();
+};
+let dialT0 = 0, waPoll = null, waKnown = 0, waPollUntil = 0;
+async function waPollOnce() {
+  if (!user) return;
+  let t; try { t = await fetch(`/whatsapp/${user.glid}`).then(r => r.json()); } catch (e) { return; }
+  if (!Array.isArray(t)) return;
+  if (t.length > waKnown) {
+    t.slice(waKnown).forEach(m => { bubble((m.image ? `<img class="pic" src="${m.image}" alt="">` : "") + linkify(esc(m.text)).replace(/\n/g, "<br>"), m.from === "user" ? "out" : "in"); if (m.via === "call") sysline("📲 Sent by VANI during the call"); });
+    waKnown = t.length; knownEvents++; refreshMemory(true, "✔ whatsapp (sent by VANI) → " + user.role + ".md");
+  }
+  if (!callTimer && Date.now() > waPollUntil) { clearInterval(waPoll); waPoll = null; }
+}
+$("#waRefresh").onclick = async () => {
+  if (!user) return; const b = $("#waRefresh"); b.classList.add("spin");
+  await waPollOnce(); b.classList.remove("spin");   // silent when nothing is new
+};
+async function startWaPoll() {
+  try { const t = await fetch(`/whatsapp/${user.glid}`).then(r => r.json()); waKnown = Array.isArray(t) ? t.length : 0; } catch (e) { waKnown = 0; }
+  clearInterval(waPoll); waPoll = setInterval(waPollOnce, 3000);
+}
+async function connectCall() {
+  startWaPoll();
+  const inbound = callCtx && callCtx.direction === "inbound";
+  muted = false; $("#muteBtn").classList.remove("on"); $("#muteBtn").lastChild.textContent = "mute";
+  try { await widgetStart(); } catch (e) { ringtone(false); $("#callStatus").textContent = "⚠ " + e.message; return; }
   let connected = false;
   for (let i = 0; i < 100; i++) {                       // wait up to ~15 s for Sarvam to connect
     await sleep(150); const st = widgetState();
     if (st === "connected") { connected = true; break; }
-    if (st === "error") { $("#callStatus").textContent = "⚠ Sarvam could not connect (check mic / embed key)"; return; }
+    if (st === "error") { ringtone(false); $("#callStatus").textContent = "⚠ Sarvam could not connect (check mic / embed key)"; return; }
   }
-  if (!connected) { $("#callStatus").textContent = "⚠ no answer from Sarvam"; return; }
-  $("#incall").className = "scr callscr live"; $("#callStatus").textContent = "VANI · IndiaMART"; callT0 = Date.now();
+  if (!connected) { ringtone(false); $("#callStatus").textContent = "⚠ no answer from Sarvam"; return; }
+  if (inbound) { const left = 4000 - (Date.now() - dialT0); if (left > 0) await sleep(left); }   // let it ring at least ~4 s, like a real pickup
+  ringtone(false); pickupClick();
+  $("#incall").className = "scr callscr oncall"; $("#callStatus").textContent = inbound ? "VANI answered" : "VANI · IndiaMART"; callT0 = Date.now();
+  if (inbound) setTimeout(() => { if (callTimer) $("#callStatus").textContent = "IndiaMART helpline · VANI"; }, 1800);
   $("#caption").innerHTML = `<span class="hint">Memory loaded. Listen…</span>`;
+  $("#lastCall").textContent = callCtx ? (callCtx.direction === "inbound" ? `Last: you called VANI about ${callCtx.label}` : `Last: VANI called you about ${callCtx.label}`) : "";
   callTimer = setInterval(() => { const s = Math.floor((Date.now() - callT0) / 1000); $("#timer").textContent = `${String(s / 60 | 0).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; if (widgetState() !== "connected") endCall(false); }, 500);
-};
+}
 $("#endBtn").onclick = () => endCall(true);
-$("#muteBtn").onclick = () => toast("Mute is visual only in this demo");
+let muted = false;
+$("#muteBtn").onclick = () => {
+  muted = !muted; $("#muteBtn").classList.toggle("on", muted); $("#muteBtn").lastChild.textContent = muted ? "unmute" : "mute";
+  try { (widget && widget.shadowRoot ? [...widget.shadowRoot.querySelectorAll("audio, video")] : []).forEach(m => { if (m.srcObject) m.srcObject.getAudioTracks().forEach(t => { t.enabled = !muted; }); }); } catch (e) {}
+  try { navigator.mediaDevices.__vaniStreams = navigator.mediaDevices.__vaniStreams || []; navigator.mediaDevices.__vaniStreams.forEach(st => st.getAudioTracks().forEach(t => { t.enabled = !muted; })); } catch (e) {}
+  if (muted) $("#callStatus").textContent = "Muted"; else $("#callStatus").textContent = callCtx && callCtx.direction === "inbound" ? "IndiaMART helpline · VANI" : "VANI · IndiaMART";
+};
+// keep a handle on microphone streams the Sarvam widget opens, so mute can really silence the mic
+(() => { const md = navigator.mediaDevices; if (!md || !md.getUserMedia) return; const orig = md.getUserMedia.bind(md);
+  md.getUserMedia = async c => { const st = await orig(c); (md.__vaniStreams = md.__vaniStreams || []).push(st); if (muted) st.getAudioTracks().forEach(t => { t.enabled = false; }); return st; }; })();
+$("#incall").addEventListener("click", e => { const k = e.target.closest(".key.dummy"); if (k) toast(`${k.textContent.trim()} is not available in this demo`); });
 $("#doneBack").onclick = () => showScr("callIdle");
 function endCall(byUser) {
-  clearInterval(callTimer); if (byUser) widgetStop();
+  clearInterval(callTimer); callTimer = null; ringtone(false); waPollUntil = Date.now() + 90000; if (byUser) widgetStop(); callCtx = null; fetch("/active/call", { method: "DELETE" }).catch(() => {});
   showScr("callDone"); $("#doneDur").textContent = `Duration ${$("#timer").textContent}`;
   $("#doneState").className = "st"; $("#doneState").textContent = "🧠 VANI is saving this call to memory…";
   sysline(`📞 Call with VANI ended · ${$("#timer").textContent}`);
@@ -586,7 +977,7 @@ $("#url").addEventListener("keydown", e => { if (e.key === "Enter" && mode === "
 window.addEventListener("message", e => {
   const d = e.data || {};
   if (d.vani === "url" && mode === "live") { $("#url").value = d.href; }
-  else if (d.vani === "event") { toast("📝 " + d.summary); const f = $("#fresh"); f.className = "fresh busy"; f.textContent = `web → ${user.role}.md…`; setTimeout(pollOnce, 2500); }
+  else if (d.vani === "event") { const f = $("#fresh"); f.className = "fresh busy"; f.textContent = `web → ${user.role}.md…`; setTimeout(pollOnce, 2500); }
 });
 async function pollOnce() { if (!user) return; const ev = await fetch(`/events/${user.glid}`).then(r => r.json()).catch(() => null); if (ev && ev.length > knownEvents) { knownEvents = ev.length; refreshMemory(true, "✔ web → " + user.role + ".md"); } else setTimeout(pollOnce, 1500); }
 setMode(mode);
@@ -596,7 +987,7 @@ setInterval(async () => { if (!user || pollTimer) return; const ev = await fetch
 
 // deep link: /demo#95568576  (dev: #95568576&scr=incoming|incall|callDone shows a call screen; &mem opens the drawer)
 const hash = new URLSearchParams(location.hash.slice(1).replace(/^(\d+)/, "glid=$1"));
-selectUser(USERS.some(u => u.glid === Number(hash.get("glid"))) ? Number(hash.get("glid")) : USERS[0].glid).then(() => { if (hash.get("scr")) showScr(hash.get("scr")); if (hash.has("mem")) $("#brainBtn").click(); if (hash.has("live")) setMode("live"); });
+selectUser(USERS.some(u => u.glid === Number(hash.get("glid"))) ? Number(hash.get("glid")) : USERS[0].glid).then(() => { if (hash.get("scr")) { showScr(hash.get("scr")); if (hash.get("state") === "oncall") { $("#incall").className = "scr callscr oncall"; $("#callStatus").textContent = "IndiaMART helpline · VANI"; $("#timer").textContent = "00:10"; $("#caption").innerHTML = '<div class="a"><b>VANI:</b> नमस्ते Aarti, IndiaMART helpline में आपका स्वागत है।</div>'; } } if (hash.has("mem")) $("#brainBtn").click(); if (hash.has("live")) setMode("live"); });
 </script>
 </body>
 </html>

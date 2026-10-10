@@ -14,12 +14,14 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import PlainTextResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -32,6 +34,26 @@ from app.sources.buyer import _all_contexts as _buyer_contexts
 from app.sources.seller import _csv as _seller_csv
 
 app = FastAPI(title="VANI Context API", version="0.1")
+
+
+@app.exception_handler(RequestValidationError)
+async def _log_validation(request: Request, exc: RequestValidationError):
+    """A 422 from a Sarvam tool is otherwise invisible: log the raw body so the tool's body shape can be fixed."""
+    body = (await request.body())[:600]
+    entry = {"time": datetime.now().isoformat(timespec="seconds"), "method": request.method, "path": request.url.path,
+             "content_type": request.headers.get("content-type"), "body": body.decode("utf-8", "replace"), "errors": [str(e) for e in exc.errors()[:3]]}
+    _LAST_422.append(entry); del _LAST_422[:-10]
+    print(f"[422] {entry}", flush=True)
+    return JSONResponse(status_code=422, content={"detail": exc.errors()[:3], "spoken": "Details could not be sent right now; they have been noted."})
+
+
+_LAST_422: list[dict] = []
+
+
+@app.get("/debug/422")
+def last_422():
+    """Last rejected request bodies (to see exactly what a Sarvam tool sends)."""
+    return _LAST_422
 
 # The demo page frames the real indiamart.com and a Chrome extension there posts events to us from another origin.
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
@@ -168,16 +190,114 @@ def resolve_uid(uid: str) -> int | None:
 ACTIVE_FILE = OUT_DIR / "_active.json"
 
 
+class CallIntent(BaseModel):
+    """Why the NEXT call happens, set by the demo page just before it rings / dials.
+    outbound = IndiaMART (VANI) calls the user about a flag (enquiry, WhatsApp help request, dashboard action);
+    inbound  = the user calls IndiaMART: about one product (Call Now on a card) or the general helpline (dialer)."""
+    direction: str = Field(..., pattern="^(inbound|outbound)$")
+    source: str | None = None       # enquiry | whatsapp | dashboard | product | dialer
+    reason: str | None = None       # one English line for the agent and the greeting writer
+    label: str | None = None        # short human label shown on the phone
+    product: dict | None = None     # product card (title, company, city, price_text, ...) when the call is about one
+
+
 class Active(BaseModel):
     glid: int
+    call: CallIntent | None = None
+
+
+CALL_LINES_PROMPT = """You write the first words of a phone call between VANI (IndiaMART's voice assistant) and a {role} named {name}.
+{situation}
+Latest things in the {role}'s memory (newest first):
+{latest}
+
+Write ONLY a JSON object with two keys:
+- "greeting": VANI's very first sentence(s), in {language}{script}, under 30 words, entirely in that language (Hindi means Devanagari Hindi sentences with only product/brand names in English, never full English sentences). It starts by greeting {name} BY NAME (e.g. "नमस्ते {name}, …"). {greeting_rule}
+- "opener": the next thing VANI says after the {role} responds, Hinglish in Roman script, under 25 words: {opener_rule}
+Facts only from the lines above. No prices unless given above. Never invent names, dates or numbers."""
+
+
+def _call_lines(glid: int, role: str, name: str, intent: CallIntent) -> dict:
+    """greeting + opener + a call-card line for one specific call. LLM with a template fallback."""
+    language = get_language(glid)
+    name = name.split()[0] if role == "buyer" and name else name   # a person is greeted by first name, a seller by company name
+    p = intent.product or {}
+    ptxt = ""
+    if p:
+        ptxt = f"{p.get('title', '')}" + (f" from {p.get('company')}" if p.get("company") else "") + (f", {p.get('city')}" if p.get("city") else "") + (f" ({p.get('price_text')})" if p.get("price") else "")
+    who = "buyer" if role == "buyer" else "seller"
+    if intent.direction == "outbound":
+        situation = f"VANI is CALLING the {who} (outbound call from IndiaMART). Reason: {intent.reason or 'a recent activity that may need help'}."
+        greeting_rule = f"VANI says who is calling (VANI from IndiaMART), names the reason in a few words, and asks if this is a good time."
+        opener_rule = "offer concrete help with exactly that reason (e.g. share quotes, connect to the seller, fix the issue) and ask one question."
+        card = f"THIS CALL: VANI (IndiaMART) called the {who} because: {intent.reason}. Stay on that topic; help with it first."
+        g_fb = f"नमस्ते {name}, मैं IndiaMART से VANI बोल रही हूँ। {('आपकी ' + ptxt + ' की enquiry') if ptxt else 'आपकी हाल की request'} के बारे में call किया है, अभी बात कर सकते हैं?"
+        o_fb = f"Aapne abhi {ptxt or 'ek request'} ke liye enquiry bheji thi, main best quotes dilwane mein help kar sakti hoon. Quantity kitni chahiye?"
+    elif intent.source == "product" and p:
+        situation = f"The {who} has CALLED IndiaMART (inbound) by pressing Call Now on this product: {ptxt}."
+        greeting_rule = "VANI welcomes the caller to IndiaMART, says it can see they are calling about that product (name it), and asks what they want to know."
+        opener_rule = "stay on that product: ask quantity / delivery city, or offer to get the best price from that supplier."
+        card = f"THIS CALL: the {who} called IndiaMART about this product: {ptxt}. Keep the whole call about this product and its supplier."
+        g_fb = f"नमस्ते {name}, IndiaMART में आपका स्वागत है। आप {p.get('title', '')} के बारे में call कर रहे हैं, बताइए क्या जानना है?"
+        o_fb = f"{p.get('title', '')} ke liye aapko kitni quantity chahiye, aur delivery kahan honi hai?"
+    else:
+        situation = f"The {who} has CALLED the IndiaMART helpline (inbound, no specific topic chosen)."
+        greeting_rule = "VANI welcomes the caller to the IndiaMART helpline, recalls their most recent activity in a few words (from the lines above), and asks whether they need help with that or something else."
+        opener_rule = "ask one short question to find out what they need help with today."
+        card = f"THIS CALL: the {who} called the IndiaMART helpline. First recall their latest activity in one line, then ask what they need help with."
+        g_fb = f"नमस्ते {name}, IndiaMART helpline में आपका स्वागत है। बताइए, आज किस चीज़ में help चाहिए?"
+        o_fb = "Aap kis product ya enquiry ke baare mein baat karna chahte hain?"
+    latest = [f"- {e.get('time', '')} via {e.get('channel', '')}: {e.get('summary', '')}" for e in list_events(glid)[-4:][::-1]] or ["- (nothing yet)"]
+    script = (" (Devanagari script, product and brand names in English letters; polite gender-neutral forms only: 'आप कर रहे हैं', "
+              "'चाहेंगे', 'कैसे हैं' - never guess the person's gender from the name)") if language == "Hindi" else ""
+    out = {"greeting": g_fb, "opener": o_fb, "card_line": card, "source": "fallback"}
+    try:
+        from sarvamai import SarvamAI
+        client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
+        r = client.chat.completions(model="sarvam-105b", temperature=0.2, reasoning_effort=None, max_tokens=300,
+                                    messages=[{"role": "user", "content": CALL_LINES_PROMPT.format(
+                                        role=who, name=name, situation=situation, latest="\n".join(latest), language=language, script=script,
+                                        greeting_rule=greeting_rule, opener_rule=opener_rule)}])
+        text = (r.choices[0].message.content or "").strip()
+        data = json.loads(text[text.find("{"): text.rfind("}") + 1])
+        if data.get("greeting"):
+            out.update(greeting=data["greeting"].strip(), opener=(data.get("opener") or o_fb).strip(), source="llm")
+    except Exception as e:  # noqa: BLE001
+        out["error"] = str(e)[:80]
+    out["greeting"] = _ensure_name(out["greeting"], name, language)
+    return out
+
+
+def _ensure_name(greeting: str, name: str, language: str) -> str:
+    """The first line must greet the user by name when the name is known (user rule). If the LLM left it out,
+    the name is put right after the opening word."""
+    first = (name or "").split()[0] if name else ""
+    if not first or first.lower() in ("ji", "glid") or first.lower() in greeting.lower():
+        return greeting
+    hello = "Hello" if language == "English" else "नमस्ते"
+    body = re.sub(r"^(नमस्ते|नमस्कार|namaste|hello|hi|hey)[,!।]?\s*", "", greeting.strip(), flags=re.I)
+    return f"{hello} {first}, {body[0].lower() + body[1:] if language == 'English' and body else body}"
 
 
 @app.post("/active")
 def set_active(a: Active):
-    role_of(a.glid)  # 404 for unknown GLIDs
+    role = role_of(a.glid)  # 404 for unknown GLIDs
     data = {"glid": a.glid, "set_at": datetime.now().isoformat(timespec="seconds")}
+    if a.call:
+        t0 = time.perf_counter()
+        ctx = get_context(a.glid)
+        lines = _call_lines(a.glid, role, ctx["name"], a.call)
+        data["call"] = a.call.model_dump() | lines | {"set_at": data["set_at"], "seconds": round(time.perf_counter() - t0, 2)}
     ACTIVE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    ACTIVE_FILE.write_text(json.dumps(data))
+    ACTIVE_FILE.write_text(json.dumps(data, ensure_ascii=False))
+    return data
+
+
+@app.delete("/active/call")
+def clear_call_intent():
+    data = get_active()
+    data.pop("call", None)
+    ACTIVE_FILE.write_text(json.dumps(data, ensure_ascii=False))
     return data
 
 
@@ -197,13 +317,21 @@ def get_context_q(glid: int | None = None, phone: str | None = None, uid: str | 
         if g is not None:
             glid = g
             uid = None  # resolved, skip the active-GLID fallback below
+    intent = None
     if uid is not None and get_active().get("glid"):  # agent call (sends uid=) with no usable uid -> page's GLID
-        glid = get_active()["glid"]
+        active = get_active()
+        glid = active["glid"]
+        intent = active.get("call")
     if glid is None and phone:
         glid = glid_from_phone(phone)
     if glid is None:
         raise HTTPException(status_code=400, detail="pass glid, phone or uid")
-    return get_context(glid, rebuild)
+    res = get_context(glid, rebuild)
+    if intent and intent.get("greeting"):  # this call has a known reason: VANI opens on it, and the card says what kind of call it is
+        res = res | {"greeting": intent["greeting"], "opener": intent["opener"], "call_intent": intent,
+                     "call_card": intent["card_line"] + "\n" + res["call_card"]}
+        data = get_active(); data.pop("call", None); data["last_call"] = intent; ACTIVE_FILE.write_text(json.dumps(data, ensure_ascii=False))  # one call only; kept as last_call for mid-call tools
+    return res
 
 
 # ------------------------------------------------------------------ mid-call: older history on demand
@@ -211,8 +339,17 @@ HISTORY_PROMPT = """You help VANI, IndiaMART's voice agent, answer a question du
 Use ONLY the memory file and raw data below. Answer in {language}{script}, in 1 or 2 short spoken sentences
 (under 40 words), no markdown, no lists. Speak TO the {role} as "aap" (second person), never "the {role}". Say prices and dates the way a person says them. If the answer is not
 in the data, say that this detail is not available right now and offer to note it. Never invent facts.
+If the question is about what the {role} just did or sent (WhatsApp, website, enquiry, "just now"), answer from
+LIVE EVENTS (newest first; today is {today}) and the WHATSAPP CHAT below: say what they did or wrote, then one
+short follow-up question about it.
 
 QUESTION: {question}
+
+LIVE EVENTS (newest first):
+{live}
+
+WHATSAPP CHAT (latest turns):
+{wa}
 
 MEMORY FILE:
 {md}
@@ -235,13 +372,17 @@ def get_history(glid: int, question: str = ""):
     ordered = {k: ev[k] for k in first if k in ev} | {k: v for k, v in ev.items() if k not in first and k != "replies"}
     raw = json.dumps(ordered, ensure_ascii=False)[:12000]
     script = " (Devanagari script, product and brand names in English letters)" if language == "Hindi" else ""
+    live_rows = list_events(glid)[-5:][::-1]  # read fresh: includes anything posted during the call
+    live = "\n".join(f"- {e.get('time', '')} via {e.get('channel', '')}: {e.get('summary', '')}" for e in live_rows) or "(none)"
+    wa = "\n".join(f"{'USER' if t['from'] == 'user' else 'BOT'}: {t['text']}" for t in _wa_thread(glid)[-6:]) or "(none)"
     try:
         from sarvamai import SarvamAI
         client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
         r = client.chat.completions(
             model="sarvam-105b", temperature=0.2, reasoning_effort=None, max_tokens=250,
             messages=[{"role": "user", "content": HISTORY_PROMPT.format(
-                role=role, language=language, script=script, question=question or "summarise the older history", md=md, raw=raw)}])
+                role=role, language=language, script=script, question=question or "summarise the older history", md=md, raw=raw,
+                live=live, wa=wa, today=datetime.now().strftime("%d %B %Y %H:%M"))}])
         answer = (r.choices[0].message.content or "").strip()
     except Exception as e:  # noqa: BLE001
         answer = ""
@@ -338,14 +479,38 @@ def list_events(glid: int):
 @app.delete("/events/{glid}")
 def reset_events(glid: int):
     """Demo reset: drop the live events of this GLID and rebuild the memory from the dataset only."""
-    f = OUT_DIR / str(glid) / "events.jsonl"
-    if f.exists():
-        f.unlink()
+    for name in ("events.jsonl", "whatsapp_thread.json"):
+        f = OUT_DIR / str(glid) / name
+        if f.exists():
+            f.unlink()
     r = build_context(glid)
     return {"ok": True, "glid": glid, "opener": _parse_md(r["md"])["opener"]}
 
 
 # ------------------------------------------------------------------ demo page (/demo): website items + WhatsApp
+@app.get("/search")
+def live_search(q: str, limit: int = 12):
+    """Real indiamart.com search results for the emulated website panel (parsed from the mobile site's
+    embedded JSON). Nothing invented: real listings, real suppliers, real prices."""
+    from app.sources.im_search import search_indiamart
+    if not q.strip():
+        raise HTTPException(status_code=400, detail="empty query")
+    try:
+        return search_indiamart(q, limit=limit)
+    except Exception as e:  # noqa: BLE001 — network / parse failure: the page shows a note, nothing crashes
+        raise HTTPException(status_code=502, detail=f"indiamart.com search unavailable: {str(e)[:120]}") from e
+
+
+@app.get("/home-feed")
+def home_feed_route():
+    """Real www.indiamart.com home sections (trending tiles, industry rows) for the emulated home page."""
+    from app.sources.im_home import home_feed
+    try:
+        return home_feed()
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"indiamart.com home unavailable: {str(e)[:120]}") from e
+
+
 @app.get("/site/{glid}")
 def site_items(glid: int):
     """What the emulated IndiaMART website shows this user. Buyer: the categories they searched (indiamart.com).
@@ -376,24 +541,182 @@ def site_items(glid: int):
 class WhatsAppMsg(BaseModel):
     text: str
     language: str | None = None
+    image: str | None = None    # product photo sent with the message (demo: WhatsApp card from the website)
+    product: str | None = None  # product name, kept with the thread for display
 
 
-WA_REPLY_PROMPT = """You are IndiaMART's WhatsApp assistant replying to a {role}. The {role} just wrote the message below.
-Reply in the SAME language and script as the message (Hinglish in Latin letters if they wrote Hinglish), in 1 or 2 short
-WhatsApp lines (under 35 words), no markdown, no lists. Acknowledge precisely what they said using the memory below,
-confirm it is noted, and say VANI will follow up by call if needed. Never invent prices, names or dates.
+WA_REPLY_PROMPT = """You are IndiaMART's WhatsApp assistant chatting with a {role} ({name}). You have their memory card and the
+recent chat. Write the NEXT reply only.
 
-MESSAGE: {text}
+How to reply:
+- Same language and script as their last message (Hinglish in Latin letters if they wrote Hinglish). 1 or 2 short
+  WhatsApp lines, under 35 words, no markdown, no lists, no greeting if the chat has already started.
+- The reply is ABOUT THEIR LAST MESSAGE. First acknowledge exactly what they said or asked, repeating the key
+  words (product, quantity, question). Answer a question directly. Do NOT bring up items from the memory card
+  unless they relate to this message or the user asks about them.
+- Then ask ONE useful next question or offer ONE concrete next step, so the conversation moves forward:
+  someone who wants to buy something (even a seller writing "I want X"): quantity, delivery city, budget or specs,
+  then "shall I connect you to verified sellers?";
+  a seller talking about their own enquiries: which buyer to reply to, their rate or stock, "shall I send it?".
+- Once quantity and city are known, do not ask for them again; confirm and offer the next step.
+- If they ask when something will happen, give a concrete answer: sellers' quotes come on this chat within a few
+  hours; nothing is pending on them except the details you still need. NEVER say that VANI or anyone will call
+  them later, and never say "noted, we will follow up".
+- If they agree to a next step ("haan", "connect karo", "bhej do"), confirm it is done in one line and say what
+  comes next (e.g. "verified sellers ko bhej diya, unke quotes isi chat par aayenge"; no made-up counts). Do not ask
+  again for something they already gave or declined.
+- Output ONLY the message text to send, nothing else: no reasoning, no labels, no quotes.
+- Never invent prices, names, dates or sellers. Address them by name at most once.
+- The topic of the chat is whatever the {role} is talking about in the RECENT CHAT below (e.g. a product they want).
+  Keep that topic; details like quantity or city they give belong to THAT topic, not to products in the background.
 
+RECENT CHAT (oldest first):
+{thread}
+{role_upper}: {text}
+
+BACKGROUND (memory card, only for when the chat touches it):
+{card}
+
+ASSISTANT:"""
+
+
+HELP_FLAG = re.compile(r"\b(help|issue|problem|complain\w*|refund|urgent|wrong|not (?:received|working|delivered|reply\w*)|call me|call back|callback|"
+                       r"madad|dikkat|samasya|shikayat|baat karni|baat karo|phone karo|call karo|galat|nahi (?:mila|aaya|aayi|pahuncha))\b", re.I)
+
+HELP_NEGATED = re.compile(r"\b(?:koi|no|nahi|nhi|without)\s+(?:dikkat|problem|issue|samasya|help)\b|\b(?:dikkat|problem|issue|samasya)\s+(?:nahi|nhi|nai|nahin)\b", re.I)
+
+
+def needs_help(text: str) -> bool:
+    """WhatsApp text that asks for help / reports a problem -> VANI calls back. 'koi dikkat nahi' is not a request."""
+    return bool(HELP_FLAG.search(text)) and not HELP_NEGATED.search(text)
+
+
+def _wa_thread_path(glid: int) -> Path:
+    return OUT_DIR / str(glid) / "whatsapp_thread.json"
+
+
+def _wa_thread(glid: int) -> list[dict]:
+    p = _wa_thread_path(glid)
+    return json.loads(p.read_text()) if p.exists() else []
+
+
+# NOTE: declared before /whatsapp/{glid}, otherwise FastAPI matches 'send' as a GLID and answers 422.
+class WaSend(BaseModel):
+    glid: int
+    request: str = Field(..., examples=["seller contact details for the Card Pen Drive", "the quotes I asked for"])
+
+
+WA_SEND_PROMPT = """VANI (IndiaMART's voice assistant) is on a call with a {role} named {name} and promised to send something on WhatsApp.
+What VANI was asked to send: {request}
+
+Data available (facts only; never invent a name, number, price or link):
+PRODUCTS / SUPPLIERS the {role} is dealing with right now (newest first){live_note}:
+{products}
+RECENT ENQUIRIES (for a seller: buyers who enquired):
+{enquiries}
 MEMORY CARD:
 {card}
+
+Write ONLY a JSON object with two keys:
+- "message": the WhatsApp message VANI sends, {lang_rule}. Start with one short line saying this is what was discussed on the call,
+  then the details as short lines (one fact per line, use emoji bullets sparingly: 📦 product, 💰 price, 🏢 supplier/buyer, 📍 city,
+  ⭐ rating, 🔗 link). Include every relevant link given above. Under 110 words. End with one short line offering the next step.
+  If the data does not contain what was asked, send what is available and say the rest will follow.
+- "spoken": one sentence VANI says on the call right after sending, in {spoken_lang}, under 18 words, confirming it is sent on WhatsApp.
 """
+
+
+@app.post("/whatsapp/send")
+def whatsapp_send(m: WaSend):
+    """Called by the agent's run tool `send_whatsapp` mid-call: VANI composes a WhatsApp message from the user's memory
+    (products viewed / called about, enquiries, links) and it lands in the WhatsApp thread + the memory as a live event."""
+    glid = m.glid
+    role = role_of(glid)
+    ctx = get_context(glid)
+    language = get_language(glid)
+    # products this user touched recently (events with a product card), newest first, plus the product of the current call
+    seen, products = set(), []
+    active = get_active()
+    cand = []
+    lc = active.get("last_call") or active.get("call") or {}
+    if lc.get("product"):
+        cand.append(lc["product"])
+    for e in reversed(list_events(glid)):
+        p = (e.get("meta") or {}).get("product")
+        if p:
+            cand.append(p)
+    for p in cand:
+        k = p.get("display_id") or p.get("title")
+        if k and k not in seen:
+            seen.add(k); products.append(p)
+        if len(products) == 4:
+            break
+    # The request may name a product the user only TALKED about (never clicked): then no card exists in memory.
+    # Ask the LLM which product is meant; if no known card matches it, fetch real listings from indiamart.com now.
+    live_note = ""
+    try:
+        from sarvamai import SarvamAI
+        from app.sources.im_search import search_indiamart
+        client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
+        r = client.chat.completions(model="sarvam-105b", temperature=0.0, reasoning_effort=None, max_tokens=30,
+                                    messages=[{"role": "user", "content": "From this request, give ONLY the product to search on IndiaMART "
+                                               "(2-5 words, English, e.g. '7.5 KVA diesel generator'), or NONE if no product is named.\n"
+                                               f"Request: {m.request}\nRecent memory lines: " + " | ".join(e.get("summary", "")[:80] for e in list_events(glid)[-4:])}])
+        want = (r.choices[0].message.content or "").strip().strip('"').splitlines()[0]
+        words = [w for w in re.findall(r"[a-z0-9]{3,}", want.lower()) if w not in ("the", "and", "for", "with")]
+        known = " ".join((p.get("title") or "").lower() for p in products)
+        if want.upper() != "NONE" and words and not any(w in known for w in words):
+            res = search_indiamart(want, limit=3)
+            if res["items"]:
+                products = res["items"][:3] + products
+                live_note = f" (LIVE LISTINGS for '{want}' found on indiamart.com just now are listed FIRST; use them for this request)"
+    except Exception as e:  # noqa: BLE001
+        live_note = ""
+    ptxt = "\n".join(
+        f"- {p.get('title')} | price {p.get('price_text') or 'on request'} | supplier {p.get('company') or '-'}, {p.get('city') or '-'}"
+        + (f" | rating {p.get('rating')} ({p.get('rating_count')} reviews)" if p.get("rating") else "")
+        + (f" | GST verified" if p.get("gst_verified") else "") + (f" | product link {p.get('url')}" if p.get("url") else "")
+        + (f" | supplier page {str(p.get('supplier_url')).split('?')[0]}" if p.get("supplier_url") else "") for p in products) or "- (none)"
+    ev = json.loads((OUT_DIR / str(glid) / "events.json").read_text())
+    enq = "\n".join(f"- {e.get('date')}: {e.get('product')} from {e.get('buyer_company') or 'a buyer'}, {e.get('buyer_city') or ''}"
+                     + (f' | "{e.get("message")}"' if e.get("message") else "") for e in (ev.get("enquiries") or [])[:5]) or "- (none)"
+    lang_rule = ("in Hinglish written in Roman letters (the way Indian business people type on WhatsApp)" if language == "Hindi"
+                 else f"in simple {language}")
+    spoken_lang = ("Hindi in Devanagari script with product names in English letters" if language == "Hindi" else language)
+    message, spoken = "", ""
+    try:
+        from sarvamai import SarvamAI
+        client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
+        r = client.chat.completions(model="sarvam-105b", temperature=0.2, reasoning_effort=None, max_tokens=500,
+                                    messages=[{"role": "user", "content": WA_SEND_PROMPT.format(
+                                        role=role, name=ctx["name"], request=m.request, products=ptxt, enquiries=enq,
+                                        card=ctx["call_card"], lang_rule=lang_rule, spoken_lang=spoken_lang, live_note=live_note)}])
+        text = (r.choices[0].message.content or "").strip()
+        data = json.loads(text[text.find("{"): text.rfind("}") + 1])
+        message, spoken = (data.get("message") or "").strip(), (data.get("spoken") or "").strip()
+    except Exception as e:  # noqa: BLE001
+        message = ""
+    if not message:  # deterministic fallback from the first product
+        p = products[0] if products else None
+        message = (f"Namaste {ctx['name']}, call par jo baat hui uski details:\n📦 {p.get('title')}\n💰 {p.get('price_text') or 'price on request'}\n"
+                   f"🏢 {p.get('company') or '-'}, {p.get('city') or ''}" + (f"\n🔗 {p.get('url')}" if p.get("url") else "") + "\nKoi aur help chahiye to yahin reply karein."
+                   if p else f"Namaste {ctx['name']}, call par jo baat hui, uski details hum jald hi yahin bhej denge.")
+        spoken = spoken or ("मैंने details WhatsApp पर भेज दी हैं, देख लीजिए।" if language == "Hindi" else "I have sent the details on WhatsApp.")
+    image = products[0].get("image") if products and products[0].get("image") else None
+    turn = {"from": "bot", "text": message, "via": "call", "time": datetime.now().strftime("%Y-%m-%d %H:%M")} | ({"image": image, "product": products[0].get("title")} if image else {})
+    thread = _wa_thread(glid) + [turn]
+    _wa_thread_path(glid).parent.mkdir(parents=True, exist_ok=True)
+    _wa_thread_path(glid).write_text(json.dumps(thread[-20:], ensure_ascii=False))
+    first = message.splitlines()[0][:120]
+    r = post_event(glid, Event(channel="whatsapp", summary=f"VANI sent on WhatsApp during the call: {first}", meta={"kind": "vani_whatsapp", "request": m.request}))
+    return {"ok": True, "glid": glid, "sent": True, "message": message, "spoken": spoken, "image": image,
+            "freshness_seconds": r.get("freshness_seconds")}
 
 
 @app.post("/whatsapp/{glid}")
 def whatsapp_message(glid: int, m: WhatsAppMsg):
-    """Emulated WhatsApp: the user's message becomes a live event (memory rebuilt), then a short bot reply is written
-    from the fresh memory. Returns the reply, the new opener/greeting and freshness seconds."""
+    """Emulated WhatsApp: the user's message becomes a live event (memory rebuilt), then the bot answers from the fresh
+    memory and the recent chat thread. Returns the reply, the new opener/greeting and freshness seconds."""
     role = role_of(glid)
     who = "Buyer" if role == "buyer" else "Seller"
     text = m.text.strip()
@@ -401,19 +724,45 @@ def whatsapp_message(glid: int, m: WhatsAppMsg):
         raise HTTPException(status_code=400, detail="empty message")
     r = post_event(glid, Event(channel="whatsapp", summary=f"{who} wrote on WhatsApp: {text}", language=m.language))
     ctx = get_context(glid)
+    thread = _wa_thread(glid)[-8:]
+    thread_txt = "\n".join(f"{who.upper() if t['from'] == 'user' else 'ASSISTANT'}: {t['text']}" for t in thread) or "(start of chat)"
+    # The memory card is shown to the bot on the first message, and later only when the message touches it
+    # (enquiries, buyers, rates, or a product named in the card); otherwise the model kept pitching old enquiries.
+    card = ctx["call_card"]
+    card_words = {w for w in re.findall(r"[a-z]{5,}", card.lower())}
+    msg_words = set(re.findall(r"[a-z]{5,}", text.lower()))
+    touches = bool(re.search(r"enquir|buyer|lead|rate|quote|memory|pehle|earlier|last time|yaad", text, re.I)) or bool(card_words & msg_words - {"indiamart", "whatsapp", "chahiye", "please"})
+    if not touches:  # only who they are; the model otherwise pitches old enquiries instead of answering
+        card = card.splitlines()[0] + "\n(rest of the memory not needed for this message; stay on the chat topic)"
     reply = ""
     try:
         from sarvamai import SarvamAI
         client = SarvamAI(api_subscription_key=os.environ["SARVAM_API_KEY"])
-        c = client.chat.completions(model="sarvam-105b", temperature=0.3, reasoning_effort=None, max_tokens=120,
-                                    messages=[{"role": "user", "content": WA_REPLY_PROMPT.format(role=role, text=text, card=ctx["call_card"])}])
+        c = client.chat.completions(model="sarvam-105b", temperature=0.2, reasoning_effort=None, max_tokens=140,
+                                    messages=[{"role": "user", "content": WA_REPLY_PROMPT.format(
+                                        role=role, role_upper=who.upper(), name=ctx["name"], text=text, card=card, thread=thread_txt)}])
         reply = (c.choices[0].message.content or "").strip()
+        paras = [p.strip() for p in re.split(r"\n\s*\n", reply) if p.strip()]
+        reply = paras[-1] if paras else reply  # the model sometimes thinks aloud first; the message is the last paragraph
+        reply = re.sub(r"^(ASSISTANT|Assistant|Reply)\s*:\s*", "", reply).strip().strip('"“”')
     except Exception as e:  # noqa: BLE001
         print("whatsapp reply LLM failed:", e)
     if not reply:
-        reply = "Noted 👍 Aapki baat save kar li hai. VANI aapko call par iske baare mein update degi."
-    return {"ok": True, "glid": glid, "reply": reply, "freshness_seconds": r["freshness_seconds"],
+        reply = ("Samajh gaya. Aapko kitni quantity chahiye aur kis city mein delivery?" if role == "buyer"
+                 else "Samajh gaya. Kis buyer ko reply bhejna hai, aur aapka rate kya rahega?")
+    user_turn = {"from": "user", "text": text} | ({"image": m.image, "product": m.product} if m.image else {})
+    thread = _wa_thread(glid) + [user_turn, {"from": "bot", "text": reply}]
+    _wa_thread_path(glid).parent.mkdir(parents=True, exist_ok=True)
+    _wa_thread_path(glid).write_text(json.dumps(thread[-20:], ensure_ascii=False))
+    needs_call = needs_help(text)
+    return {"ok": True, "glid": glid, "reply": reply, "needs_call": needs_call, "freshness_seconds": r["freshness_seconds"],
             "opener": ctx["opener"], "greeting": ctx["greeting"], "event": r["event"]}
+
+
+@app.get("/whatsapp/{glid}")
+def whatsapp_thread(glid: int):
+    """The emulated WhatsApp chat so far (user + bot turns), for re-rendering the phone."""
+    return _wa_thread(glid)
 
 
 class CallRequest(BaseModel):
