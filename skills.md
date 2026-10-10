@@ -79,3 +79,24 @@ rules; the dataset-based prototype below is that learning phase and will be rebu
   - Still open for Day 2: a measured "lift" of the personalised opening vs. a cold greeting, the app channel in the
     demo, one real mic call on `/demo` to confirm captions, swap the dataset loaders for the Day-1 starter APIs,
     the 5–7 minute video.
+
+## 2026-10-10 13:40 IST — Tanya becomes real IndiaMART customer care (facts + guardrails)
+
+- Researched IndiaMART from public sources (help.indiamart.com, corporate.indiamart.com): what the platform is and is not
+  (matchmaking, not a party to the deal), helpline and hours, BuyLead vs direct enquiry, Lead Manager, badges (Verified /
+  TrustSEAL / Star / Leading), paid plans and weekly BuyLead quotas, Pay with IndiaMART discontinued (31 Mar 2024), the Buyer
+  Payment Protection Plan (12 Feb 2026) conditions, safe-deal and fraud-reporting advice.
+- Cross-checked with the organiser dataset: WhatsApp chatbot intents (catalog/photo help, 89 % seller-as-buyer), bot-call
+  dispositions and summaries (old bot pitched meetings; 42 % not interested), seller profile flags (do-not-call, frustration,
+  executive already in touch, is_paid 5 %), executive-call modules.
+- Added to BOTH agent prompts: "IndiaMART facts the agent may state" (plan prices deliberately excluded because IndiaMART's own
+  pages disagree) and a prioritised 9/10-rule guardrail set (identity, scope, truth, promises/no selling, money+OTP, privacy,
+  disputes/complaints, respect, must-avoid). Buyer committed v23, seller v3.
+- Verified by text chat: off-topic question -> IndiaMART-only redirect; "TrustSEAL price / Pay with IndiaMART" -> no price,
+  sales callback, service closed; "paid 50k to personal UPI + shared OTP, refund?" -> never pay personal UPI / share OTP,
+  complaint registered, helpline, police, no protection for direct payment; "paid plan, no orders, refund" -> one apology,
+  complaint noted, helpline, help with enquiries, no refund promise.
+- Tooling lesson: the Sarvam MCP `agents get include=[...]` returned only the summary from this client, so the live prompts
+  were recovered from Claude Code session transcripts; copies now live in `docs/agent_prompt_*.md`.
+- Also today: Sarvam embed key moved from `web/config.js` into `.env` (`GET /config.js` is now an API route); start-page
+  dropdown and the top-bar "updated N s ago" badge removed on request.

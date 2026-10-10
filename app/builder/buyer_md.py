@@ -9,7 +9,7 @@ import time
 from datetime import datetime
 
 from app.builder.insight import llm_insight
-from app.builder.prefs import clean_greeting, fallback_greeting, get_language, greeting_rule
+from app.builder.prefs import clean_greeting, fallback_greeting, get_language, greeting_rule, latest_topic
 from app.builder.seller_md import OUT_DIR, _day, _yn, recent_calls_line
 from app.sources.buyer import get_buyer_events
 
@@ -116,7 +116,7 @@ def build_buyer_md(glid: int, use_llm: bool = True) -> dict:
             "time; count those as calls with sellers. 'X responded to your enquiry' means seller X replied.\n"
             "- Address the buyer by first name + ' ji'."),
             greeting_rule=greeting_rule(get_language(glid), (ev["profile"]["name"] or "ji").split()[0],
-                                        latest=(ev["live_events"][-1]["summary"] if ev["live_events"] else None)))
+                                        latest=latest_topic(ev["live_events"])))
     if not insight:
         insight = _fallback_insight(ev)
         src = "rules" if src == "rules" else src
