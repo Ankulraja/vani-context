@@ -1,0 +1,288 @@
+{
+ "glid": 253633098,
+ "as_of": "2026-10-02 23:59",
+ "window": {
+  "activity_days": 30,
+  "conversation_days": 180
+ },
+ "profile": {
+  "company": "Govind Enterprise",
+  "city": "Kolkata",
+  "state": "West Bengal",
+  "business_type": "Proprietorship",
+  "categories": [
+   "5 Ply Corrugated Box",
+   "Miniature Fan",
+   "Mobile Back Cover"
+  ],
+  "paid": false,
+  "gst_verified": true,
+  "mobile_verified": true,
+  "email_verified": true,
+  "product_count": 24,
+  "catalog_quality_score": 70.0,
+  "do_not_call": false,
+  "showed_frustration": false,
+  "asked_if_bot": false,
+  "already_with_executive": false,
+  "past_objections": null,
+  "past_questions": null,
+  "bot_attempts": 2,
+  "bot_answered": 2,
+  "meetings_fixed": 1
+ },
+ "enquiries": [
+  {
+   "date": "2026-10-01 13:02",
+   "product": "IPhone All Models Transparent Tpu Phone Cases With MagSafe",
+   "buyer_city": "Deganga",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in IPhone All Models Transparent Tpu Phone Cases With MagSafe"
+  },
+  {
+   "date": "2026-09-30 18:33",
+   "product": "Samsung Mobile Cover",
+   "buyer_city": "Kolkata",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Buyer Filled Details: s25 ultra"
+  },
+  {
+   "date": "2026-09-28 13:28",
+   "product": "Vivo Y97 Mobile Back Cover",
+   "buyer_city": "Howrah",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Compatible Brand: Vivo Material: Plastic"
+  },
+  {
+   "date": "2026-09-26 14:31",
+   "product": "IPhone All Models Transparent Tpu Phone Cases With MagSafe",
+   "buyer_city": "Jangipur",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in IPhone All Models Transparent Tpu Phone Cases With MagSafe"
+  },
+  {
+   "date": "2026-09-24 19:59",
+   "product": "IPhone All Models Transparent Tpu Phone Cases With MagSafe",
+   "buyer_city": "Lakhisarai",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in IPhone All Models Transparent Tpu Phone Cases With MagSafe"
+  },
+  {
+   "date": "2026-09-22 00:00",
+   "product": "IPhone All Models Transparent Tpu Phone Cases With MagSafe",
+   "buyer_city": "Murshidabad",
+   "buyer_company": null,
+   "unread": true,
+   "message": "15"
+  },
+  {
+   "date": "2026-09-21 17:18",
+   "product": "Mobile Back Cover for iPhone All Models Transparent Tpu Phone Cases with MagSafe",
+   "buyer_city": "Deganga",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Final price keya rahega total 400 pcs ka"
+  },
+  {
+   "date": "2026-09-21 00:23",
+   "product": "IPhone All Models Transparent Tpu Phone Cases With MagSafe",
+   "buyer_city": "Bhangar Raghunathpur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in IPhone All Models Transparent Tpu Phone Cases With MagSafe"
+  },
+  {
+   "date": "2026-09-18 20:40",
+   "product": "IPhone All Models Transparent Tpu Phone Cases With MagSafe",
+   "buyer_city": "Barasat",
+   "buyer_company": "Self Company",
+   "unread": false,
+   "message": "I need 5 pics for each models"
+  },
+  {
+   "date": "2026-09-16 22:31",
+   "product": "Mobile Back Cover for iPhone All Models Transparent Tpu Phone Cases with MagSafe",
+   "buyer_city": "Durgapur",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Mobile Back Cover for iPhone All Models Transparent Tpu Phone Cases with MagSafe"
+  },
+  {
+   "date": "2026-09-15 17:59",
+   "product": "monkey toy",
+   "buyer_city": "Memari",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in monkey toy"
+  },
+  {
+   "date": "2026-09-14 22:46",
+   "product": "Glass iPhone 16 Magsafe Mobile Cover (transparent)",
+   "buyer_city": "Kolkata",
+   "buyer_company": "pranab retail",
+   "unread": false,
+   "message": "Quantity: 20   Piece Material: Glass Compatible Model: iPhone 16 Quality Tier: Premium Probable Order Value: Rs. 1,200 -…"
+  },
+  {
+   "date": "2026-09-14 12:10",
+   "product": "Mobile Back Cover for iPhone All Models Transparent Tpu Phone Cases with MagSafe",
+   "buyer_city": "Kolkata",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Mobile Back Cover for iPhone All Models Transparent Tpu Phone Cases with MagSafe"
+  },
+  {
+   "date": "2026-09-11 07:11",
+   "product": "IPhone All Models Transparent Tpu Phone Cases With MagSafe",
+   "buyer_city": "Agartala",
+   "buyer_company": null,
+   "unread": false,
+   "message": "My price will be 40"
+  },
+  {
+   "date": "2026-09-09 23:00",
+   "product": "IPhone All Models Transparent Tpu Phone Cases With MagSafe",
+   "buyer_city": "Kolkata",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in IPhone All Models Transparent Tpu Phone Cases With MagSafe"
+  }
+ ],
+ "enquiries_30d": 20,
+ "unread_enquiries": 14,
+ "replies": [
+  {
+   "date": "2026-09-26 14:55",
+   "from": "buyer",
+   "text": "Additional details from Buyer Quantity 100 Quantity Unit Piece Material Glass Compatible Model iPhone 16 Quality Tier OG…"
+  },
+  {
+   "date": "2026-09-04 11:18",
+   "from": "buyer",
+   "text": "Is this available?"
+  }
+ ],
+ "seller_replies_30d": 0,
+ "buyer_calls": {
+  "total": 3,
+  "connected": 1,
+  "missed": 2,
+  "last": "2026-09-28 23:00",
+  "last_status": "Not connected"
+ },
+ "buyleads": {
+  "count": 0,
+  "credits": 0,
+  "last": null,
+  "keywords": []
+ },
+ "whatsapp": [
+  {
+   "date": "2026-10-02 00:08",
+   "seller_said": null,
+   "bot_said": "Hi! *Elexport* tried to reach you 📞 Did you connect?",
+   "intent": "WA_Callback_Connect_Q"
+  },
+  {
+   "date": "2026-10-01 19:56",
+   "seller_said": null,
+   "bot_said": "Hi! You just spoke with *Shopzie* 📞 Was the call helpful?",
+   "intent": "WA_Call_Feedback"
+  },
+  {
+   "date": "2026-09-22 09:58",
+   "seller_said": null,
+   "bot_said": "Thank you message call cta",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-09-22 09:48",
+   "seller_said": "BUY",
+   "bot_said": "How many *Piece*?",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-09-22 09:48",
+   "seller_said": "BUY",
+   "bot_said": null,
+   "intent": "Msite_BL_Spec"
+  },
+  {
+   "date": "2026-09-22 09:48",
+   "seller_said": "Yes",
+   "bot_said": "Please Enter Power Source Electric Manual Rechargeable   More options Battery Operated USB",
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-09-16 21:13",
+   "seller_said": "Bad",
+   "bot_said": "Please share details about your experience.",
+   "intent": "MSITE_CSAT_Bad"
+  },
+  {
+   "date": "2026-09-16 16:35",
+   "seller_said": "Price",
+   "bot_said": "Please Enter Power Source Electric Manual Rechargeable   More options Battery Operated USB",
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-09-16 13:39",
+   "seller_said": "Yes",
+   "bot_said": "Youve already shared feedback.",
+   "intent": "BUYER_NPS_Duplicate"
+  }
+ ],
+ "whatsapp_30d": 39,
+ "vani_calls": [
+  {
+   "date": "2026-09-21 18:13",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 12,
+   "summary": "The agent initiated the call by asking if they were speaking with Govind Enterprise. The call ended abruptly without further conversation."
+  },
+  {
+   "date": "2026-08-12 16:33",
+   "disposition": "Meeting Fixed",
+   "meeting_fixed": true,
+   "duration_sec": 110,
+   "summary": "The agent from IndiaMART called the lead regarding buyleads. The agent proposed a meeting with a sales executive. The lead initially stated unavailability for tomorrow but agreed to a meeting the day after tomorrow at 3 PM. The lead confirmed Maheshtala as the preferred meeting location."
+  }
+ ],
+ "vani_transcript_date": "2026-08-12 16:33",
+ "vani_latest_transcript": [
+  "bot: Hello, kya aap Govind Enterprises se bol rahe hai?",
+  "seller: Nahi.",
+  "bot: Maafi chahungi kya main aap se baat kar sakti hoon ya yeh galat number hai?",
+  "seller: Aap kahan se bol rahe hai?",
+  "bot: Main Indiamart se Payal bol rahi hoon, kya main aap se baat kar sakti hoon?",
+  "seller: Haan boliye.",
+  "bot: Theek hai, main Indiamart se Payal bol rahi hoon, maine dekha ki aap Indiamart par kuch buy leads check kar rahe the. Aapki assistance ke liye humare sales executive aap se ek chhoti si meeting karna chahenge toh kal aap kis time 15 se 20 minute nikaal sakte hain?",
+  "seller: Kal mere paas time nahi hai.",
+  "bot: Aap apne schedule ke hisaab se koi din bata dijiye, main usi din aapke liye meeting rakh dungi.",
+  "bot: Kya aap abhi bhi line par hain? Aap koi bhi din bata sakte hain.",
+  "seller: Parson kar dijiye.",
+  "bot: Theek hai, toh main parson ke liye aapki meeting schedule kar deti hoon. Aap parson kis samay 15 se 20 minute nikaal sakte hain?",
+  "seller: Wahi teen baje.",
+  "bot: Theek hai toh main parson dopahar teen baje aapki meeting book kar deti hoon.",
+  "seller: Haan, theek hai.",
+  "bot: Theek hai, meeting ke liye aapke liye Maheshtala wala location convenient rahega ya Kolkata wala?",
+  "seller: Maheshtala hi rahega.",
+  "bot: Kshama kijiye, main aapki baat samajh nahi paayi, hum aapki meeting location ki baat kar rahe the, kya aapko Kolkata ya Maheshtala mein milna theek rahega?",
+  "seller: Haan.",
+  "bot: Theek hai, toh main parson dopahar teen baje aapki meeting book kar deti hoon. Humara executive aap se aapki location par mil lenge. Apna samay dene ke liye dhanyavad, aapka din shubh ho."
+ ],
+ "executive_calls": {
+  "total": 0,
+  "answered": 0,
+  "last": null,
+  "last_duration_sec": null
+ },
+ "pns_calls": [],
+ "live_events": []
+}

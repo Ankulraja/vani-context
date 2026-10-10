@@ -1,0 +1,9 @@
+{"channel": "web", "summary": "Seller clicked Call buyer in Lead Manager for the enquiry White Thermocol Balls (Lucky Gift House, New Delhi)", "meta": {}, "time": "2026-10-10 13:46"}
+{"channel": "voice", "summary": "Seller called the IndiaMART helpline (VANI)", "meta": {"kind": "user_call", "source": "dialer", "product": null}, "time": "2026-10-10 13:46"}
+{"channel": "voice", "summary": "The agent contacted the user regarding their enquiry for White Thermocol Balls, and the user confirmed they had made the enquiry.", "meta": {}, "language": "Hindi", "outcome": "resumed_and_helped", "callback_time": "", "time": "2026-10-10 13:47"}
+{"channel": "voice", "summary": "Seller called the IndiaMART helpline (VANI)", "meta": {"kind": "user_call", "source": "dialer", "product": null}, "time": "2026-10-10 13:54"}
+{"channel": "voice", "summary": "The user complained about not receiving quality leads or enquiries, and the agent offered to reply to a specific enquiry for White Thermocol Balls.", "meta": {}, "language": "Hindi", "outcome": "resumed_and_helped", "callback_time": "", "time": "2026-10-10 13:55"}
+{"channel": "voice", "summary": "Seller called the IndiaMART helpline (VANI)", "meta": {"kind": "user_call", "source": "dialer", "product": null}, "time": "2026-10-10 14:31"}
+{"channel": "voice", "summary": "Seller called the IndiaMART helpline (VANI)", "meta": {"kind": "user_call", "source": "dialer", "product": null}, "time": "2026-10-10 14:36"}
+{"channel": "voice", "summary": "Seller called the IndiaMART helpline (VANI)", "meta": {"kind": "user_call", "source": "dialer", "product": null}, "time": "2026-10-10 14:36"}
+{"channel": "voice", "summary": "The user complained about not receiving good enquiries, and the agent offered to reply to a specific enquiry for white thermocol balls from New Delhi, which the user accepted.", "meta": {}, "language": "Hindi", "outcome": "resumed_and_helped", "callback_time": "", "time": "2026-10-10 14:36"}

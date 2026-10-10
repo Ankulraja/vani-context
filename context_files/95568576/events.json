@@ -1,0 +1,386 @@
+{
+ "glid": 95568576,
+ "as_of": "2026-10-02 23:59",
+ "window": {
+  "activity_days": 30,
+  "conversation_days": 180
+ },
+ "profile": {
+  "company": "Alfa Enterprises",
+  "city": "New Delhi",
+  "state": "Delhi",
+  "business_type": "Proprietorship",
+  "categories": [
+   "Compact Flash Card",
+   "HP Pen Drive",
+   "Memory Cards"
+  ],
+  "paid": false,
+  "gst_verified": true,
+  "mobile_verified": true,
+  "email_verified": true,
+  "product_count": 148,
+  "catalog_quality_score": 86.0,
+  "do_not_call": false,
+  "showed_frustration": false,
+  "asked_if_bot": false,
+  "already_with_executive": false,
+  "past_objections": null,
+  "past_questions": null,
+  "bot_attempts": 6,
+  "bot_answered": 5,
+  "meetings_fixed": 1
+ },
+ "enquiries": [
+  {
+   "date": "2026-10-02 09:22",
+   "product": "HP Pen Drive 16gb",
+   "buyer_city": "Barmer",
+   "buyer_company": "M/s Thar Collection",
+   "unread": true,
+   "message": "Capacity: 16 Gb Usb Version: Usb 3.0 Probable Requirement Type: Business Use"
+  },
+  {
+   "date": "2026-09-30 20:15",
+   "product": "SanDisk Ultra Sdhc Uhs-i Memory Card",
+   "buyer_city": "New Delhi",
+   "buyer_company": "Sane Traders",
+   "unread": true,
+   "message": "Storage Capacity: 32 GB Product Series: Ultra Card Type: SD Card Probable Order Value: Rs. 10,000 to 20,000 Probable Req…"
+  },
+  {
+   "date": "2026-09-30 14:58",
+   "product": "Sdhc Memory Cards",
+   "buyer_city": "New Delhi",
+   "buyer_company": "DM International",
+   "unread": true,
+   "message": "Capacity: 4 GB Speed Class: Class 10 Application: DSLR camera"
+  },
+  {
+   "date": "2026-09-28 15:37",
+   "product": "SANDISK Mobile Phone Memory Card 256gb",
+   "buyer_city": "New Delhi",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Buyer Searched for sandisk memory card 1tb near new delhi  Capacity: 256 GB Buyer Filled Details: 1tb"
+  },
+  {
+   "date": "2026-09-27 13:02",
+   "product": "Samsung Evo Plus Memory Card 32gb",
+   "buyer_city": "New Delhi",
+   "buyer_company": "MUDRAKSHI HYTECH INDIA PVT. LTD.",
+   "unread": true,
+   "message": "Why do you need this: For Business Use Probable Order Value: Rs. 28,000 - 30,000 Quantity: 50   piece Memory Storage Cap…"
+  },
+  {
+   "date": "2026-09-26 14:43",
+   "product": "32GB Memory Card",
+   "buyer_city": "Faridabad",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Quantity: 300   Piece Storage Capacity: 32 GB Probable Order Value: Rs. 84,000 - 90,000 Probable Requirement Type: Busin…"
+  },
+  {
+   "date": "2026-09-25 00:00",
+   "product": "SanDisk 256 GB USB 3.2 Type-A Flash Drive",
+   "buyer_city": "Fatehpur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in SanDisk 256 GB USB 3.2 Type-A Flash Drive"
+  },
+  {
+   "date": "2026-09-23 22:44",
+   "product": "HP Pen Drive",
+   "buyer_city": "New Delhi",
+   "buyer_company": "Sharma Computer World",
+   "unread": false,
+   "message": "Brand: HP Capacity: 64 GB USB Version: USB 3.2 Color: Black  USB Version: 3.2 Material: Metal Probable Order Value: Rs. …"
+  },
+  {
+   "date": "2026-09-23 19:49",
+   "product": "HP 64 GB MicroSD Card",
+   "buyer_city": "Delhi",
+   "buyer_company": "Computer Maintenance Centre",
+   "unread": false,
+   "message": "Card Format: MicroSD Card Probable Order Value: Rs. 50,000 to 1 Lakh Probable Requirement Type: Business Use Quantity: 1…"
+  },
+  {
+   "date": "2026-09-21 10:42",
+   "product": "Samsung 8 GB MicroSD Memory Card",
+   "buyer_city": "Delhi",
+   "buyer_company": "SLTPL",
+   "unread": true,
+   "message": "Buyer Searched for sd card, 9v2.5 amp & 9v2.5a adaptor c-type"
+  },
+  {
+   "date": "2026-09-20 15:15",
+   "product": "Samsung 8 GB MicroSD Memory Card",
+   "buyer_city": "Chandigarh",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in Samsung 8 GB MicroSD Memory Card"
+  },
+  {
+   "date": "2026-09-19 11:31",
+   "product": "HP 16 GB USB Flash Drive",
+   "buyer_city": "Ghaziabad",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in HP 16 GB USB Flash Drive"
+  },
+  {
+   "date": "2026-09-18 19:57",
+   "product": "Samsung 8 GB MicroSD Memory Card",
+   "buyer_city": "Ghaziabad",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Samsung 8 GB MicroSD Memory Card"
+  },
+  {
+   "date": "2026-09-18 16:59",
+   "product": "SanDisk Pen Drive 4 Gb",
+   "buyer_city": "Baghpat",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Body Material: Metal Probable Order Value: Rs. 20,000 - 28,000 Probable Requirement Type: Business Use Quantity: 100   P…"
+  },
+  {
+   "date": "2026-09-18 16:15",
+   "product": "Samsung 8 GB MicroSD Memory Card",
+   "buyer_city": "New Delhi",
+   "buyer_company": "Raj Enterprises",
+   "unread": false,
+   "message": "I am interested in Samsung 8 GB MicroSD Memory Card"
+  }
+ ],
+ "enquiries_30d": 57,
+ "unread_enquiries": 8,
+ "replies": [
+  {
+   "date": "2026-09-26 17:41",
+   "from": "seller",
+   "text": "Hi Ravi,  Thanks for your Enquiry to Alfa Enterprises, New Delhi.  Please find my catalog : https://www.indiamart.com/al…"
+  },
+  {
+   "date": "2026-09-19 11:34",
+   "from": "seller",
+   "text": "We have shared all the details in your whatapp from thia number"
+  },
+  {
+   "date": "2026-09-19 11:33",
+   "from": "seller",
+   "text": "8368566212"
+  },
+  {
+   "date": "2026-09-17 14:15",
+   "from": "seller",
+   "text": "Hi Shivangi,  Thanks for your Enquiry to Alfa Enterprises, New Delhi.  Please find my catalog : https://www.indiamart.co…"
+  },
+  {
+   "date": "2026-09-16 22:59",
+   "from": "buyer",
+   "text": "Hi Razia, 2 Piece kitne ka hai?"
+  },
+  {
+   "date": "2026-09-12 07:12",
+   "from": "buyer",
+   "text": "Additional details from Buyer Quantity 1 Quantity Unit Piece Capacity 256 GB Storage Capacity 512 GB USB Version 3.2 Bod…"
+  },
+  {
+   "date": "2026-09-11 20:38",
+   "from": "seller",
+   "text": "Hi Master,  Thanks for your Enquiry to Alfa Enterprises, New Delhi.  Please find my catalog : https://www.indiamart.com/…"
+  },
+  {
+   "date": "2026-09-10 20:37",
+   "from": "seller",
+   "text": "Hi Deepak,  Thanks for your Enquiry to Alfa Enterprises, New Delhi.  Please find my catalog : https://www.indiamart.com/…"
+  }
+ ],
+ "seller_replies_30d": 6,
+ "buyer_calls": {
+  "total": 32,
+  "connected": 21,
+  "missed": 11,
+  "last": "2026-09-29 15:58",
+  "last_status": "Not connected"
+ },
+ "buyleads": {
+  "count": 55,
+  "credits": 11000,
+  "last": "2026-10-01 22:37",
+  "keywords": [
+   "Flying Ball",
+   "Flying ball",
+   "Sd card"
+  ]
+ },
+ "whatsapp": [
+  {
+   "date": "2026-07-25 16:49",
+   "seller_said": "Hp brand 8-256g pendrive and memory card  SanDisk memory card and Pendrive  Samsung memory card 8-256gb memory card",
+   "bot_said": "What is this for? New BuyLeads | Add to Catalog | Buy",
+   "intent": "Product Details"
+  },
+  {
+   "date": "2026-07-25 16:47",
+   "seller_said": null,
+   "bot_said": "{\"queryImage\":{\"img_src\":\"http:\\/\\/5.imimg.com\\/data5\\/WA_9696\\/Default\\/2026\\/7\\/628763718\\/FY\\/XH\\…",
+   "intent": "Photo uploaded but not added as a product as .."
+  },
+  {
+   "date": "2026-07-25 16:47",
+   "seller_said": null,
+   "bot_said": "{\"queryImage\":{\"img_src\":\"http:\\/\\/5.imimg.com\\/data5\\/WA_9696\\/Default\\/2026\\/7\\/628763715\\/XX\\/AQ\\…",
+   "intent": "Photo uploaded but not added as a product as .."
+  },
+  {
+   "date": "2026-07-25 16:47",
+   "seller_said": null,
+   "bot_said": "{\"queryImage\":{\"img_src\":\"http:\\/\\/5.imimg.com\\/data5\\/WA_9696\\/Default\\/2026\\/7\\/628763700\\/VZ\\/XP\\…",
+   "intent": "Photo uploaded but not added as a product as .."
+  },
+  {
+   "date": "2026-07-25 16:02",
+   "seller_said": "8gb 16gb 32gb 64gb 128gb 256gb",
+   "bot_said": null,
+   "intent": null
+  },
+  {
+   "date": "2026-07-25 16:02",
+   "seller_said": "Hp pendrive version 210w",
+   "bot_said": null,
+   "intent": null
+  },
+  {
+   "date": "2026-07-25 16:01",
+   "seller_said": "Hii",
+   "bot_said": "Hello, how can I help? Update Catalog New BuyLeads My Account Manager Complaint Edit Profile My Invo…",
+   "intent": "Default Welcome Intent Default"
+  },
+  {
+   "date": "2026-07-23 13:49",
+   "seller_said": "Products Already Added",
+   "bot_said": null,
+   "intent": "fdbk_ob"
+  },
+  {
+   "date": "2026-07-23 13:49",
+   "seller_said": "Yes, I confirm",
+   "bot_said": null,
+   "intent": "fdbk_ob"
+  }
+ ],
+ "whatsapp_30d": 0,
+ "vani_calls": [
+  {
+   "date": "2026-07-23 12:57",
+   "disposition": "Meeting Fixed",
+   "meeting_fixed": true,
+   "duration_sec": 76,
+   "summary": "The agent from IndiaMART called the lead from Alpha Enterprises regarding buyer inquiries for SanDisk Pen Drives. The agent proposed a meeting with a sales executive to improve the lead's catalog. The lead agreed to a physical meeting tomorrow at 3 PM in New Delhi."
+  },
+  {
+   "date": "2026-07-17 12:43",
+   "disposition": "Not Interested",
+   "meeting_fixed": false,
+   "duration_sec": 2,
+   "summary": "The agent initiated the call by asking if the recipient was from Alpha Enterprises. The call disconnected abruptly after this initial question."
+  },
+  {
+   "date": "2026-07-09 18:39",
+   "disposition": "Call Later / Busy",
+   "meeting_fixed": false,
+   "duration_sec": 75,
+   "summary": "The agent from IndiaMART called the lead to discuss paid services and schedule a meeting with a sales executive. The lead agreed to a physical meeting on August 1st at 3:00 PM in Sector 18."
+  },
+  {
+   "date": "2026-07-01 09:18",
+   "disposition": "Not Interested",
+   "meeting_fixed": false,
+   "duration_sec": 4,
+   "summary": "The agent initiated the call by asking if the lead was from Alpha Enterprises. The call ended abruptly without further conversation."
+  },
+  {
+   "date": "2026-06-20 15:29",
+   "disposition": "Not Interested",
+   "meeting_fixed": false,
+   "duration_sec": 48,
+   "summary": "The agent contacted the lead from Alpha Enterprises to schedule a meeting with a sales executive regarding buyer leads on IndiaMART. The lead mentioned that the account was created for demo purposes and that they already work in IndiaMART. The agent reiterated that the executive could guide them thr…"
+  }
+ ],
+ "vani_transcript_date": "2026-07-09 18:39",
+ "vani_latest_transcript": [
+  "bot: Hello, kya aap Alpha Enterprises se bol rahe hain?",
+  "seller: Haan ji boliye.",
+  "bot: Thik hai main IndiaMART se Payal bol rahi hoon. Main dekh rahi hoon ki aap IndiaMART ki paid services explore kar rahe the isi bare mein baat karne ke liye hamare sales executive aapke saath ek chhoti si meeting karna chahte hain. Toh kal aap kis time pandrah se bees minute nikaal sakte hain?",
+  "seller: Kal... fir agle mahine free hoon, next month.",
+  "bot: Aap apne schedule ke hisaab se koi din bata dijiye main usi din aapke liye meeting rakh dungi.",
+  "seller: Uh... 1 August.",
+  "bot: Kya aap kal ya parson koi time nikaal sakte hain? Agar nahi toh August mein kaunsa date aapke liye convenient rahega?",
+  "seller: Ek tarikh, first.",
+  "bot: Thik hai, 1 August ko kis time aap pandrah se bees minute nikaal sakte hain meeting ke liye?",
+  "seller: 3 PM.",
+  "bot: Thik hai, meeting ke liye aapke liye Sector 18 wala location convenient rahega ya Sector 7 Dwarka wala?",
+  "seller: Sector 18.",
+  "bot: Bahut badhiya, toh hamare sales executive 1 August ko 3 baje Sector 18 par aapse milenge. Apna samay dene ke liye dhanyavaad, aapka din shubh rahe.",
+  "seller: Okay."
+ ],
+ "executive_calls": {
+  "total": 5,
+  "answered": 4,
+  "last": "2026-08-13 16:13",
+  "last_duration_sec": 466
+ },
+ "pns_calls": [
+  {
+   "date": "2026-09-10 09:54",
+   "products": "Product (Not named)",
+   "prices": null
+  },
+  {
+   "date": "2026-09-10 09:42",
+   "products": "SanDisk 256GB Pen Drive",
+   "prices": null
+  },
+  {
+   "date": "2026-08-08 06:38",
+   "products": "General Products (SS Enterprises)",
+   "prices": null
+  },
+  {
+   "date": "2026-08-08 06:35",
+   "products": "Sandisk 8GB 2.0 Cruzer Blade Pen Drive",
+   "prices": "210 / piece"
+  }
+ ],
+ "live_events": [
+  {
+   "channel": "web",
+   "summary": "Seller browsed on Lead Manager: Ductile Cast Iron Spun Pipe, For Utilities Water, 1 inch, Ductile Iron Double Flanged Pipe (5.5m) - DN100 K9, Ductile Iron Pipe, 150mm Ductile Iron Double Flange Pipe, Pressure Class (Class): K9, Ductile Iron Double Flange Pipe K9 (300mm DN x 3m Length), 1 Inch Ductile Iron Pipe, For Utilities Water, Ms Road Bollard, Road Safety Bollard, Street Road Bollard, Hydraulic Rising Bollards, Mild Steel Road Safety Barriers, Road Bollard Barrier, RCC Precast Bollard, Road Bollard, Ductile Iron Spun Pipes, Concrete Road Bollards, Concrete Bollard RCC, For Road Sider, Nature: Flexible",
+   "meta": {},
+   "time": "2026-10-10 00:19"
+  },
+  {
+   "channel": "web",
+   "summary": "Seller browsed on Lead Manager: Brass God Statues, Marble Radha Krishna Statue, Vastu Accessories",
+   "meta": {},
+   "time": "2026-10-10 11:36"
+  },
+  {
+   "channel": "web",
+   "summary": "Seller browsed on Lead Manager: SanDisk Ultra Sdhc Uhs-i Memory Card (Sane Traders, New Delhi), HP Pen Drive 16gb (M/s Thar Collection, Barmer)",
+   "meta": {},
+   "time": "2026-10-10 13:39"
+  },
+  {
+   "channel": "web",
+   "summary": "Seller opened Lead Manager on seller.indiamart.com",
+   "meta": {
+    "url": "https://seller.indiamart.com/messagecentre?h1",
+    "source": "chrome-extension"
+   },
+   "time": "2026-10-10 13:41"
+  }
+ ]
+}

@@ -1,0 +1,270 @@
+{
+ "glid": 274238067,
+ "role": "buyer",
+ "as_of": "2026-10-01 10:23",
+ "window": {
+  "activity_days": 30
+ },
+ "profile": {
+  "name": "Aarti Singh",
+  "company": null,
+  "city": "Gharaunda",
+  "customer_type": "Free",
+  "mobile_verified": true,
+  "email_verified": false,
+  "gst_verified": false,
+  "registered_since": "0 Y 0 M",
+  "listing_status": "NFL",
+  "preferred_cities": null
+ },
+ "activity_counts": {
+  "enquiry sent": 11,
+  "called seller": 14,
+  "buy-lead posted": 2,
+  "searched": 9,
+  "other": 6,
+  "browsed": 2
+ },
+ "top_categories": [
+  {
+   "category": "RCC Precast Bollard",
+   "events": 16
+  },
+  {
+   "category": "Ductile Iron Pipe",
+   "events": 5
+  },
+  {
+   "category": "Road Bollard",
+   "events": 3
+  },
+  {
+   "category": "Ductile Iron Spun Pipes",
+   "events": 1
+  }
+ ],
+ "sellers_contacted": 11,
+ "recent_activity": [
+  {
+   "date": "2026-09-29 18:01",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": null,
+   "keyword": "Concrete Road Bollards",
+   "seller_glid": "227645696"
+  },
+  {
+   "date": "2026-09-29 17:31",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": null,
+   "keyword": "Concrete Bollard RCC, For Road Sider, Nature: Flexible",
+   "seller_glid": "16098019"
+  },
+  {
+   "date": "2026-09-29 17:15",
+   "type": "C2C",
+   "what": "called seller",
+   "category": "RCC Precast Bollard",
+   "keyword": "Concrete Road Bollards",
+   "seller_glid": "227645696"
+  },
+  {
+   "date": "2026-09-29 16:59",
+   "type": "C2C",
+   "what": "called seller",
+   "category": "Road Bollard",
+   "keyword": "Concrete Bollard RCC, For Road Sider, Nature: Flexible",
+   "seller_glid": "16098019"
+  },
+  {
+   "date": "2026-09-29 16:58",
+   "type": "C2C",
+   "what": "called seller",
+   "category": "Road Bollard",
+   "keyword": "Concrete Bollard RCC, For Road Sider, Nature: Flexible",
+   "seller_glid": "16098019"
+  },
+  {
+   "date": "2026-09-26 11:31",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": null,
+   "keyword": "Round Ductile Cast Iron Pipe",
+   "seller_glid": "20825563"
+  },
+  {
+   "date": "2026-09-26 11:01",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": null,
+   "keyword": "Round Ductile Iron Pipe, Size: 100 mm",
+   "seller_glid": "43794762"
+  },
+  {
+   "date": "2026-09-26 11:01",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": null,
+   "keyword": "100mm Ductile Iron Pipe, 100 mm (4 inch), 100 mm (4 Inch)",
+   "seller_glid": "217248780"
+  },
+  {
+   "date": "2026-09-26 11:01",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": null,
+   "keyword": "Ductile Iron Spun Pipes",
+   "seller_glid": "65048574"
+  },
+  {
+   "date": "2026-09-26 11:01",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": null,
+   "keyword": "Ductile Iron Pipe, 100 mm, Pressure Class (Class): K9",
+   "seller_glid": "7062708"
+  },
+  {
+   "date": "2026-09-26 11:00",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": null,
+   "keyword": "DI Spun Pipes, Pressure Class (Class): K9, 100 mm (4 inch)",
+   "seller_glid": "63540630"
+  },
+  {
+   "date": "2026-09-26 10:55",
+   "type": "C2C",
+   "what": "called seller",
+   "category": "Ductile Iron Pipe",
+   "keyword": "Round Ductile Cast Iron Pipe",
+   "seller_glid": "20825563"
+  }
+ ],
+ "last_enquiry": {
+  "title": "Concrete Cylindrical Bollards",
+  "text": "I am interested in Concrete Cylindrical Bollards"
+ },
+ "last_lead": {
+  "title": "Concrete Cylindrical Bollards",
+  "date": "2026-09-30 12:50"
+ },
+ "active_buyleads": [
+  "Concrete Cylindrical Bollards"
+ ],
+ "enquiries_30d": 0,
+ "enquiries_90d": 0,
+ "whatsapp": [
+  {
+   "date": "2026-10-01 10:19",
+   "from": "indiamart",
+   "text": "Hi! You just spoke with *VP Precon LLP* 📞 Was the call helpful?"
+  },
+  {
+   "date": "2026-09-30 15:15",
+   "from": "indiamart",
+   "text": "Hi! You just spoke with *Tridev Concrete Product* 📞 Was the call helpful?"
+  },
+  {
+   "date": "2026-09-30 15:10",
+   "from": "indiamart",
+   "text": "Hi! You just spoke with *Shloka Konkrete Industries .* 📞 Was the call helpful?"
+  },
+  {
+   "date": "2026-09-30 14:35",
+   "from": "indiamart",
+   "text": "Hi! You just spoke with *Arfi RCC Works* 📞 Was the call helpful?"
+  },
+  {
+   "date": "2026-09-30 13:46",
+   "from": "indiamart",
+   "text": "Hi Aarti Singh, Secure Innovative Solutions LLP (Ahmedabad) (also deals in *Gharaunda*) responded to your Concrete Cylindrical Bollards enqu"
+  },
+  {
+   "date": "2026-09-30 12:55",
+   "from": "indiamart",
+   "text": "Hi Aarti Singh, Shreram Concrete Products (Palwal) (also deals in *Gharaunda*) responded to your enquiry for RCC Precast Bollard. shriramcon"
+  }
+ ],
+ "indiamart_calls": [],
+ "tickets": {
+  "open_7d": 0,
+  "negative_feedback_7d": 0,
+  "wip_type": null
+ },
+ "last_call_summary": null,
+ "live_events": [
+  {
+   "channel": "whatsapp",
+   "summary": "Buyer wrote on WhatsApp: Hi i need a tshirt",
+   "meta": {},
+   "time": "2026-10-10 14:46"
+  },
+  {
+   "channel": "web",
+   "summary": "Buyer browsed on indiamart.com: RCC Precast Bollard, Ductile Iron Pipe, Electric Scooter, Aromatic Incense Sticks, Kamadhenu Cow and Calf Statue, Dupion Silk, Income Tax Consultant, Air Hose Pipe, 2 ft 40mm Precast RCC Bollard, Rcc Precast Bollard",
+   "meta": {},
+   "time": "2026-10-10 14:46"
+  },
+  {
+   "channel": "whatsapp",
+   "summary": "Buyer wrote on WhatsApp: Can you help me",
+   "meta": {},
+   "time": "2026-10-10 14:47"
+  },
+  {
+   "channel": "voice",
+   "summary": "VANI called Aarti about the WhatsApp message \"Can you help me\"; Aarti picked up",
+   "meta": {
+    "kind": "vani_call",
+    "source": "whatsapp",
+    "product": null
+   },
+   "time": "2026-10-10 14:47"
+  },
+  {
+   "channel": "web",
+   "summary": "Buyer searched \"EV Charging Station\" on indiamart.com",
+   "meta": {
+    "kind": "search",
+    "q": "EV Charging Station"
+   },
+   "time": "2026-10-10 14:47"
+  },
+  {
+   "channel": "web",
+   "summary": "Buyer opened the product page 9.9 kW 3.3kW 3 Socket Ev Charging Station, Two Wheeler from Axonify Tech Systems Private Limited, Hyderabad (₹ 43299/unit) on indiamart.com",
+   "meta": {
+    "kind": "view",
+    "q": "EV Charging Station",
+    "product": {
+     "title": "9.9 kW 3.3kW 3 Socket Ev Charging Station, Two Wheeler",
+     "price": "43299",
+     "price_unit": "unit",
+     "price_text": "₹ 43299/unit",
+     "moq": null,
+     "company": "Axonify Tech Systems Private Limited",
+     "city": "Hyderabad",
+     "state": "Telangana",
+     "member_since": "7 yrs",
+     "gst_verified": true,
+     "rating": 4.9,
+     "rating_count": 13,
+     "image": "https://5.imimg.com/data5/SELLER/Default/2026/1/575727689/FY/ZE/JW/75596003/3-3kw-3-socket-ev-charging-station-250x250.jpg",
+     "url": "https://www.indiamart.com/proddetail/3-3kw-3-socket-ev-charging-station-2857733407173.html",
+     "supplier_url": "https://www.indiamart.com/axonifytechsystemsprivatelimited/",
+     "display_id": "2857733407173",
+     "seller_glid": "75596003",
+     "category": "EV Charging Station",
+     "specs": [
+      "Maximum Output Power: 9.9 kW",
+      "Connector Type: 16 amps plug",
+      "Output Power: 9.9 kW"
+     ]
+    }
+   },
+   "time": "2026-10-10 14:48"
+  }
+ ]
+}

@@ -1,0 +1,320 @@
+{
+ "glid": 209139024,
+ "as_of": "2026-10-02 23:59",
+ "window": {
+  "activity_days": 30,
+  "conversation_days": 180
+ },
+ "profile": {
+  "company": "Shreeva Enterprises",
+  "city": "Jaipur",
+  "state": "Rajasthan",
+  "business_type": "Proprietorship",
+  "categories": [
+   "Door Seals",
+   "Drop Down Door Seal",
+   "PVC Strip Curtains"
+  ],
+  "paid": false,
+  "gst_verified": true,
+  "mobile_verified": true,
+  "email_verified": true,
+  "product_count": 0,
+  "catalog_quality_score": null,
+  "do_not_call": false,
+  "showed_frustration": false,
+  "asked_if_bot": false,
+  "already_with_executive": false,
+  "past_objections": null,
+  "past_questions": null,
+  "bot_attempts": 4,
+  "bot_answered": 3,
+  "meetings_fixed": 0
+ },
+ "enquiries": [
+  {
+   "date": "2026-09-30 10:00",
+   "product": "Aluminium Door Seals",
+   "buyer_city": "Jaipur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Application: Wooden Door Material: Aluminium Length: 39 inch (1 m) Probable Order Value: Rs. 1,000 to 3,000 Probable Req…"
+  },
+  {
+   "date": "2026-09-28 17:15",
+   "product": "SHREEVA Brown Door Dust Guard For Home",
+   "buyer_city": "Jaipur",
+   "buyer_company": "Ravi Jangid",
+   "unread": false,
+   "message": "I am interested in SHREEVA Brown Door Dust Guard For Home"
+  },
+  {
+   "date": "2026-09-24 21:13",
+   "product": "Door Guard 36\"",
+   "buyer_city": "Jaipur",
+   "buyer_company": "Shiva",
+   "unread": false,
+   "message": "I am interested in Door Guard 36\""
+  },
+  {
+   "date": "2026-09-24 20:11",
+   "product": "39 Inch Door Seal Guard",
+   "buyer_city": "Jaipur",
+   "buyer_company": "Shiva",
+   "unread": false,
+   "message": "I am interested in 39 Inch Door Seal Guard"
+  },
+  {
+   "date": "2026-09-22 21:06",
+   "product": "MR A BROWN NON WOVEN DOOR SEAL",
+   "buyer_city": "Yamuna Nagar",
+   "buyer_company": "Mehboob Khan",
+   "unread": false,
+   "message": "I am interested in MR A BROWN NON WOVEN DOOR SEAL"
+  },
+  {
+   "date": "2026-09-20 18:42",
+   "product": "SHREEVA Door Bottom Sealing Guard for Home, Office, Hotel",
+   "buyer_city": "Meerut",
+   "buyer_company": "Shree Traders",
+   "unread": false,
+   "message": "Home"
+  },
+  {
+   "date": "2026-09-18 15:42",
+   "product": "Door Guard 36\"",
+   "buyer_city": "Hapur",
+   "buyer_company": "Sar main naya business kar raha Mera company name registered Nahin Hua Hai yah Abhi zero se shuru ka",
+   "unread": false,
+   "message": "I am interested in Door Guard 36\""
+  },
+  {
+   "date": "2026-09-18 11:44",
+   "product": "Mr A Brown Door Gaurd Seal",
+   "buyer_city": "Ghaziabad",
+   "buyer_company": "Sar main naya business kar raha Mera company name registered Nahin Hua Hai yah Abhi zero se shuru ka",
+   "unread": false,
+   "message": "I am interested in Mr A Brown Door Gaurd Seal"
+  },
+  {
+   "date": "2026-09-16 13:53",
+   "product": "Door Seals",
+   "buyer_city": "Jaipur",
+   "buyer_company": "S.M. Enterprises",
+   "unread": false,
+   "message": "Application: Door Bottom Probable Requirement Type: Business Use"
+  },
+  {
+   "date": "2026-09-14 17:48",
+   "product": "Tear Drop Seal",
+   "buyer_city": "Jaipur",
+   "buyer_company": "Avento Industries",
+   "unread": false,
+   "message": "Quantity: 100   Meter Application: Fabricated door Material: Silicone Probable Order Value: Rs. 6,000 - 9,300 Probable R…"
+  },
+  {
+   "date": "2026-09-14 15:58",
+   "product": "Mr A Printed Door Seal",
+   "buyer_city": "Jaipur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in Mr A Printed Door Seal"
+  },
+  {
+   "date": "2026-09-14 15:55",
+   "product": "Mr A Printed Door Seal",
+   "buyer_city": "Jaipur",
+   "buyer_company": "Abbgruu",
+   "unread": false,
+   "message": "I am interested in Mr A Printed Door Seal"
+  },
+  {
+   "date": "2026-09-10 08:11",
+   "product": "Door Guard",
+   "buyer_city": "Tonk",
+   "buyer_company": "Super Cope HR Solutions",
+   "unread": false,
+   "message": "I am interested in Door Guard"
+  },
+  {
+   "date": "2026-09-05 15:31",
+   "product": "Door Guard",
+   "buyer_city": "Jaipur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in Door Guard"
+  },
+  {
+   "date": "2026-09-05 00:32",
+   "product": "Door Guard",
+   "buyer_city": "Jaipur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in Door Guard"
+  }
+ ],
+ "enquiries_30d": 18,
+ "unread_enquiries": 0,
+ "replies": [
+  {
+   "date": "2026-09-30 10:05",
+   "from": "seller",
+   "text": "Hi Ravindra,  Your requirement for Aluminium Door Seals on IndiaMART has been received.  We discussed over the call earl…"
+  },
+  {
+   "date": "2026-09-25 14:19",
+   "from": "seller",
+   "text": "We hope you had an amazing experience with us. Don't forget to provide a quick review."
+  },
+  {
+   "date": "2026-09-25 13:00",
+   "from": "seller",
+   "text": "We hope you had an amazing experience with us. Don't forget to provide a quick review."
+  },
+  {
+   "date": "2026-09-25 08:54",
+   "from": "buyer",
+   "text": "Additional details from Buyer"
+  },
+  {
+   "date": "2026-09-24 20:53",
+   "from": "seller",
+   "text": "Hi Vishnu,  Your requirement for 39 Inch Door Seal Guard on IndiaMART has been received.  We discussed over the call ear…"
+  },
+  {
+   "date": "2026-09-23 11:17",
+   "from": "seller",
+   "text": "Hi Mehboob,  Your requirement for MR A BROWN NON WOVEN DOOR SEAL on IndiaMART has been received.  We attempted to reach …"
+  },
+  {
+   "date": "2026-09-23 11:17",
+   "from": "seller",
+   "text": "Hi Mehboob, yes, MR A BROWN NON WOVEN DOOR SEAL is available"
+  },
+  {
+   "date": "2026-09-19 22:01",
+   "from": "seller",
+   "text": "Hi Prem, yes, Mr A Printed Door Seal is available"
+  }
+ ],
+ "seller_replies_30d": 21,
+ "buyer_calls": {
+  "total": 14,
+  "connected": 10,
+  "missed": 4,
+  "last": "2026-09-30 21:38",
+  "last_status": "Connected"
+ },
+ "buyleads": {
+  "count": 57,
+  "credits": 11400,
+  "last": "2026-10-01 22:37",
+  "keywords": [
+   "Door Dust Guard",
+   "Door Guards",
+   "Door Guard For Home"
+  ]
+ },
+ "whatsapp": [
+  {
+   "date": "2026-09-16 16:46",
+   "seller_said": null,
+   "bot_said": "Hi! You just spoke with *Fitpack (A Brand Surendra Kumar & Co.)* 📞 Was the call helpful?",
+   "intent": "WA_Call_Feedback"
+  },
+  {
+   "date": "2026-09-16 16:18",
+   "seller_said": null,
+   "bot_said": "Hi! You just spoke with *Dhani Ultratech* 📞 Was the call helpful?",
+   "intent": "WA_Call_Feedback"
+  },
+  {
+   "date": "2026-09-02 16:38",
+   "seller_said": null,
+   "bot_said": "How was your chat experience with IndiaMart?",
+   "intent": "MSITE_CSAT"
+  },
+  {
+   "date": "2026-09-02 12:28",
+   "seller_said": "9461205439",
+   "bot_said": null,
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-09-02 12:28",
+   "seller_said": "9461205439",
+   "bot_said": "Please enter number of *Kg* required. Example: 10 *Kg*.",
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-09-02 12:25",
+   "seller_said": "70 GSM",
+   "bot_said": "How many *Kg*?",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-09-02 12:25",
+   "seller_said": "70 GSM",
+   "bot_said": null,
+   "intent": "Msite_BL_Spec"
+  },
+  {
+   "date": "2026-09-02 12:24",
+   "seller_said": "https://m.indiamart.com/pd/25932998797?2088792  Hello *Gtech Products Private Limited*, Need best price for Non Woven Fa…",
+   "bot_said": "Please Enter GSM 80 GSM 70 GSM 90 GSM   More options 60 GSM 100 GSM 20 GSM",
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-09-01 17:04",
+   "seller_said": "http://5.imimg.com/data5/WA_9696/Doc/2026/9/640188744/TN/TX/MO/209139024/document.pdf",
+   "bot_said": "Your document has been uploaded on your Seller Dashboard. Please find the link below: https://seller…",
+   "intent": "Your document has been uploaded on your Selle.."
+  }
+ ],
+ "whatsapp_30d": 2,
+ "vani_calls": [
+  {
+   "date": "2026-08-10 12:32",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 25,
+   "summary": "Seller from Shreeva Enterprises confirmed interest in exploring IndiaMART paid services after buyers showed interest; no further details provided."
+  },
+  {
+   "date": "2026-08-08 11:15",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 14,
+   "summary": "Seller confirmed they are Shreeva Enterprises; no further details or meeting arranged."
+  },
+  {
+   "date": "2026-08-07 13:49",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 34,
+   "summary": "Seller confirmed identity as Shreeva Enterprises, engaged in brief greeting; no business details or meeting arranged."
+  }
+ ],
+ "vani_transcript_date": "2026-08-10 12:32",
+ "vani_latest_transcript": [
+  "bot: Hello ji kya meri baat Shree Vinayak Enterprises mein ho rahi hai?",
+  "seller: Hmm",
+  "seller: Haan ji",
+  "bot: Namaste IndiaMART ki taraf se Payal bol rahi hu ji. Ji main dekh pa rahi hu ki aap IndiaMART ki paid services ko explore kar rahe the right? Kaafi buyers ne aapke profile ke liye-",
+  "seller: Abhi hum busy hai baad mein call kariye."
+ ],
+ "executive_calls": {
+  "total": 22,
+  "answered": 9,
+  "last": "2026-09-16 10:17",
+  "last_duration_sec": 172
+ },
+ "pns_calls": [
+  {
+   "date": "2026-09-14 12:23",
+   "products": "Door Guard (Heavy Quality); Door Guard (Tear Drop Seal)",
+   "prices": "11 / piece; 13 / piece"
+  }
+ ],
+ "live_events": []
+}

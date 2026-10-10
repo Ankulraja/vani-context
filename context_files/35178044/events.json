@@ -1,0 +1,339 @@
+{
+ "glid": 35178044,
+ "as_of": "2026-10-02 23:59",
+ "window": {
+  "activity_days": 30,
+  "conversation_days": 180
+ },
+ "profile": {
+  "company": "DK Bean Bags",
+  "city": "New Delhi",
+  "state": "Delhi",
+  "business_type": "Proprietorship",
+  "categories": [
+   "Bean Bag",
+   "Leather Bean Bag Chair",
+   "Thermocol Beans"
+  ],
+  "paid": false,
+  "gst_verified": true,
+  "mobile_verified": true,
+  "email_verified": true,
+  "product_count": 32,
+  "catalog_quality_score": 10.0,
+  "do_not_call": false,
+  "showed_frustration": false,
+  "asked_if_bot": false,
+  "already_with_executive": false,
+  "past_objections": null,
+  "past_questions": null,
+  "bot_attempts": 1,
+  "bot_answered": 1,
+  "meetings_fixed": 1
+ },
+ "enquiries": [
+  {
+   "date": "2026-10-01 15:28",
+   "product": "White Thermocol Balls",
+   "buyer_city": "New Delhi",
+   "buyer_company": "Lucky Gift House",
+   "unread": false,
+   "message": "Bean Size: approx 1 inch size Application: Toy Filling Probable Order Value: Rs. 11,000 - 15,000 Probable Requirement Ty…"
+  },
+  {
+   "date": "2026-09-29 17:53",
+   "product": "Bean Bag Filler Rohini",
+   "buyer_city": "New Delhi",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I want to fill 2 bags of 4xl beand bag with foot rest   Quantity:   7   Kg  Size:   8-10 mm  Packaging Size:   2.5 kg  C…"
+  },
+  {
+   "date": "2026-09-28 08:03",
+   "product": "Premium Quality Thermocol Bean Bag Filler",
+   "buyer_city": "New Delhi",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Density: 8-15 Kg/m3 Color: White"
+  },
+  {
+   "date": "2026-09-24 16:23",
+   "product": "Normal Eps Thermocol Beans",
+   "buyer_city": "Bahadurgarh",
+   "buyer_company": "Sheets And Craft",
+   "unread": false,
+   "message": "Quantity: 5   Kg Bean Size: 2-3 mm Packaging Weight: 2.5 kg Probable Order Value: Rs. 1,100 - 1,500"
+  },
+  {
+   "date": "2026-09-23 17:11",
+   "product": "Thermocol Bean Balls",
+   "buyer_city": "New Delhi",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Quantity: 9   Kg Bean Size: Medium Size Application: Packaging Probable Order Value: Rs. 1,600 - 1,800"
+  },
+  {
+   "date": "2026-09-22 06:37",
+   "product": "Bean Bag Filler",
+   "buyer_city": "New Delhi",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Quantity: 3   Kg Size: 6-7 mm Packaging Size: 2.5 kg Color: White Probable Order Value: Rs. 600 - 800"
+  },
+  {
+   "date": "2026-09-21 17:49",
+   "product": "Star-21a Bean Bag",
+   "buyer_city": "Sonipat",
+   "buyer_company": "2",
+   "unread": false,
+   "message": "2  Size: XXXL I am interested in: Leather Bean Bag Chair Probable Order Value: Rs. 1,500 - 2,000 Quantity: 2   Piece"
+  },
+  {
+   "date": "2026-09-21 13:57",
+   "product": "Dark Brown Leatherette Bean Bag Chair",
+   "buyer_city": "New Delhi",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Probable Order Value: Rs. 700 - 800 Quantity: 1   Piece Size: XXL"
+  },
+  {
+   "date": "2026-09-21 07:48",
+   "product": "Bean Chair",
+   "buyer_city": "New Delhi",
+   "buyer_company": "Direct Credit",
+   "unread": true,
+   "message": "Buyer Filled Details: The buyer wants a wide and comfortable bean bag chair at the lowest price for a 60 to 70 years old…"
+  },
+  {
+   "date": "2026-09-20 12:43",
+   "product": "White Thermocol Beans",
+   "buyer_city": "New Delhi",
+   "buyer_company": "agarrbati  botic",
+   "unread": true,
+   "message": "Buyer Searched for beans filling lexavi bag  Quantity: 2   Kg Bean Size: 8-10 mm Probable Order Value: Rs. 400 - 600 App…"
+  },
+  {
+   "date": "2026-09-18 16:57",
+   "product": "Bean Bag Filler",
+   "buyer_city": "New Delhi",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Size: 8-10 mm Packaging Size: 5 kg Color: White Probable Order Value: Rs. 1,000 - 1,200 Quantity: 5   Kg"
+  },
+  {
+   "date": "2026-09-18 16:07",
+   "product": "Stillo Tear Drop Xxxl Bean Bag",
+   "buyer_city": "Ghaziabad",
+   "buyer_company": "Goyal And Sons",
+   "unread": true,
+   "message": "Quantity: 2   Piece Size: XL I am interested in: Leather Bean Bag Chair Probable Order Value: Rs. 800 - 1,500"
+  },
+  {
+   "date": "2026-09-17 16:40",
+   "product": "Small Thermocol Beans",
+   "buyer_city": "New Delhi",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Application: Artificial Items Packaging Weight: 1 kg Buyer Filled Details: 2-3 mm Probable Order Value: Rs. Upto 1,000 Q…"
+  },
+  {
+   "date": "2026-09-16 21:44",
+   "product": "EPS Thermocol Beans 2.5 kg",
+   "buyer_city": "Ghaziabad",
+   "buyer_company": null,
+   "unread": true,
+   "message": "6 kg bean bag for filling  Bean Size: 6-8 mm Application: Bean Bag Filling Packaging Weight: 2.5 kg Probable Order Value…"
+  },
+  {
+   "date": "2026-09-16 07:04",
+   "product": "Thermocol Beans",
+   "buyer_city": "New Delhi",
+   "buyer_company": "Healthy Break",
+   "unread": true,
+   "message": "Bean Size: 4-6 mm Application: Bean Bag Filling Packaging Weight: 1 kg Probable Order Value: Rs. 4,500 - 5,500 Quantity:…"
+  }
+ ],
+ "enquiries_30d": 32,
+ "unread_enquiries": 24,
+ "replies": [],
+ "seller_replies_30d": 0,
+ "buyer_calls": {
+  "total": 13,
+  "connected": 9,
+  "missed": 4,
+  "last": "2026-10-01 15:41",
+  "last_status": "Connected"
+ },
+ "buyleads": {
+  "count": 33,
+  "credits": 13800,
+  "last": "2026-10-01 01:38",
+  "keywords": []
+ },
+ "whatsapp": [
+  {
+   "date": "2026-06-04 15:35",
+   "seller_said": "Products Already Added",
+   "bot_said": null,
+   "intent": "fdbk_ob"
+  },
+  {
+   "date": "2026-06-04 15:33",
+   "seller_said": "Yes, I confirm",
+   "bot_said": null,
+   "intent": "fdbk_ob"
+  },
+  {
+   "date": "2026-06-01 17:04",
+   "seller_said": null,
+   "bot_said": "Thank you!   Your requirement for Leather Bean Bag Chair has been received.",
+   "intent": "Buy_Product"
+  },
+  {
+   "date": "2026-06-01 17:04",
+   "seller_said": null,
+   "bot_said": "Share details for approval. Delete Requirement Enter Other Details",
+   "intent": "Buy_Product"
+  },
+  {
+   "date": "2026-06-01 16:59",
+   "seller_said": null,
+   "bot_said": "Seller is waiting for quantity to share price. Enter quantity now.",
+   "intent": "Buy_Product"
+  },
+  {
+   "date": "2026-06-01 16:54",
+   "seller_said": "Bean bag",
+   "bot_said": "For Best Price of *Leather Bean Bag Chair*. Please Enter Size XXXL XXL XL   More options L",
+   "intent": "liveCustomer_Buyer_Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-06-01 16:45",
+   "seller_said": "Sell",
+   "bot_said": "Your photo has been uploaded. Add your photo as a Product  Add to Catalog: https://seller.indiamart.…",
+   "intent": "Photo_Menu_Sell"
+  },
+  {
+   "date": "2026-06-01 16:45",
+   "seller_said": "Bean bag",
+   "bot_said": "{\"queryImage\":{\"img_src\":\"http:\\/\\/5.imimg.com\\/data5\\/WA_9696\\/Default\\/2026\\/6\\/612739742\\/IN\\/GA\\…",
+   "intent": "Photo uploaded but not added as a product as .."
+  },
+  {
+   "date": "2026-05-14 18:17",
+   "seller_said": "Paid Services",
+   "bot_said": null,
+   "intent": "Paid Services of Indiamart"
+  }
+ ],
+ "whatsapp_30d": 0,
+ "vani_calls": [
+  {
+   "date": "2026-05-22 12:20",
+   "disposition": "Meeting Fixed",
+   "meeting_fixed": true,
+   "duration_sec": 75,
+   "summary": "The agent from IndiaMART called the lead regarding their interest in buyleads. The agent offered to schedule a meeting with a sales executive. The lead initially declined for tomorrow but then agreed to a meeting on Monday at 11 AM."
+  }
+ ],
+ "vani_transcript_date": null,
+ "vani_latest_transcript": [],
+ "executive_calls": {
+  "total": 0,
+  "answered": 0,
+  "last": null,
+  "last_duration_sec": null
+ },
+ "pns_calls": [
+  {
+   "date": "2026-09-29 09:44",
+   "products": "Bean Bag",
+   "prices": "1100 / piece"
+  }
+ ],
+ "live_events": [
+  {
+   "channel": "web",
+   "summary": "Seller clicked Call buyer in Lead Manager for the enquiry White Thermocol Balls (Lucky Gift House, New Delhi)",
+   "meta": {},
+   "time": "2026-10-10 13:46"
+  },
+  {
+   "channel": "voice",
+   "summary": "Seller called the IndiaMART helpline (VANI)",
+   "meta": {
+    "kind": "user_call",
+    "source": "dialer",
+    "product": null
+   },
+   "time": "2026-10-10 13:46"
+  },
+  {
+   "channel": "voice",
+   "summary": "The agent contacted the user regarding their enquiry for White Thermocol Balls, and the user confirmed they had made the enquiry.",
+   "meta": {},
+   "language": "Hindi",
+   "outcome": "resumed_and_helped",
+   "callback_time": "",
+   "time": "2026-10-10 13:47"
+  },
+  {
+   "channel": "voice",
+   "summary": "Seller called the IndiaMART helpline (VANI)",
+   "meta": {
+    "kind": "user_call",
+    "source": "dialer",
+    "product": null
+   },
+   "time": "2026-10-10 13:54"
+  },
+  {
+   "channel": "voice",
+   "summary": "The user complained about not receiving quality leads or enquiries, and the agent offered to reply to a specific enquiry for White Thermocol Balls.",
+   "meta": {},
+   "language": "Hindi",
+   "outcome": "resumed_and_helped",
+   "callback_time": "",
+   "time": "2026-10-10 13:55"
+  },
+  {
+   "channel": "voice",
+   "summary": "Seller called the IndiaMART helpline (VANI)",
+   "meta": {
+    "kind": "user_call",
+    "source": "dialer",
+    "product": null
+   },
+   "time": "2026-10-10 14:31"
+  },
+  {
+   "channel": "voice",
+   "summary": "Seller called the IndiaMART helpline (VANI)",
+   "meta": {
+    "kind": "user_call",
+    "source": "dialer",
+    "product": null
+   },
+   "time": "2026-10-10 14:36"
+  },
+  {
+   "channel": "voice",
+   "summary": "Seller called the IndiaMART helpline (VANI)",
+   "meta": {
+    "kind": "user_call",
+    "source": "dialer",
+    "product": null
+   },
+   "time": "2026-10-10 14:36"
+  },
+  {
+   "channel": "voice",
+   "summary": "The user complained about not receiving good enquiries, and the agent offered to reply to a specific enquiry for white thermocol balls from New Delhi, which the user accepted.",
+   "meta": {},
+   "language": "Hindi",
+   "outcome": "resumed_and_helped",
+   "callback_time": "",
+   "time": "2026-10-10 14:36"
+  }
+ ]
+}

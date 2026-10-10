@@ -1,0 +1,254 @@
+{
+ "glid": 93557756,
+ "as_of": "2026-10-02 23:59",
+ "window": {
+  "activity_days": 30,
+  "conversation_days": 180
+ },
+ "profile": {
+  "company": "Visionary Style Enterprise",
+  "city": "Surat",
+  "state": "Gujarat",
+  "business_type": "Proprietorship",
+  "categories": [
+   "Air Bra",
+   "Crop Top",
+   "Ladies Bra"
+  ],
+  "paid": false,
+  "gst_verified": true,
+  "mobile_verified": true,
+  "email_verified": true,
+  "product_count": 23,
+  "catalog_quality_score": 43.0,
+  "do_not_call": false,
+  "showed_frustration": false,
+  "asked_if_bot": false,
+  "already_with_executive": true,
+  "past_objections": "Callback / Deferred Engagement (Neutral) (1)",
+  "past_questions": "Identity Confirmation (1); Purpose Reason (1); Callback Contact (1)",
+  "bot_attempts": 22,
+  "bot_answered": 21,
+  "meetings_fixed": 2
+ },
+ "enquiries": [
+  {
+   "date": "2026-10-01 17:39",
+   "product": "Air Bra / AIR FOLDER BRA - Women & Ladies",
+   "buyer_city": "Surat",
+   "buyer_company": "Aplinova",
+   "unread": false,
+   "message": "I am interested in Air Bra / AIR FOLDER BRA - Women & Ladies"
+  },
+  {
+   "date": "2026-10-01 17:38",
+   "product": "Women's Sleeveless Cotton Crop Top Bra",
+   "buyer_city": "Surat",
+   "buyer_company": "Aplinova",
+   "unread": false,
+   "message": "I am interested in Women's Sleeveless Cotton Crop Top Bra"
+  },
+  {
+   "date": "2026-10-01 17:36",
+   "product": "Women's Sleeveless Cotton Crop Top Bra",
+   "buyer_city": "Surat",
+   "buyer_company": "Aplinova",
+   "unread": false,
+   "message": "I want this 5 pc on tryer base then i will buy balk"
+  },
+  {
+   "date": "2026-09-30 15:00",
+   "product": "Air Bra / AIR FOLDER BRA - Women & Ladies",
+   "buyer_city": "Surat",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Pack Type: Pack of 4 Strap Type: Broad Strap Cup Style: Wirefree"
+  },
+  {
+   "date": "2026-09-12 20:30",
+   "product": "Air Bra / AIR FOLDER BRA - Women & Ladies",
+   "buyer_city": "Surat",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in Air Bra / AIR FOLDER BRA - Women & Ladies"
+  },
+  {
+   "date": "2026-09-12 12:18",
+   "product": "Air Bra / AIR FOLDER BRA - Women & Ladies",
+   "buyer_city": "Surat",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in Air Bra / AIR FOLDER BRA - Women & Ladies"
+  }
+ ],
+ "enquiries_30d": 6,
+ "unread_enquiries": 0,
+ "replies": [
+  {
+   "date": "2026-10-01 17:44",
+   "from": "buyer",
+   "text": "I understand. How about I start with a small quantity first, and once I start getting orders, I can purchase in bulk bas…"
+  },
+  {
+   "date": "2026-10-01 17:40",
+   "from": "seller",
+   "text": "Sorry we are dealing in bulk quantity ...."
+  },
+  {
+   "date": "2026-10-01 17:40",
+   "from": "seller",
+   "text": "Hii...."
+  },
+  {
+   "date": "2026-10-01 17:40",
+   "from": "seller",
+   "text": "Hii"
+  },
+  {
+   "date": "2026-10-01 17:40",
+   "from": "buyer",
+   "text": "Hi Jayesh, what is the price for 5 Piece of Air Bra / AIR FOLDER BRA - Women &amp; Ladies?"
+  },
+  {
+   "date": "2026-09-30 15:00",
+   "from": "buyer",
+   "text": "Hey"
+  },
+  {
+   "date": "2026-09-12 20:36",
+   "from": "seller",
+   "text": "Hi ASHISH Pandav, Thanks for talking to me. Looking forward to doing business with you."
+  },
+  {
+   "date": "2026-09-12 12:18",
+   "from": "buyer",
+   "text": "Call me on 9638949508"
+  }
+ ],
+ "seller_replies_30d": 4,
+ "buyer_calls": {
+  "total": 2,
+  "connected": 2,
+  "missed": 0,
+  "last": "2026-09-05 15:37",
+  "last_status": "Connected"
+ },
+ "buyleads": {
+  "count": 0,
+  "credits": 0,
+  "last": null,
+  "keywords": []
+ },
+ "whatsapp": [
+  {
+   "date": "2026-06-21 12:01",
+   "seller_said": null,
+   "bot_said": "Hi! You just spoke with *S P Trade* 📞 Was the call helpful?",
+   "intent": "WA_Call_Feedback"
+  },
+  {
+   "date": "2026-06-21 11:55",
+   "seller_said": null,
+   "bot_said": "Share details for approval. Delete Requirement Enter Other Details",
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-06-21 11:55",
+   "seller_said": null,
+   "bot_said": "Thank you message templated",
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-06-21 11:45",
+   "seller_said": "https://m.indiamart.com/pd/24155192233?2499201  Hello *Angel Enterprise*, Need best price for 2 Aa Batteries Orange and …",
+   "bot_said": "Please Enter Product Type Rock Crawler Racing Car Stunt Car   More options Drift Car Monster Truck B…",
+   "intent": "Msite_BL_Quantity"
+  }
+ ],
+ "whatsapp_30d": 0,
+ "vani_calls": [
+  {
+   "date": "2026-09-21 11:53",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 4,
+   "summary": "The agent initiated the call by asking if the recipient was from Visionary Style Enterprise. The call ended abruptly without further conversation."
+  },
+  {
+   "date": "2026-09-20 11:56",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 21,
+   "summary": "The agent from IndiaMART called the lead from Visionary Style Enterprise to discuss improving their profile. The lead acknowledged the previous conversation and thanked the agent, but the call ended abruptly without further discussion."
+  },
+  {
+   "date": "2026-09-19 11:56",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 37,
+   "summary": "The agent called the lead from IndiaMART, reminding them of a previous conversation where the lead had requested a callback. The lead informed the agent that the callback had already happened, they had spoken, and an executive had already been sent. The lead confirmed that everything was fine and th…"
+  },
+  {
+   "date": "2026-09-18 11:52",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 50,
+   "summary": "The agent from IndiaMART called the lead regarding their profile. The lead informed the agent that they had already spoken to an executive sent by IndiaMART and requested the agent to update their system to stop further calls."
+  },
+  {
+   "date": "2026-09-17 11:55",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 32,
+   "summary": "The agent from IndiaMART called the lead to follow up on a previous conversation about improving their profile. The lead informed the agent that an executive from IndiaMART had already visited them, and their query was resolved. The lead declined further assistance."
+  },
+  {
+   "date": "2026-09-16 17:40",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 38,
+   "summary": "The agent called the lead to discuss increasing their profile's visibility on IndiaMART. The lead informed the agent that an executive had already met with them yesterday. The lead stated they did not require any further assistance at the moment."
+  }
+ ],
+ "vani_transcript_date": null,
+ "vani_latest_transcript": [],
+ "executive_calls": {
+  "total": 0,
+  "answered": 0,
+  "last": null,
+  "last_duration_sec": null
+ },
+ "pns_calls": [],
+ "live_events": [
+  {
+   "channel": "voice",
+   "summary": "The agent from IndiaMART followed up with Visionary Style Enterprise regarding a profile update, but the user stated they no longer require assistance.",
+   "time": "2026-10-09 12:07",
+   "meta": {}
+  },
+  {
+   "channel": "voice",
+   "summary": "The user questioned the AI agent about the information IndiaMART has on his account. The agent confirmed his business name, location (Surat, Gujarat), listed products (23 items including Air Bra and Crop Tops), and the number of inquiries received in the last 30 days (6).",
+   "time": "2026-10-09 12:12",
+   "meta": {}
+  },
+  {
+   "channel": "voice",
+   "summary": "The agent contacted Visionary Style Enterprise to check if they had received any new enquiries since their last interaction with an IndiaMART executive.",
+   "time": "2026-10-09 15:30",
+   "meta": {}
+  },
+  {
+   "channel": "voice",
+   "summary": "The agent contacted Visionary Style Enterprise to check if they needed help with new enquiries, but the user seemed confused or preoccupied.",
+   "time": "2026-10-09 15:31",
+   "meta": {}
+  },
+  {
+   "channel": "web",
+   "summary": "Seller browsed on Lead Manager: 1L Raag Gold Refined Palm Olein Oil (Buyer, Kanpur), 15L Fortune Refined Soyabean Oil (Buyer, Kanpur)",
+   "meta": {},
+   "time": "2026-10-10 10:50"
+  }
+ ]
+}
