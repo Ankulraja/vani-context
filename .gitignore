@@ -4,5 +4,5 @@ __pycache__/
 # context_files/
 # web/config.js
 
-# .DS_Store
+.DS_Store
 # web/widget.html
