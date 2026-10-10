@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VANI · who are we talking to?</title>
+<style>
+  :root { --bg:#f1f1ee; --card:#fff; --ink:#111; --muted:#6b6b6b; --line:#e6e6e2; --black:#111; --teal:#1d8480; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; background:var(--bg); font-family:-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); display:flex; align-items:center; justify-content:center; padding:24px; }
+  .wrap { width:100%; max-width:560px; }
+  .brand { display:flex; align-items:center; gap:10px; margin:0 0 18px 4px; }
+  .brand img { width:34px; height:34px; border-radius:9px; } .brand b { font-size:18px; } .brand span { color:var(--muted); font-size:13px; }
+  .card { background:var(--card); border-radius:24px; padding:28px; box-shadow:0 10px 40px rgba(0,0,0,.06); }
+  h1 { margin:0 0 6px; font-size:22px; } .sub { margin:0 0 22px; color:var(--muted); font-size:14px; line-height:1.5; }
+  label { display:block; font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin:0 0 6px; }
+  .row { display:flex; gap:8px; }
+  input, select { width:100%; height:48px; border:1px solid var(--line); border-radius:12px; padding:0 14px; font:inherit; font-size:15px; background:#fafaf8; }
+  input:focus, select:focus { outline:none; border-color:#999; background:#fff; }
+  .or { text-align:center; color:#aaa; font-size:12px; margin:16px 0; }
+  button { height:48px; border:0; border-radius:999px; background:var(--black); color:#fff; font:inherit; font-size:15px; font-weight:600; padding:0 22px; cursor:pointer; white-space:nowrap; }
+  button:disabled { opacity:.5; cursor:default; }
+  .status { min-height:22px; font-size:13px; color:var(--muted); margin-top:12px; } .status.err { color:#c0392b; } .status.ok { color:var(--teal); }
+  .pick { margin-top:14px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; }
+  .pick h6 { margin:0 0 6px; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+  .u { display:block; width:100%; text-align:left; white-space:normal; min-width:0; background:#fafaf8; color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:9px 12px; height:auto; font-weight:500; margin-bottom:6px; }
+  .u:hover { border-color:#999; background:#fff; } .u b { display:block; font-size:14px; } .u small { display:block; color:var(--muted); font-size:11.5px; line-height:1.35; margin-top:1px; }
+  .foot { text-align:center; color:#aaa; font-size:12px; margin-top:16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><img src="/im-logo.png" alt=""><b>VANI</b><span>· knows you before it speaks</span></div>
+  <div class="card">
+    <h1>Who are we talking to?</h1>
+    <p class="sub">Enter any IndiaMART GLID from the dataset, or pick one of the demo users. Tanya loads that user's memory before her first word.</p>
+    <label for="glid">GLID</label>
+    <div class="row"><input id="glid" inputmode="numeric" placeholder="e.g. 274238067" autofocus /><button id="go">Open demo →</button></div>
+    <div class="status" id="status"></div>
+    <div class="or">or pick a demo user</div>
+    <div class="pick" id="pick"></div>
+  </div>
+  <div class="foot">Voice AI Hackathon 2.0 · Problem 2: Memory Across Channels</div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+let users = [];
+async function load() {
+  try { users = await fetch("/users").then(r => r.json()); } catch (e) { users = []; }
+  $("#pick").innerHTML = ["buyer", "seller"].map(role => `<div><h6>${role === "buyer" ? "Buyers" : "Sellers"}</h6>${users.filter(u => u.role === role).map(u =>
+    `<button class="u" data-glid="${u.glid}"><b>${u.name}</b><small>${u.city} · GLID ${u.glid}<br>${u.hint}</small></button>`).join("")}</div>`).join("");
+  document.querySelectorAll(".u").forEach(b => { b.onclick = () => go(b.dataset.glid); });
+}
+async function go(glid) {
+  glid = String(glid || "").replace(/\D/g, "");
+  const st = $("#status");
+  if (!glid) { st.className = "status err"; st.textContent = "Please enter a GLID."; return; }
+  $("#go").disabled = true; st.className = "status"; st.textContent = "Checking the dataset…";
+  try {
+    const r = await fetch(`/lookup/${glid}`); const d = await r.json();
+    if (!r.ok) { st.className = "status err"; st.textContent = `GLID ${glid} is not in the dataset (${d.detail || r.status}).`; $("#go").disabled = false; return; }
+    st.className = "status ok"; st.textContent = `${d.name}, ${d.city} · ${d.role}. Building memory…`;
+    await fetch(`/context?glid=${glid}`);                        // builds buyer.md / seller.md if it does not exist yet (~2 s)
+    location.href = `/demo#${glid}`;
+  } catch (e) { st.className = "status err"; st.textContent = "Could not reach the API."; $("#go").disabled = false; }
+}
+$("#go").onclick = () => go($("#glid").value);
+$("#glid").addEventListener("keydown", e => { if (e.key === "Enter") go($("#glid").value); });
+load();
+</script>
+</body>
+</html>

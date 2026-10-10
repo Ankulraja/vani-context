@@ -25,7 +25,7 @@ Below is the {role}'s recent activity as JSON. Write ONLY a JSON object with the
   Hinglish in Roman script, under 25 words. It refers to the single most recent concrete thing (an enquiry,
   a call with a seller, a buy-lead, a quote, a callback that was promised) in PAST tense ("aapne bola tha",
   "aapne enquiry bheji thi") and then asks one short question to continue. Never say the agent is doing
-  something "right now".
+  something "right now". Tanya, the speaker, is a woman: in Hindi or Hinglish she uses FEMININE forms for herself ("main bol rahi hoon", "kar sakti hoon", "bhej deti hoon", "karungi"; Devanagari "बोल रही हूँ", "कर सकती हूँ"), never masculine ("bol raha hoon", "kar sakta hoon"). The user is addressed only with neutral polite "aap" forms; the user's gender is never guessed from the name.
 - "next_action": one line, English, the most useful thing VANI can help with on this call.
 - "avoid": one line, English, what VANI must not do or repeat, based on past interactions.
 {greeting_rule}
