@@ -1,0 +1,325 @@
+{
+ "glid": 87677035,
+ "as_of": "2026-10-02 23:59",
+ "window": {
+  "activity_days": 30,
+  "conversation_days": 180
+ },
+ "profile": {
+  "company": "Anuradha Oil Mill",
+  "city": "Kanpur",
+  "state": "Uttar Pradesh",
+  "business_type": "Proprietorship",
+  "categories": [
+   "Fortune Refined Soyabean Oil",
+   "Mustard Oil",
+   "Palm Olein Oil"
+  ],
+  "paid": false,
+  "gst_verified": true,
+  "mobile_verified": true,
+  "email_verified": true,
+  "product_count": 37,
+  "catalog_quality_score": 14.0,
+  "do_not_call": false,
+  "showed_frustration": false,
+  "asked_if_bot": false,
+  "already_with_executive": false,
+  "past_objections": null,
+  "past_questions": null,
+  "bot_attempts": 19,
+  "bot_answered": 13,
+  "meetings_fixed": 0
+ },
+ "enquiries": [
+  {
+   "date": "2026-09-29 14:25",
+   "product": "15L Fortune Refined Soyabean Oil",
+   "buyer_city": "Kanpur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Buyer Searched for King refined oil, Fortune oil, and Fortune King soybean oil  Packaging Size: 15 L"
+  },
+  {
+   "date": "2026-09-29 09:21",
+   "product": "1L Raag Gold Refined Palm Olein Oil",
+   "buyer_city": "Kanpur",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Packaging Type: Tin"
+  },
+  {
+   "date": "2026-09-26 17:10",
+   "product": "15 Kg Raag Gold Refined Palmolein Oil",
+   "buyer_city": "Kanpur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Buyer Filled Details: Kitne ka hai"
+  },
+  {
+   "date": "2026-09-25 11:44",
+   "product": "Raag Gold Refined Palmolein Oil",
+   "buyer_city": "Rura",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Packaging Type: Pouch"
+  },
+  {
+   "date": "2026-09-20 19:05",
+   "product": "Samridhi Refined Oil",
+   "buyer_city": "Kanpur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Buyer Filled Details: The buyer is located in Kanpur, Uttar Pradesh and requested the price of the product. Quantity: 15…"
+  },
+  {
+   "date": "2026-09-20 07:27",
+   "product": "Refined Oil",
+   "buyer_city": "Kanpur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Quantity: 100   Litre Packaging Type: Drum Packaging Size: 15 Litre Oil Source: Palm Oil Buyer Filled Details: Soybean O…"
+  },
+  {
+   "date": "2026-09-18 17:52",
+   "product": "15Kg Fortune Refined Soyabean Oil",
+   "buyer_city": "Kanpur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Packaging Size: 16 L"
+  },
+  {
+   "date": "2026-09-16 16:01",
+   "product": "Fortune Refined Soyabean Oil",
+   "buyer_city": "Kanpur",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Quantity: 150   Litre Packaging Size: 1 L Packaging Type: Pouch Probable Order Value: Rs. 20,000 to 50,000 Probable Requ…"
+  },
+  {
+   "date": "2026-09-13 06:09",
+   "product": "Rice Bran Oil",
+   "buyer_city": "Prayagraj",
+   "buyer_company": "Gupta Enterprises",
+   "unread": false,
+   "message": "I am interested in Rice Bran Oil"
+  },
+  {
+   "date": "2026-09-08 23:22",
+   "product": "Rice Bran Oil",
+   "buyer_city": "Farrukhabad",
+   "buyer_company": null,
+   "unread": false,
+   "message": "I am interested in Rice Bran Oil"
+  },
+  {
+   "date": "2026-09-08 07:58",
+   "product": "Soyabean refined oil",
+   "buyer_city": "Auraiya",
+   "buyer_company": "Shree Ganesh Namkeen",
+   "unread": false,
+   "message": "I am interested in Soyabean refined oil"
+  },
+  {
+   "date": "2026-09-05 14:56",
+   "product": "Refined Palmolein Oil, Packaging Type: Tin, Packaging Size: 15litre",
+   "buyer_city": "Kanpur",
+   "buyer_company": "Shri ram enterprises",
+   "unread": false,
+   "message": "Packaging Size: 15litre Packaging Type: Tin"
+  },
+  {
+   "date": "2026-09-05 14:10",
+   "product": "Soyabean Oil",
+   "buyer_city": "Unnao",
+   "buyer_company": null,
+   "unread": false,
+   "message": "Usage/Application: Resale Probable Order Value: Rs. 10,000 to 20,000 Probable Requirement Type: Business Use Quantity: 1…"
+  },
+  {
+   "date": "2026-09-05 12:03",
+   "product": "Palm Oil",
+   "buyer_city": "Ahmedabad",
+   "buyer_company": "M/s Aksha Trading And Auto Motors",
+   "unread": false,
+   "message": "I am interested in Palm Oil"
+  }
+ ],
+ "enquiries_30d": 14,
+ "unread_enquiries": 1,
+ "replies": [
+  {
+   "date": "2026-09-26 17:13",
+   "from": "seller",
+   "text": "160/- kg"
+  },
+  {
+   "date": "2026-09-17 13:11",
+   "from": "seller",
+   "text": "9140156868"
+  },
+  {
+   "date": "2026-09-09 00:02",
+   "from": "seller",
+   "text": "9140156868"
+  },
+  {
+   "date": "2026-09-05 14:11",
+   "from": "buyer",
+   "text": "Additional details from Buyer"
+  },
+  {
+   "date": "2026-09-05 13:47",
+   "from": "seller",
+   "text": "Hi Mohd Sufiyan, Thanks for talking to me. Looking forward to doing business with you."
+  }
+ ],
+ "seller_replies_30d": 4,
+ "buyer_calls": {
+  "total": 9,
+  "connected": 6,
+  "missed": 3,
+  "last": "2026-09-30 19:33",
+  "last_status": "Connected"
+ },
+ "buyleads": {
+  "count": 0,
+  "credits": 0,
+  "last": null,
+  "keywords": []
+ },
+ "whatsapp": [
+  {
+   "date": "2026-09-16 12:11",
+   "seller_said": null,
+   "bot_said": "Hi! *Excellent Motors* tried to reach you 📞 Did you connect?",
+   "intent": "WA_Callback_Connect_Q"
+  },
+  {
+   "date": "2026-09-13 21:45",
+   "seller_said": null,
+   "bot_said": "Hi! *Meena E-Vehicle Delivery* tried to reach you 📞 Did you connect?",
+   "intent": "WA_Callback_Connect_Q"
+  },
+  {
+   "date": "2026-07-11 14:23",
+   "seller_said": "Kanpur",
+   "bot_said": "Thank you message templated",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-07-11 14:22",
+   "seller_said": "Winterized",
+   "bot_said": "Share photos for your requirements!",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-07-11 14:22",
+   "seller_said": "Winterized",
+   "bot_said": null,
+   "intent": "Msite_BL_Spec"
+  },
+  {
+   "date": "2026-07-11 14:22",
+   "seller_said": "Tanker",
+   "bot_said": "Please Enter Processing Type Refined Physically Refined Cold Pressed   More options Winterized Crude",
+   "intent": "Msite_BL_Spec"
+  },
+  {
+   "date": "2026-07-11 14:22",
+   "seller_said": "10000",
+   "bot_said": "Please Enter Packaging Type Tin Pouch Tanker   More options Drum Bottle Box",
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-07-11 14:22",
+   "seller_said": "200 L",
+   "bot_said": "How many *Litre*?",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-07-08 11:51",
+   "seller_said": null,
+   "bot_said": "Hi! You just spoke with *Versatile Foods And Marketing Private Limited* 📞 Was the call helpful?",
+   "intent": "WA_Call_Feedback"
+  }
+ ],
+ "whatsapp_30d": 2,
+ "vani_calls": [
+  {
+   "date": "2026-09-02 12:09",
+   "disposition": "Not Interested",
+   "meeting_fixed": false,
+   "duration_sec": 6,
+   "summary": "The agent initiated the call by asking if they were speaking with Anuradha Oil Mill. The call disconnected abruptly after the agent's initial question."
+  },
+  {
+   "date": "2026-09-01 11:55",
+   "disposition": "Call Later / Busy",
+   "meeting_fixed": false,
+   "duration_sec": 12,
+   "summary": "The agent called a lead to inquire about Anuradha Oil Mill. The lead stated that it was a wrong number. The agent apologized and ended the call."
+  },
+  {
+   "date": "2026-08-31 18:20",
+   "disposition": "Call Later / Busy",
+   "meeting_fixed": false,
+   "duration_sec": 18,
+   "summary": "The agent called a number asking if it belonged to Anuradha Oil Mill. The lead stated it was a wrong number. The agent apologized and ended the call."
+  },
+  {
+   "date": "2026-08-31 15:17",
+   "disposition": "Not Interested",
+   "meeting_fixed": false,
+   "duration_sec": 9,
+   "summary": "The agent initiated the call by asking if they were speaking with Anuradha Oil Mill. The lead confirmed and asked the agent to proceed. The agent then inquired whether the lead's business was wholesale or retail."
+  },
+  {
+   "date": "2026-08-12 19:00",
+   "disposition": "Not Interested",
+   "meeting_fixed": false,
+   "duration_sec": 94,
+   "summary": "The agent called the lead from IndiaMART to discuss increasing leads for soya oil. The agent offered to set up a meeting with a sales executive to improve the lead's profile visibility. The lead declined a physical meeting, stating he was in Kanpur. The agent then proposed an online meeting, but the…"
+  },
+  {
+   "date": "2026-08-12 18:50",
+   "disposition": "Not Interested",
+   "meeting_fixed": false,
+   "duration_sec": 6,
+   "summary": "The agent initiated the call by asking if the recipient was from Anuradha Oil Mill. The call ended without any further conversation or response from the lead."
+  }
+ ],
+ "vani_transcript_date": null,
+ "vani_latest_transcript": [],
+ "executive_calls": {
+  "total": 0,
+  "answered": 0,
+  "last": null,
+  "last_duration_sec": null
+ },
+ "pns_calls": [
+  {
+   "date": "2026-09-07 09:46",
+   "products": "Refined Oil",
+   "prices": null
+  }
+ ],
+ "live_events": [
+  {
+   "channel": "voice",
+   "summary": "Seller called the IndiaMART helpline (VANI)",
+   "meta": {
+    "kind": "user_call",
+    "source": "dialer",
+    "product": null
+   },
+   "time": "2026-10-10 10:52"
+  },
+  {
+   "channel": "web",
+   "summary": "Seller browsed on Lead Manager: Bean Bag Filler (Buyer, New Delhi), Star-21a Bean Bag (2, Sonipat), Bean Bag Filler Rohini (Buyer, New Delhi), White Thermocol Balls (Lucky Gift House, New Delhi)",
+   "meta": {},
+   "time": "2026-10-10 13:46"
+  }
+ ]
+}

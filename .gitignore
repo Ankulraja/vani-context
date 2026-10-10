@@ -1,8 +1,8 @@
 .env
 .venv/
 __pycache__/
-context_files/
-web/config.js
+# context_files/
+# web/config.js
 
 .DS_Store
-web/widget.html
+# web/widget.html

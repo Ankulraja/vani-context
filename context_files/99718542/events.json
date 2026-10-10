@@ -1,0 +1,164 @@
+{
+ "glid": 99718542,
+ "role": "buyer",
+ "as_of": "2026-10-01 10:24",
+ "window": {
+  "activity_days": 30
+ },
+ "profile": {
+  "name": "Akshay Chavan",
+  "company": null,
+  "city": "Raigad",
+  "customer_type": "Free",
+  "mobile_verified": true,
+  "email_verified": false,
+  "gst_verified": false,
+  "registered_since": "6 Y 8 M",
+  "listing_status": "NFL",
+  "preferred_cities": null
+ },
+ "activity_counts": {
+  "browsed": 16,
+  "buy-lead posted": 2,
+  "searched": 7,
+  "enquiry sent": 22,
+  "called seller": 11
+ },
+ "top_categories": [
+  {
+   "category": "Scrub Pads",
+   "events": 13
+  },
+  {
+   "category": "Dhoopbatti Raw Material",
+   "events": 9
+  },
+  {
+   "category": "Agarbatti Powder",
+   "events": 8
+  },
+  {
+   "category": "Agarbatti Raw Material",
+   "events": 8
+  }
+ ],
+ "sellers_contacted": 10,
+ "recent_activity": [
+  {
+   "date": "2026-09-26 23:05",
+   "type": "Browse",
+   "what": "browsed",
+   "category": null,
+   "keyword": null,
+   "seller_glid": null
+  },
+  {
+   "date": "2026-09-26 20:38",
+   "type": "Browse",
+   "what": "browsed",
+   "category": null,
+   "keyword": null,
+   "seller_glid": null
+  },
+  {
+   "date": "2026-09-12 22:25",
+   "type": "BL",
+   "what": "buy-lead posted",
+   "category": null,
+   "keyword": "Incense Stick Pouch",
+   "seller_glid": null
+  },
+  {
+   "date": "2026-09-12 22:05",
+   "type": "Browse",
+   "what": "browsed",
+   "category": "Incense Stick Pouch",
+   "keyword": "incense stick pouch",
+   "seller_glid": "31929298"
+  },
+  {
+   "date": "2026-09-12 22:05",
+   "type": "Browse",
+   "what": "browsed",
+   "category": "Incense Stick Pouch",
+   "keyword": "incense stick pouch",
+   "seller_glid": "5921987"
+  },
+  {
+   "date": "2026-09-12 22:04",
+   "type": "Search",
+   "what": "searched",
+   "category": null,
+   "keyword": "%E0%A4%A7%E0%A5%82%E0%A4%AA%20sticks%20%E0%A4%AA%E0%A4%BE%E0%A4%B0%E0%",
+   "seller_glid": null
+  },
+  {
+   "date": "2026-09-12 22:03",
+   "type": "Search",
+   "what": "searched",
+   "category": null,
+   "keyword": "%E0%A4%A7%E0%A5%82%E0%A4%AA%20sticks%20%E0%A4%AA%E0%A4%BE%E0%A4%B0%E0%",
+   "seller_glid": null
+  },
+  {
+   "date": "2026-09-12 22:02",
+   "type": "Browse",
+   "what": "browsed",
+   "category": null,
+   "keyword": null,
+   "seller_glid": null
+  },
+  {
+   "date": "2026-09-04 12:53",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": "Scrub Pads",
+   "keyword": "Green Scrub Pad (4x5) (10mm)",
+   "seller_glid": "104683660"
+  },
+  {
+   "date": "2026-09-04 12:52",
+   "type": "C2C",
+   "what": "called seller",
+   "category": "Scrub Pads",
+   "keyword": "Green Scrub Pad (4x5) (10mm)",
+   "seller_glid": "104683660"
+  },
+  {
+   "date": "2026-09-04 12:52",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": "Scrub Pads",
+   "keyword": "Green Scrub Pad (4x5) (10mm)",
+   "seller_glid": "104683660"
+  },
+  {
+   "date": "2026-09-04 12:51",
+   "type": "ENQ",
+   "what": "enquiry sent",
+   "category": "Scrub Pads",
+   "keyword": "Cleaning Scrub Pads",
+   "seller_glid": "2621589"
+  }
+ ],
+ "last_enquiry": {
+  "title": "Incense Sticks Raw Material",
+  "text": "I am interested in Incense Sticks Raw Material"
+ },
+ "last_lead": {
+  "title": "Sticker Printing",
+  "date": "2026-10-01 00:00"
+ },
+ "active_buyleads": [],
+ "enquiries_30d": 0,
+ "enquiries_90d": 0,
+ "whatsapp": [],
+ "indiamart_calls": [],
+ "tickets": {
+  "open_7d": 0,
+  "negative_feedback_7d": 0,
+  "wip_type": null
+ },
+ "last_call_summary": null,
+ "live_events": []
+}

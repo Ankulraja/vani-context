@@ -1,0 +1,330 @@
+{
+ "glid": 7444262,
+ "as_of": "2026-10-02 23:59",
+ "window": {
+  "activity_days": 30,
+  "conversation_days": 180
+ },
+ "profile": {
+  "company": "Wicks N More By Chandrani",
+  "city": "Kolkata",
+  "state": "West Bengal",
+  "business_type": "Proprietorship",
+  "categories": [
+   "Tamper Proof Courier Bags",
+   "Direct Thermal Labels",
+   "Jewelry Gift Box"
+  ],
+  "paid": false,
+  "gst_verified": true,
+  "mobile_verified": true,
+  "email_verified": true,
+  "product_count": 48,
+  "catalog_quality_score": 65.0,
+  "do_not_call": true,
+  "showed_frustration": false,
+  "asked_if_bot": false,
+  "already_with_executive": false,
+  "past_objections": null,
+  "past_questions": null,
+  "bot_attempts": 11,
+  "bot_answered": 11,
+  "meetings_fixed": 0
+ },
+ "enquiries": [
+  {
+   "date": "2026-10-01 21:07",
+   "product": "Meesho Poly Courier Bag 10 x 14 inch",
+   "buyer_city": "Rajarhat",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Meesho Poly Courier Bag 10 x 14 inch"
+  },
+  {
+   "date": "2026-10-01 19:38",
+   "product": "Meesho Poly Courier Bag 6 x 8 inch",
+   "buyer_city": "Patna",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Meesho Poly Courier Bag 6 x 8 inch"
+  },
+  {
+   "date": "2026-10-01 14:19",
+   "product": "Meesho Barcode Packing Material",
+   "buyer_city": "Kolkata",
+   "buyer_company": "BrightLife Led Menufactring Company",
+   "unread": true,
+   "message": "Size (Inch): 12x16 inch Printing Type: Plain"
+  },
+  {
+   "date": "2026-09-30 17:02",
+   "product": "Meesho Poly Courier Bag 10 x 14 inch",
+   "buyer_city": "South 24 Parganas",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Bag Material: Poly Mailer Closure Type: Self Adhesive Color: White Special Features: Tamper Proof"
+  },
+  {
+   "date": "2026-09-29 17:12",
+   "product": "Meesho Poly Courier Bag 12 x 16 inch",
+   "buyer_city": "Tamluk",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Meesho Poly Courier Bag 12 x 16 inch"
+  },
+  {
+   "date": "2026-09-27 20:08",
+   "product": "Meesho Poly Courier Bag 12 x 16 inch",
+   "buyer_city": "Pinarayi",
+   "buyer_company": "maniyath logistics",
+   "unread": false,
+   "message": "I am interested in Meesho Poly Courier Bag 12 x 16 inch"
+  },
+  {
+   "date": "2026-09-26 10:50",
+   "product": "Flipkart Courier Bag 24x25 square feet",
+   "buyer_city": "Kolkata",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Flipkart Courier Bag 24x25 square feet"
+  },
+  {
+   "date": "2026-09-26 01:32",
+   "product": "Flipkart Courier Bag 25 x 28 inch",
+   "buyer_city": "Kolkata",
+   "buyer_company": "Infa mosquito net",
+   "unread": true,
+   "message": "I am interested in Flipkart Courier Bag 25 x 28 inch"
+  },
+  {
+   "date": "2026-09-26 01:21",
+   "product": "Meesho Poly Courier Bag 14 x 18 inch",
+   "buyer_city": "Kolkata",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Meesho Poly Courier Bag 14 x 18 inch"
+  },
+  {
+   "date": "2026-09-25 20:01",
+   "product": "Meesho Poly Courier Bag 12 x 16 inch",
+   "buyer_city": "Malda",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Meesho Poly Courier Bag 12 x 16 inch"
+  },
+  {
+   "date": "2026-09-25 09:20",
+   "product": "Flipkart Courier Bag 12 X 16 Inch",
+   "buyer_city": "Shilda",
+   "buyer_company": null,
+   "unread": true,
+   "message": "Buyer Searched for flipkart polybag opaque & flipkart polybag<br><br>"
+  },
+  {
+   "date": "2026-09-25 08:57",
+   "product": "Flipkart Courier Bag 14 x 18 inch",
+   "buyer_city": "Shilda",
+   "buyer_company": null,
+   "unread": true,
+   "message": "I am interested in Flipkart Courier Bag 14 x 18 inch"
+  },
+  {
+   "date": "2026-09-24 14:01",
+   "product": "Meesho Poly Courier Bag 10 x 14 inch",
+   "buyer_city": "Gola Bazar",
+   "buyer_company": "Pappu Hosiery",
+   "unread": true,
+   "message": "I am interested in Meesho Poly Courier Bag 10 x 14 inch"
+  },
+  {
+   "date": "2026-09-23 17:27",
+   "product": "Meesho Poly Courier Bag 12 x 16 inch",
+   "buyer_city": "Chandpur",
+   "buyer_company": "Sanchita Sarkar Ghosh",
+   "unread": true,
+   "message": "I am interested in Meesho Poly Courier Bag 12 x 16 inch"
+  },
+  {
+   "date": "2026-09-23 15:00",
+   "product": "Pearl Stud Earrings for Women",
+   "buyer_city": "Bokaro",
+   "buyer_company": "Argo Textile",
+   "unread": false,
+   "message": "I am interested in Pearl Stud Earrings for Women"
+  }
+ ],
+ "enquiries_30d": 57,
+ "unread_enquiries": 44,
+ "replies": [
+  {
+   "date": "2026-09-29 17:15",
+   "from": "buyer",
+   "text": "Kindly share your catalog"
+  },
+  {
+   "date": "2026-09-29 17:15",
+   "from": "buyer",
+   "text": "Hello sir"
+  },
+  {
+   "date": "2026-09-27 20:11",
+   "from": "seller",
+   "text": "Retail Rs.4.50/- Wholesale Rs.4.00/- Per pc price"
+  },
+  {
+   "date": "2026-09-27 20:10",
+   "from": "seller",
+   "text": "Available"
+  },
+  {
+   "date": "2026-09-26 06:37",
+   "from": "buyer",
+   "text": "Additional details from Buyer Bag Material Ldpe Bag Size 25x28 Inch"
+  },
+  {
+   "date": "2026-09-23 16:46",
+   "from": "seller",
+   "text": "Available"
+  },
+  {
+   "date": "2026-09-23 11:33",
+   "from": "buyer",
+   "text": "100 pc koto ?"
+  },
+  {
+   "date": "2026-09-23 11:20",
+   "from": "seller",
+   "text": "50 hobe na"
+  }
+ ],
+ "seller_replies_30d": 11,
+ "buyer_calls": {
+  "total": 44,
+  "connected": 20,
+  "missed": 24,
+  "last": "2026-10-01 17:33",
+  "last_status": "Connected"
+ },
+ "buyleads": {
+  "count": 0,
+  "credits": 0,
+  "last": null,
+  "keywords": []
+ },
+ "whatsapp": [
+  {
+   "date": "2026-09-06 18:43",
+   "seller_said": null,
+   "bot_said": "How was your chat experience with IndiaMart?",
+   "intent": "MSITE_CSAT"
+  },
+  {
+   "date": "2026-09-06 18:01",
+   "seller_said": null,
+   "bot_said": "Hi! *Shree Raj International Private Limited* tried to reach you 📞 Did you connect?",
+   "intent": "WA_Callback_Connect_Q"
+  },
+  {
+   "date": "2026-09-06 15:43",
+   "seller_said": null,
+   "bot_said": "Hi! Did you connect with *Shree Raj International Private Limited*? 📞 Call now for best price & quic…",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-09-06 14:33",
+   "seller_said": "12 micron",
+   "bot_said": "How many *Roll*?",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-09-06 14:33",
+   "seller_said": "12 micron",
+   "bot_said": null,
+   "intent": "Msite_BL_Spec"
+  },
+  {
+   "date": "2026-09-06 14:32",
+   "seller_said": "https://m.indiamart.com/pd/6496189362?5360216  Hello *Shree Raj International Private Limited*, Need best price for Pof …",
+   "bot_said": "Please Enter Thickness 19 micron 25 micron 15 micron   More options 12 micron 50 micron 51 micron",
+   "intent": "Msite_BL_Quantity"
+  },
+  {
+   "date": "2026-09-06 14:31",
+   "seller_said": "Roll",
+   "bot_said": "Share photos for your requirements!",
+   "intent": "Msite_BL"
+  },
+  {
+   "date": "2026-09-06 14:31",
+   "seller_said": "Roll",
+   "bot_said": null,
+   "intent": "Msite_BL_Spec"
+  },
+  {
+   "date": "2026-09-06 14:31",
+   "seller_said": "12 inch",
+   "bot_said": "Please Enter Film Form Roll Center Fold Jumbo Roll   More options Pouch Sheet Cut Bags",
+   "intent": "Msite_BL_Spec"
+  }
+ ],
+ "whatsapp_30d": 16,
+ "vani_calls": [
+  {
+   "date": "2026-08-10 12:06",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 5,
+   "summary": "The agent initiated the call by asking if the lead was from 'Vicks N More by Chandrani'. The call ended abruptly without any further conversation or response from the lead."
+  },
+  {
+   "date": "2026-08-08 13:11",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 49,
+   "summary": "The agent tried to confirm if the lead was from \"Wix N More by Chandrani\" and asked if they were available to talk. The lead did not respond, and the agent disconnected the call."
+  },
+  {
+   "date": "2026-08-08 13:02",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 4,
+   "summary": "The agent initiated the call by asking if the lead was from 'Wicks N More by Chandrani'. The lead did not respond, and the call disconnected abruptly."
+  },
+  {
+   "date": "2026-08-08 12:43",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 7,
+   "summary": "The agent initiated the call by asking if the lead was from 'Wix N More by Chandrani'. The call ended abruptly without any further conversation or response from the lead."
+  },
+  {
+   "date": "2026-08-08 12:20",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 3,
+   "summary": "The agent initiated the call by asking if the lead was from 'Vicks N More by Chandrani'. The call disconnected abruptly after the agent's question."
+  },
+  {
+   "date": "2026-08-07 12:23",
+   "disposition": "General (talked)",
+   "meeting_fixed": false,
+   "duration_sec": 60,
+   "summary": "The agent from IndiaMART introduced herself and asked if the lead was available to talk. The lead responded with an unclear statement. The agent then asked if the lead wanted to continue the conversation or reschedule, but the lead's response was again unclear. The call ended without a clear outcome…"
+  }
+ ],
+ "vani_transcript_date": "2026-08-08 13:11",
+ "vani_latest_transcript": [
+  "bot: Hello, kya aap Vix and More by Chandrani se bol rahe hain?",
+  "bot: Kya aap abhi bhi wahan hain? Kripya jawab den.",
+  "bot: Aap abhi available hain? Kya aap se baat kar sakta hun ya baad me call karun?",
+  "bot: Apna samay dene ke liye dhanyavad. Aapka din shubh ho."
+ ],
+ "executive_calls": {
+  "total": 0,
+  "answered": 0,
+  "last": null,
+  "last_duration_sec": null
+ },
+ "pns_calls": [],
+ "live_events": []
+}
