@@ -3,3 +3,5 @@
 __pycache__/
 context_files/
 Datasetweb/config.js
+
+.DS_Store
