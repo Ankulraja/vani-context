@@ -2,6 +2,8 @@
 .venv/
 __pycache__/
 context_files/
-Datasetweb/config.js
+Dataset/
+web/config.js
 
 .DS_Store
+web/widget.html
