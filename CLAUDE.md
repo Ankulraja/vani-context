@@ -19,6 +19,107 @@ re-reading the hackathon PDF and the earlier chat. Keep it updated when the plan
 - Since 2026-10-09 ~16:00 IST the user wants replies in **simple English** again (was Hinglish before).
   Code, file names and commands stay in English.
 
+## CURRENT STATE — read this first (2026-10-10 14:50 IST, hackathon Day 2; submission window 14:00–23:59 today)
+
+Everything below this section is background and a dated build log (oldest first). This section is the whole picture now.
+
+### What exists and works
+- **Product:** a memory layer around Sarvam's hosted voice agent. `GET /context` builds `context_files/<glid>/{buyer,seller}.md`
+  from the organiser dataset + live events, in ~2 s, and hands the agent a 10-line **call card**, a personalised **greeting**,
+  an **opener**, next action and "avoid" line before its first word. New activity on any channel (`POST /events`, WhatsApp,
+  website, call end) rebuilds the file (freshness ~1.5–2 s). Lookback: 30 d activity / 180 d conversations (README).
+- **Two Sarvam agents, persona "Tanya"** (VANI = the service name; she introduces herself only as Tanya from IndiaMART):
+  | Agent | id | live version | draft | default glid |
+  |---|---|---|---|---|
+  | VANI IndiaMART (**buyer**) | `VANI-IndiaM-b67b20da-8a1b` | v24 | v25 | 274238067 Aarti Singh |
+  | VANI IndiaMART Seller | `VANI-IndiaM-61f2af95-c5b7` | v6 | v7 | 95568576 Alfa Enterprises |
+  Same voice (Sarika - Conversational, `01a0cf16-97b2-…`, pace 1.1, single voice, no per-language mapping), same 4 tools,
+  same API. Each prompt = Persona / Environment / Playbook A (IndiaMART called) / Playbook B (user called) / shared steps /
+  Guardrails. The seller prompt has a section "What 9,657 past calls taught us" (from `docs/seller_call_insights.md`).
+  **Since 13:36 IST (buyer v23 / seller v3) both prompts carry "## IndiaMART facts the agent may state" (verified from
+  help.indiamart.com: matchmaking platform not party to the deal, helpline 096-9696-9696 7am-11pm, BuyLead vs direct enquiry,
+  badges, Pay with IndiaMART closed 31 Mar 2024, Payment Protection Plan rules, safe-deal advice, Lead Manager, paid plans
+  WITHOUT prices) and a 9/10-rule customer-care "## Guardrails" (identity, IndiaMART-only scope, truth, promises / no selling,
+  money+OTP, privacy, disputes+complaints, respect, must-avoid). Sources + dataset evidence + chat test results:
+  `docs/indiamart_facts_and_guardrails.md`; full prompt copies `docs/agent_prompt_{buyer,seller}.md` (the MCP `agents get`
+  `include` param is ignored by this client, so the prompts were recovered from session transcripts; keep the docs copies
+  in sync after every prompt edit). `configure_agent` takes `agent_id` + `prompt`.
+  **13:55 IST seller helpline fix (user: DK Bean Bags heard "aapne thermocol ball ke liye enquiry ki thi"):** in `_call_lines()`
+  a SELLER dialing the helpline now gets a plain welcome (name + "main Tanya, IndiaMART helpline" + "kya help chahiye"), no
+  recall in the greeting; the latest RECEIVED enquiry is offered only in the opener in seller words ("aapko X ki enquiry aayi thi,
+  buyer ko reply bhej doon?"). `CALL_LINES_PROMPT` has a vocabulary rule (buyer sends, seller receives); outbound fallback opener
+  fixed for sellers; seller prompt Playbook B step 1 updated (committed v4). Buyers keep the recall in the greeting.
+  **14:35 IST Tanya is female (user rule):** every prompt that writes her lines (agent Speaking style on both agents, buyer v24 /
+  seller v5; API `CALL_LINES_PROMPT`, `WA_SEND_PROMPT`, `prefs.GREETING_RULE`, `insight.PROMPT`) says she uses feminine Hindi forms
+  (बोल रही हूँ / kar sakti hoon), never masculine; `prefs.feminine()` is a code guard that rewrites राहा हूँ→रही हूँ, sakta→sakti,
+  karunga→karungi etc. and is applied to greetings and call-intent openers. Users stay in neutral आप forms.
+  **14:45 IST whole-memory answers (user: "not only the last activity"):** seller call card now has a `Health check (last 30 days)`
+  line (enquiries received / unread / replies, buyer calls + missed, buyleads + credits, WhatsApp) and a rule-based `likely cause`
+  line (no replies, unread >= 3, buyleads without replies, missed calls, < 5 products) in `call_card.py`; buyer card got an
+  `Activity` line. Seller prompt has a new section "How a question or complaint is answered" (read the whole card, number first,
+  then one question, offer to reply on their behalf; irrelevant leads -> categories; missing number -> get_more_history), committed
+  v6. `HISTORY_PROMPT` reasons over the whole file from the user's side. Verified by send_chat on DK Bean Bags: "achhi enquiry nahi
+  mil rahi" -> "aapke paas 24 enquiries unread hain aur 30 din mein ek bhi reply nahi, koi dikkat aa rahi hai?".
+  **14:50 IST server check + 2 fixes:** API, tunnel and Sarvam egress all OK (public /health 200, Sarvam IP hitting /context and
+  /events). Bug from the 14:45 card change fixed: buyer `sellers_contacted` is an int -> `len()` crashed `/context` for every buyer
+  (TypeError in call_card.py); all 5 curated users rebuild fine now. Greeting topic: `prefs.latest_topic()` skips topic-less clicks
+  (opened Lead Manager, helpline call, no-answer) so Alfa no longer hears "Lead Manager par baat karni thi"; both builders use it.
+  Buyer chat on v24 through the tunnel recalled Aarti's WhatsApp message about the Duke e-rickshaw sent one minute earlier.
+  Barge-in: hybrid VAD, no interruption dampening. Org `01a11128-bd2a-794c-a92a-5f518eacaba5`, workspace `01a11128-bd2f-7b40-9f2d-a2a3b2edf5d7`.
+- **Tools on BOTH agents** (ids differ per agent and change on every commit → `agents get include=tools` before editing):
+  `load_user_memory` (on_start, GET `<TUNNEL>/context?glid={{glid}}&uid={{user_identifier}}`, saves call_card→user_context,
+  greeting, language→preferred_language, opener, next_action, avoid, name→user_name, role→user_role, glid),
+  `get_more_history` (run, GET `/history?glid=&question=`, resp `{{answer}}`), `save_call_to_memory` (on_end, POST `/events`
+  with glid, channel voice, summary=call_summary, language=user_language, outcome=call_outcome, callback_time),
+  `send_whatsapp` (run, POST `/whatsapp/send` {glid, request}, resp `{{spoken}}`). Egress IP `4.213.167.70`.
+- **Tunnel:** cloudflared quick tunnel, URL changes on every restart. Current `https://header-notebook-plastics-saying.trycloudflare.com`
+  (also in `/tmp/vani_public_url.txt`). **Restart procedure:** `cd repo && nohup ./.venv/bin/uvicorn app.api:app --port 8000 --reload
+  > /tmp/vani_api.log 2>&1 &` then `nohup cloudflared tunnel --url http://localhost:8000 > /tmp/cloudflared.log 2>&1 &`, read the URL
+  from the log, then via MCP `configure_app_tool` ×4 per agent (8 calls, same connector_config with the new url) and `agents commit`
+  ×2. If Tanya says "Hello ji" / "no recent activity" the on_start tool could not reach the API. MCP login expires daily (`/mcp`).
+- **Call flows (demo page):** Flow A = IndiaMART calls the user: triggers are Get Latest Price on a product, Post Requirement,
+  or a WhatsApp message that asks for help (`needs_help()` regex); phone rings, Tanya opens on that reason. Flow B = user calls:
+  Call Now on a product (call dedicated to it) or 📞 Call Tanya (helpline, recalls latest activity). Mechanism: page `POST /active
+  {glid, call:{direction, source, reason, label, product}}` → API `_call_lines()` writes greeting + opener + "THIS CALL:" card line
+  with sarvam-105b; the agent's on_start fetch (uid path) gets them once, then the intent is consumed. Greetings always use the name
+  (buyer first name, seller company). Memory records "VANI called X about …; picked up / no answer" and "X called VANI about …".
+- **Mid-call WhatsApp:** when the user asks for details, Tanya says it is being sent and calls `send_whatsapp`; the API composes a
+  Hinglish message (facts only, product/supplier links, photo) from the products in memory, with a live indiamart.com search when
+  the requested product has no card (e.g. only talked about); it lands in `whatsapp_thread.json` + a whatsapp event; the demo's
+  WhatsApp phone polls during the call and has a ↻ refresh button.
+- **Demo pages (served by the API):** `/` = start page (`web/start.html`: GLID box + 10 curated users from `GET /users`; any dataset
+  GLID works via `GET /lookup/{glid}`), `/demo#<glid>` = three screens (`web/demo.html`): WhatsApp phone (thread bot, photo
+  messages, refresh), emulated IndiaMART website (real search results from `app/sources/im_search.py`, real home feed from
+  `im_home.py`, PDP, ← → history, "Your recent activity" from memory, 3 CTAs per card: Get Latest Price / WhatsApp / Call Now;
+  Live indiamart.com mode via the Chrome extension in `extension/`), call phone (helpline idle, ringback, keypad, Tanya labels),
+  🧠 Memory drawer (file + "VANI will open with"). `web/config.js` (git-ignored) holds the embed key, `appId` (buyer) and
+  `appIdSeller`; the page picks the agent by role. Old detailed page: `/index.html`.
+  **Since 13:10 IST the embed key is NOT in a file any more:** `web/config.js` was deleted; the pages still load `/config.js`,
+  but it is now an API route (`config_js()` in api.py) that builds `window.SARVAM_EMBED` from `.env`
+  (`SARVAM_EMBED_KEY`, `SARVAM_ORG_ID`, `SARVAM_WORKSPACE_ID`, `SARVAM_APP_ID`, `SARVAM_APP_ID_SELLER`). api.py now calls
+  `load_dotenv` itself. After rotating the key in the Sarvam dashboard: edit `SARVAM_EMBED_KEY` in `.env` and restart uvicorn.
+- **Data:** organiser `Dataset/` (git-ignored, real names) stands in for the Day-1 APIs; `app/sources/seller.py` / `buyer.py` are
+  the only files that know the raw layout. Curated demo users: buyers 274238067 Aarti Singh, 59681744 Ramesh, 274154429 Shinehomz,
+  99718542 Akshay Chavan, 43279328 Prem Kumar; sellers 95568576 Alfa Enterprises, 253633098 Govind Enterprise, 35178044 DK Bean
+  Bags, 87677035 Anuradha Oil Mill, 93557756 Visionary Style (hard case: 22 calls, said stop, met the executive).
+- **Docs for the submission:** `README.md` (architecture, sources, lookback, refresh, real vs simulated, credits), `skills.md`
+  (dated build journey, 15 % of the score; needs today's entries), `docs/seller_call_insights.md` (dataset analysis).
+
+### Open items / risks (in priority order)
+1. **DATA LEAK (needs the user):** commit ce91289 pushed `Dataset/` and `web/config.js` (Sarvam embed key) to the PUBLIC GitHub
+   repo Ankulraja/vani-context. They are untracked now but still in history (commits ce91289, a55123c, 1707511). Needed: make
+   the repo private, purge history (`git filter-repo --path Dataset --path web/config.js --invert-paths` + force-push), rotate the
+   embed key in the Sarvam dashboard, put the new key in `.env` as `SARVAM_EMBED_KEY` (done 13:10: key moved out of the repo).
+2. Uncommitted work in git right now: `app/api.py`, `web/demo.html`, `web/config.js.example`, `web/start.html`, `docs/`, `CLAUDE.md`.
+   Branch `Ankul-main`; `main` is fast-forwarded to it after each push.
+3. Tunnel URL is not static (ngrok static domain needs the user's ngrok account; `scripts/tunnel.sh` supports `NGROK_DOMAIN`).
+4. Not yet done for the deck's success metrics: a measured "lift" of the personalised opening vs a cold greeting; the "app"
+   channel is not shown; skills.md lacks the Day-2 entries; the 5–7 min demo video; the approach note.
+5. Inbound telephony: no Sarvam phone number in the workspace; `data/phone_to_glid.json` maps caller numbers for the demo.
+6. Seller-side triggers are thinner than buyer-side: Lead Manager "Reply" / "Call buyer" only save memory (no call); a new
+   unread enquiry does not ring the seller yet.
+7. Each call's memory is loaded once at call start (platform limit); mid-call changes are fetched on demand via get_more_history.
+
 ## The hackathon (facts from the deck, 31 pages)
 
 - **Voice AI Hackathon 2.0**, IndiaMART, **9–10 Oct 2026**, in office (11th floor).
@@ -163,7 +264,7 @@ Design decisions:
 - Lookback window: to be decided (default idea: 30 days activity, 90 days enquiries).
 - Fallback if the hosted agent is blocked at the event: own loop with Saaras + sarvam-105b + Bulbul via SDK.
 
-## Sarvam agent + MCP state (2026-10-08, evening — MCP WORKING)
+## Build log — Sarvam agent + MCP + demo (chronological, oldest first; 2026-10-08 evening → now)
 
 - Agent **"VANI IndiaMART"**, id `VANI-IndiaM-b67b20da-8a1b`, owner ankul.patel@indiamart.com.
   Org id `01a11128-bd2a-794c-a92a-5f518eacaba5`, workspace id `01a11128-bd2f-7b40-9f2d-a2a3b2edf5d7`
@@ -380,6 +481,13 @@ Design decisions:
 - **2026-10-10 10:40 IST morning restart (Day 2):** laptop slept overnight → uvicorn + cloudflared dead, old tunnel gone, MCP login expired. Restarted both (`nohup .venv/bin/uvicorn app.api:app --port 8000`, `cloudflared tunnel --url http://localhost:8000`), new URL **`https://header-notebook-plastics-saying.trycloudflare.com`**. User re-authenticated MCP. The user had committed up to v18 themselves overnight; draft was v19 with all 4 tools still on the dead URL (API log showed only 127.0.0.1 requests, none from Sarvam) → `configure_app_tool` ×4 in place (load_user_memory c637b3f6, get_more_history c0ba1fce, save_call_to_memory 6ee3b860, send_whatsapp 5f081a67), **v19 committed → draft v20**. send_chat on v19 opened with Aarti's latest activity (7.5 KVA diesel generator) = memory reaches Sarvam again. Tool ids change on every commit: always `agents get include=tools` first.
 - **10:45 IST WhatsApp-from-call verified live on v19** (Sarvam IP → `POST /whatsapp/send` 200, message + photo in Aarti's thread). Quality bug: Aarti had only TALKED about a generator (voice summary), never clicked one → no product card → the message used the last clicked product (scooter battery). Fix in `whatsapp_send()`: a 30-token sarvam-105b call extracts the product named in the request; if no known card matches its words, `search_indiamart(want, limit=3)` fetches real listings and they are listed FIRST (`live_note` in the prompt). Note: uvicorn was started WITHOUT `--reload` this morning → restart it after api.py edits (`pkill -f 'uvicorn app.api' && nohup .venv/bin/uvicorn app.api:app --port 8000 ...`).
 - **10:50 IST greet by name (user rule):** call-intent greetings (`_call_lines`) now always address the user by name: prompt rule + `_ensure_name()` guard inserts the name after नमस्ते/Hello if the LLM drops it; buyers by FIRST name, sellers by company name; Hindi greetings must be Hindi sentences (English only for product names). Normal greetings already used the name.
+- **11:00 IST GIT / DATA LEAK FOUND:** `.gitignore` had `Dataset` and `web/config.js` glued on one line (`Datasetweb/config.js`) → the user's commit ce91289 (9 Oct) pushed the whole 69 MB organiser **Dataset/** (real customer names) and **web/config.js** (Sarvam embed key) to **public** GitHub repo Ankulraja/vani-context. Fixed going forward: `.gitignore` repaired, both untracked (commit on Ankul-main, fast-forwarded to main, pushed). Side effect: the ff on main deleted the working copies (restored from a55123c with `git restore --source … --worktree`). STILL OPEN (user decision): rewrite history to purge them (`git filter-repo --path Dataset --path web/config.js --invert-paths` + force-push both branches), make the repo private, rotate the Sarvam embed key in the dashboard and update web/config.js. .DS_Store also ignored + untracked.
+- **11:15 IST persona renamed to Tanya (user request):** the agent introduces herself as "Tanya from IndiaMART" (VANI stays the product/service name). Changed: agent prompt Persona + steps 1 (who is calling / wrong person), voicemail message (`tool_runner_parameters`), **committed v20 → draft v21**; API `CALL_LINES_PROMPT` / fallbacks / `WA_SEND_PROMPT` say Tanya; demo call phone shows "Tanya" (avatar T, Call Tanya, Tanya answered, helpline · Tanya, missed call / sent-by lines). Memory event summaries still say VANI (product) on purpose.
+- **11:25 IST barge-in fix (user: "when I interrupt she does not stop"):** `allow_interrupt_during_playback` was already true, but `vad_config.primary_vad` was `basic-vad` and `probability_modulator_config` was null = Sarvam defaults that DAMPEN interruptions while the bot speaks (×0.5 for the first 2 s, ×0.8 after). Changed to `hybrid-vad`, resist duration 0.6 s, start multiplier 0.85, speaking multiplier 1.0 (no dampening), end-of-speech boost 1.5 kept; frames 4/6/-40 kept. Committed as v21 → draft v22. Voice on the agent = **Sarika - Conversational Voice** (`01a0cf16-97b2-…`), single voice, no per-language mapping, pace 1.1 (user changed it overnight from Chaitra). Still user-side: use earphones on the demo so Tanya's own audio does not feed the mic.
+- **11:45 IST seller call analysis (user request) → `docs/seller_call_insights.md`.** Key numbers: VANI→seller calls end Not Interested 42 %, General 30 %, Call later 16 %, Meeting fixed 11 %; 19 % hang up abruptly; VANI's pitch is a sales-executive meeting in 30 % of calls; avg 3.8 attempts/seller, 341 sellers called 10+ times, 496 sellers still called 5+ times after 2× Not Interested; 521/1,267 sellers with enquiries replied to none. Seller→IndiaMART WhatsApp: 89 % of typed turns are the BUY-LEAD flow (seller acting as buyer); real support asks = photo/document uploaded but not added as product (925), product price/details, phone number requests, catalog management, stop-calls (23), complaints/call-me. Implications listed in the doc (no re-pitch after 2× NI, open with unread enquiries, honour callback times, treat seller-on-WhatsApp as buyer).
+- **12:05 IST TWO AGENTS (user decision: one per role, not four):** **buyer agent = existing `VANI-IndiaM-b67b20da-8a1b`** ("VANI IndiaMART", committed v22, draft v23; glid default 274238067, user_role buyer) and **seller agent = clone `VANI-IndiaM-61f2af95-c5b7`** ("VANI IndiaMART Seller", committed v1, draft v2; glid default 95568576, user_role seller). The clone copied all 4 tools on the current tunnel (seller tool ids: load_user_memory de106a1a, get_more_history 8f581f67, save_call_to_memory 436b3d19, send_whatsapp 108906c0) → **every tunnel restart now = 8 `configure_app_tool` calls + 2 commits**. Prompts: shared Persona/Style/Guardrails; each has Playbook A (IndiaMART called) and Playbook B (user called) for its role; the seller prompt encodes the dataset insights (never pitch a meeting/paid plan unless asked, open with unread enquiries, honour callback, catalog/photo asks, stop-calls). Prompt gotcha: `tool:name.` with a trailing period is parsed as a tool name → write "the tool:name tool, as described in step N". `web/config.js` (+ example) has `appIdSeller`; `ensureWidget()` picks the app-id by `user.role` (re-mounts the widget when the agent changes); `/call` picks `SARVAM_APP_ID_SELLER` for sellers.
+- **12:15 IST seller agent now carries the dataset insights explicitly** (section "What 9,657 past IndiaMART calls to sellers taught us": 30 % meeting pitch / 42 % NI / 19 % hang-ups → never pitch unless asked; 36 s avg → value in first two turns; 14 % busy → one question for a time; repeat calling after 2× NI → acknowledge + enquiries only; 3 % 'bot?' → one honest line; already-paid / executive-visited → never contradict; free is enough → agree; 41 % never replied to enquiries → read the latest unread enquiry; denied callback → accept; WhatsApp = catalog/photo asks and 89 % seller-as-buyer → help as buyer). Playbook B gained a 'seller wants to BUY' branch. **Seller agent committed v2 → draft v3.** Hard-case test target: 93557756 Visionary Style.
+- **12:30 IST start page (user request):** `GET /` now serves `web/start.html` (old detailed page stays at `/index.html`): GLID box + dropdown + cards of 10 curated users (`GET /users` → `DEMO_USERS` in api.py, scored from the dataset: buyers Aarti Singh 274238067, Ramesh 59681744, Shinehomz 274154429, Akshay Chavan 99718542, Prem Kumar 43279328; sellers Alfa 95568576, Govind Enterprise 253633098, DK Bean Bags 35178044, Anuradha Oil Mill 87677035, Visionary Style 93557756). `GET /lookup/{glid}` = cheap role/name check (404 if not in dataset); the page then calls `/context?glid=` (builds the .md, ~2 s) and opens `/demo#<glid>`. `/demo` now loads USERS from `/users`, accepts ANY dataset GLID (`userFromLookup` adds a chip), shows only the current role's chips + "⌂ change user" link, and reacts to hashchange. Verified headless (bad GLID message, DK Bean Bags card → demo, uncurated Wicks N More 7444262 opens with its own chip).
 - Still user-side: earphones for widget calls; one real mic call on `/demo` to confirm captions; listen to Chaitra
   on a full Hindi call (switch back to Ishita `01a0cf17-0b6e-…` + commit if it sounds off); git commit.
 
@@ -556,54 +664,44 @@ Sample output for 95568576 is in `context_files/95568576/seller.md` (git-ignored
 Known nit: the LLM "story" sometimes over-weights old "Not Interested" calls over the later "Meeting Fixed";
 prompt could tell it to weight the most recent VANI outcome. Opener lacks the "ji" address sometimes.
 
-## Repo state (as of 2026-10-08)
+## Repo state (as of 2026-10-10 12:45 IST)
 
 ```
-vani-context/
-├── .env                 SARVAM_API_KEY=...   (git-ignored, never commit)
-├── .gitignore           .env  .venv/  __pycache__/  context_files/  Dataset
-├── .mcp.json            Sarvam Voice Agents MCP server (commit this)
-├── .venv/               Python 3.13.5; sarvamai 0.1.35, python-dotenv, fastapi, uvicorn,
-│                        pydantic, streamlit, pypdf
-├── requirements.txt
-├── app/{sources,builder,bot}/__init__.py     empty packages
-├── data/sample/         empty (no mock data — use Dataset/ instead)
-├── context_files/       empty — generated .md output
-├── Dataset/             organiser data (git-ignored), see "The dataset" section
-├── scripts/test_sarvam.py                     LLM smoke test (works)
-├── pss-runner/          UNRELATED Node page-speed tool with its own .git — untracked; user to move out
-├── README.md, skills.md                       empty
-└── CLAUDE.md            this file
+vani-context/                     branch Ankul-main (main is fast-forwarded to it); remote github.com/Ankulraja/vani-context (PUBLIC, see risk 1)
+├── .env                          SARVAM_API_KEY (+ optional NGROK_DOMAIN, SARVAM_APP_ID, SARVAM_APP_ID_SELLER)  git-ignored
+├── .gitignore                    .env .venv/ __pycache__/ context_files/ Dataset/ web/config.js .DS_Store web/widget.html
+├── .mcp.json                     Sarvam Voice Agents MCP (OAuth daily via /mcp)
+├── app/api.py                    FastAPI: /, /demo, /users, /lookup/{glid}, /context (+/{glid}, /md), /history, /events (+/{glid}, DELETE),
+│                                 /active (+DELETE /active/call), /whatsapp/{glid} (GET/POST), /whatsapp/send, /webhook/sarvam,
+│                                 /search, /home-feed, /site/{glid}, /call, /health, /debug/422
+├── app/sources/seller.py buyer.py   dataset → events dict (only files that know the raw layout; swap for real APIs here)
+├── app/sources/im_search.py im_home.py   live indiamart.com search (mobile page JSON) and home feed (trending + industries)
+├── app/builder/seller_md.py buyer_md.py insight.py call_card.py prefs.py   facts by code + sarvam-105b insight → .md, call card, language prefs
+├── web/start.html demo.html index.html   start page, three-screen demo, old detailed page; config.js(.example), widget.html.example
+├── web/im-logo.png im-wordmark.png wa-bg.png ringback.ogg
+├── extension/                    Chrome MV3 extension for the "Live indiamart.com" mode
+├── scripts/explore_seller.py test_sarvam.py tunnel.sh
+├── data/phone_to_glid.json       demo caller-number → GLID map
+├── docs/seller_call_insights.md  dataset analysis (10 Oct)
+├── context_files/                generated memory (git-ignored): <glid>/{buyer|seller}.md, events.json, events.jsonl, prefs.json,
+│                                 whatsapp_thread.json; _active.json; _backups/
+├── Dataset/                      organiser data (git-ignored, never commit)
+├── README.md skills.md CLAUDE.md
+└── .venv/                        Python 3.13: sarvamai, fastapi, uvicorn, pandas, httpx, playwright (tests)
 ```
-Git: 2 commits on `main` ("first commit", "add project structure"). Uncommitted: `.gitignore`,
-`scripts/test_sarvam.py`, `CLAUDE.md`, `.mcp.json`. Run `source .venv/bin/activate` first.
-Hackathon deck PDF: `~/Desktop/Voice_AI_Hackathon_2.0_Deck_Revised - Final.pptx.pdf` (read with pypdf).
+Run: `source .venv/bin/activate; uvicorn app.api:app --port 8000 --reload` + `cloudflared tunnel --url http://localhost:8000`.
+Headless checks: Playwright scripts in `/tmp/vani_tests/` (recreate as needed) or
+`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --screenshot=… "http://localhost:8000/demo#<glid>&scr=incall&state=oncall"`.
 
-## Next steps (in order)
+## Next steps (Day 2, in order)
 
-2026-10-09 15:40 IST: user restarted the API himself but NOT the tunnel → agent fell back to defaults
-("Rajesh"). Claude restarted cloudflared: new URL `https://occasional-advisor-combination-profit.trycloudflare.com`,
-tools re-pointed (see agent state). **Every tunnel restart = re-point both tools + commit.** Consider ngrok with a
-free static domain for the event so the URL stops changing.
-Background processes Claude started on 2026-10-08 (may be dead after a reboot): `uvicorn app.api:app --port 8000`
-(log `/tmp/vani_api.log`) and `cloudflared tunnel --url http://localhost:8000` (log `/tmp/cloudflared.log`,
-URL in `/tmp/vani_public_url.txt`). Restart both, then re-point the two agent tools at the new URL.
-
-**Rule check before Day 1:** the deck says "all build work happens during the 2 days; setup/learning beforehand
-is fine". Tonight's code is a learning prototype on stand-in data. Plan: on Day 1 rebuild `app/sources/` on the
-real starter APIs, re-create the agent tools, and log all of it in `skills.md` so the journey is honest.
-
-1. User: add Day-0 lines to `skills.md`; move `pss-runner/` out; press "Test agent" in the dashboard (draft v2)
-   to hear the memory opener by voice; send Org ID to organisers.
-2. (done 2026-10-09 00:00) Buyer side: source + builder + role-aware API, tested end to end with the agent.
-3. Agent polish via MCP: voicemail message (`configure_voicemail`), call goal / evaluation criteria, then
-   `agents commit` → v2. Intro line may address the company name ("Alfa Enterprises ji") — fine for sellers.
-4. Phone test: `verify_phone_number` (OTP to the user's phone) → `place_test_call(app_variables={"glid": "95568576"})`
-   with `webhook_config.url=<TUNNEL>/webhook/sarvam` where supported; confirm the webhook arrives.
-5. Web widget / chat channel: Deploy with Code → Embed (dashboard). Demo flow: chat on widget → event →
-   phone call resumes (or reverse). Record the 5–7 min video.
-6. Freshness dashboard: tiny Streamlit page showing seller.md, events.jsonl and `freshness_seconds` per event.
-7. README (architecture, sources, lookback 30 d/180 d, refresh logic), `skills.md` build journey, approach note.
+1. User: make the GitHub repo private, then say "purge it" → history rewrite + force-push; rotate the Sarvam embed key.
+2. Commit + push the current work (start page, two agents, insights doc).
+3. skills.md: add the Day-2 entries (two agents, Tanya, call flows, WhatsApp-from-call, start page, dataset analysis, data-leak lesson).
+4. Demo rehearsal with earphones: buyer flow (Aarti: search → Get Latest Price → Tanya calls → ask for supplier details on
+   WhatsApp) and seller flow (Alfa: Call Tanya → unread enquiry; Visionary Style: "phir se call?" → no pitch). Record the 5–7 min video.
+5. Optional if time: seller triggers (Call buyer in Lead Manager → call about that enquiry; new unread enquiry → Tanya calls),
+   a "lift" number (cold vs personalised opening), approach note, static ngrok domain.
 
 ## Conventions
 

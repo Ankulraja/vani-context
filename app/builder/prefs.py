@@ -65,7 +65,21 @@ GREETING_RULE = """- "greeting": the very first line VANI speaks, before anythin
   few words (e.g. the product or requirement). The latest topic is the subject of the FIRST item of
   "live_events_newest_first" when that list is non-empty (what the user just searched, opened, wrote or said);
   only when it is empty, use the newest requirement from the history. No prices, numbers, dates or account details.
-  Ends with a question."""
+  Ends with a question. Tanya, the speaker, is a woman: in Hindi or Hinglish she uses FEMININE forms for herself ('main bol rahi hoon', 'kar sakti hoon', 'bhej deti hoon', 'karungi'; Devanagari 'बोल रही हूँ', 'कर सकती हूँ'), never masculine ('bol raha hoon', 'kar sakta hoon'). The user is addressed only with neutral polite 'aap' forms; the user's gender is never guessed from the name."""
+
+
+WEAK_EVENT = re.compile(r"(opened (the )?Lead Manager|opened the IndiaMART|called the IndiaMART helpline\s*(\(VANI\))?$|"
+                        r"VANI called .* no answer|picked up$|opened the website|went to the home ?page)", re.I)
+
+
+def latest_topic(live_events: list[dict]) -> str | None:
+    """Newest live event whose summary carries a real topic (a product, enquiry, message). Clicks like
+    'Seller opened Lead Manager' are skipped so the greeting does not say 'Lead Manager par baat karni thi' (10 Oct)."""
+    for e in reversed(live_events or []):
+        summ = (e.get("summary") or "").strip()
+        if summ and not WEAK_EVENT.search(summ):
+            return summ
+    return None
 
 
 def greeting_rule(language: str, name_hint: str, role: str = "buyer", latest: str | None = None) -> str:
@@ -84,6 +98,18 @@ def greeting_rule(language: str, name_hint: str, role: str = "buyer", latest: st
     return rule
 
 
+FEM_FIXES = [("बोल रहा हूँ", "बोल रही हूँ"), ("रहा हूँ", "रही हूँ"), ("सकता हूँ", "सकती हूँ"), ("करूँगा", "करूँगी"), ("करूंगा", "करूंगी"),
+             ("देता हूँ", "देती हूँ"), ("चाहता हूँ", "चाहती हूँ"), ("bol raha hoon", "bol rahi hoon"), ("raha hoon", "rahi hoon"),
+             ("sakta hoon", "sakti hoon"), ("karunga", "karungi"), ("deta hoon", "deti hoon"), ("chahta hoon", "chahti hoon")]
+
+
+def feminine(text: str) -> str:
+    """Tanya is a woman: any masculine first-person form the LLM slipped in is corrected (user rule, 10 Oct)."""
+    for a, b in FEM_FIXES:
+        text = text.replace(a, b)
+    return text
+
+
 def clean_greeting(greeting: str, name: str) -> str:
     """Code-level guard for the LLM greeting (seen in analytics: 'नमस्ते आरती ji, आप कैसी हैं?'):
     neutral 'कैसे हैं', no 'ji'/'जी' glued to the name, no double spaces."""
@@ -91,7 +117,7 @@ def clean_greeting(greeting: str, name: str) -> str:
     g = g.replace("कैसी हैं", "कैसे हैं").replace("कैसी हो", "कैसे हैं")
     g = re.sub(r"\s+(ji|जी)\s*([,!?.])", r"\2", g)  # "आरती ji," -> "आरती,"
     g = re.sub(r"\s+(ji|जी)\s+", " ", g)
-    return re.sub(r"\s{2,}", " ", g)
+    return feminine(re.sub(r"\s{2,}", " ", g))
 
 
 def fallback_greeting(name: str, language: str) -> str:

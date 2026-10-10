@@ -21,9 +21,11 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+
+from dotenv import load_dotenv
 
 from app.builder.buyer_md import build_buyer_md
 from app.builder.call_card import build_call_card
@@ -32,6 +34,8 @@ from app.sources.seller import ROOT
 from app.builder.seller_md import OUT_DIR, build_seller_md
 from app.sources.buyer import _all_contexts as _buyer_contexts
 from app.sources.seller import _csv as _seller_csv
+
+load_dotenv(ROOT / ".env")
 
 app = FastAPI(title="VANI Context API", version="0.1")
 
@@ -206,14 +210,16 @@ class Active(BaseModel):
     call: CallIntent | None = None
 
 
-CALL_LINES_PROMPT = """You write the first words of a phone call between VANI (IndiaMART's voice assistant) and a {role} named {name}.
+CALL_LINES_PROMPT = """You write the first words of a phone call between Tanya (IndiaMART's voice assistant; she introduces herself only as "Tanya from IndiaMART", never as VANI) and a {role} named {name}.
 {situation}
 Latest things in the {role}'s memory (newest first):
 {latest}
 
 Write ONLY a JSON object with two keys:
-- "greeting": VANI's very first sentence(s), in {language}{script}, under 30 words, entirely in that language (Hindi means Devanagari Hindi sentences with only product/brand names in English, never full English sentences). It starts by greeting {name} BY NAME (e.g. "नमस्ते {name}, …"). {greeting_rule}
-- "opener": the next thing VANI says after the {role} responds, Hinglish in Roman script, under 25 words: {opener_rule}
+- "greeting": Tanya's very first sentence(s), in {language}{script}, under 30 words, entirely in that language (Hindi means Devanagari Hindi sentences with only product/brand names in English, never full English sentences). It starts by greeting {name} BY NAME (e.g. "नमस्ते {name}, …"). {greeting_rule}
+- "opener": the next thing Tanya says after the {role} responds, Hinglish in Roman script, under 25 words: {opener_rule}
+Vocabulary: a buyer SENDS enquiries ("aapne enquiry bheji thi", "aapne X dekha tha"); a seller RECEIVES them from buyers ("aapko X ki enquiry aayi thi", "buyer ne pucha hai"). Never say that a seller sent or made an enquiry.
+Tanya, the speaker, is a woman: in Hindi or Hinglish she uses FEMININE forms for herself ("main bol rahi hoon", "kar sakti hoon", "bhej deti hoon", "karungi"; Devanagari "बोल रही हूँ", "कर सकती हूँ"), never masculine ("bol raha hoon", "kar sakta hoon"). The user is addressed only with neutral polite "aap" forms; the user's gender is never guessed from the name.
 Facts only from the lines above. No prices unless given above. Never invent names, dates or numbers."""
 
 
@@ -227,22 +233,35 @@ def _call_lines(glid: int, role: str, name: str, intent: CallIntent) -> dict:
         ptxt = f"{p.get('title', '')}" + (f" from {p.get('company')}" if p.get("company") else "") + (f", {p.get('city')}" if p.get("city") else "") + (f" ({p.get('price_text')})" if p.get("price") else "")
     who = "buyer" if role == "buyer" else "seller"
     if intent.direction == "outbound":
-        situation = f"VANI is CALLING the {who} (outbound call from IndiaMART). Reason: {intent.reason or 'a recent activity that may need help'}."
-        greeting_rule = f"VANI says who is calling (VANI from IndiaMART), names the reason in a few words, and asks if this is a good time."
+        situation = f"Tanya is CALLING the {who} (outbound call from IndiaMART). Reason: {intent.reason or 'a recent activity that may need help'}."
+        greeting_rule = f"Tanya says who is calling (Tanya from IndiaMART), names the reason in a few words, and asks if this is a good time."
         opener_rule = "offer concrete help with exactly that reason (e.g. share quotes, connect to the seller, fix the issue) and ask one question."
-        card = f"THIS CALL: VANI (IndiaMART) called the {who} because: {intent.reason}. Stay on that topic; help with it first."
-        g_fb = f"नमस्ते {name}, मैं IndiaMART से VANI बोल रही हूँ। {('आपकी ' + ptxt + ' की enquiry') if ptxt else 'आपकी हाल की request'} के बारे में call किया है, अभी बात कर सकते हैं?"
-        o_fb = f"Aapne abhi {ptxt or 'ek request'} ke liye enquiry bheji thi, main best quotes dilwane mein help kar sakti hoon. Quantity kitni chahiye?"
+        card = f"THIS CALL: Tanya (IndiaMART) called the {who} because: {intent.reason}. Stay on that topic; help with it first."
+        g_fb = f"नमस्ते {name}, मैं IndiaMART से Tanya बोल रही हूँ। {('आपकी ' + ptxt + ' की enquiry') if ptxt else 'आपकी हाल की request'} के बारे में call किया है, अभी बात कर सकते हैं?"
+        o_fb = (f"Aapne abhi {ptxt or 'ek request'} ke liye enquiry bheji thi, main best quotes dilwane mein help kar sakti hoon. Quantity kitni chahiye?" if who == "buyer"
+                else f"Aapko abhi {ptxt or 'ek buyer'} ki enquiry aayi hai, kya main buyer ko aapka reply ya rate bhej doon?")
     elif intent.source == "product" and p:
         situation = f"The {who} has CALLED IndiaMART (inbound) by pressing Call Now on this product: {ptxt}."
-        greeting_rule = "VANI welcomes the caller to IndiaMART, says it can see they are calling about that product (name it), and asks what they want to know."
+        greeting_rule = "Tanya welcomes the caller to IndiaMART, says it can see they are calling about that product (name it), and asks what they want to know."
         opener_rule = "stay on that product: ask quantity / delivery city, or offer to get the best price from that supplier."
         card = f"THIS CALL: the {who} called IndiaMART about this product: {ptxt}. Keep the whole call about this product and its supplier."
         g_fb = f"नमस्ते {name}, IndiaMART में आपका स्वागत है। आप {p.get('title', '')} के बारे में call कर रहे हैं, बताइए क्या जानना है?"
         o_fb = f"{p.get('title', '')} ke liye aapko kitni quantity chahiye, aur delivery kahan honi hai?"
+    elif who == "seller":
+        # A seller who dials the helpline gets a plain customer-care welcome (name + Tanya + "what help is needed").
+        # Their latest RECEIVED enquiry is offered only in the opener, after they say why they called (user rule, 10 Oct).
+        situation = "The seller has CALLED the IndiaMART helpline (inbound, no specific topic chosen)."
+        greeting_rule = ("Tanya says she is Tanya from the IndiaMART helpline and asks what help is needed today. "
+                         "The greeting does NOT mention any enquiry, buyer, product or past activity.")
+        opener_rule = ("if the lines above show an enquiry the seller RECEIVED, offer it in seller words ('aapko X ki enquiry aayi thi, "
+                       "buyer ko reply bhej doon?'); otherwise ask one short question about what they need today.")
+        card = ("THIS CALL: the seller called the IndiaMART helpline. First ask what they need help with; only after they answer, "
+                "offer the latest enquiry they RECEIVED (seller vocabulary: 'aapko enquiry aayi thi'). Never say the seller sent an enquiry.")
+        g_fb = f"नमस्ते {name}, मैं Tanya, IndiaMART helpline से। बताइए, आज किस चीज़ में help चाहिए?"
+        o_fb = "Aapko jo latest enquiry aayi hai, kya main us buyer ko aapka reply bhej doon?"
     else:
         situation = f"The {who} has CALLED the IndiaMART helpline (inbound, no specific topic chosen)."
-        greeting_rule = "VANI welcomes the caller to the IndiaMART helpline, recalls their most recent activity in a few words (from the lines above), and asks whether they need help with that or something else."
+        greeting_rule = "Tanya welcomes the caller to the IndiaMART helpline, recalls their most recent activity in a few words (from the lines above), and asks whether they need help with that or something else."
         opener_rule = "ask one short question to find out what they need help with today."
         card = f"THIS CALL: the {who} called the IndiaMART helpline. First recall their latest activity in one line, then ask what they need help with."
         g_fb = f"नमस्ते {name}, IndiaMART helpline में आपका स्वागत है। बताइए, आज किस चीज़ में help चाहिए?"
@@ -264,7 +283,9 @@ def _call_lines(glid: int, role: str, name: str, intent: CallIntent) -> dict:
             out.update(greeting=data["greeting"].strip(), opener=(data.get("opener") or o_fb).strip(), source="llm")
     except Exception as e:  # noqa: BLE001
         out["error"] = str(e)[:80]
-    out["greeting"] = _ensure_name(out["greeting"], name, language)
+    from app.builder.prefs import feminine
+    out["greeting"] = feminine(_ensure_name(out["greeting"], name, language))
+    out["opener"] = feminine(out["opener"])
     return out
 
 
@@ -339,6 +360,10 @@ HISTORY_PROMPT = """You help VANI, IndiaMART's voice agent, answer a question du
 Use ONLY the memory file and raw data below. Answer in {language}{script}, in 1 or 2 short spoken sentences
 (under 40 words), no markdown, no lists. Speak TO the {role} as "aap" (second person), never "the {role}". Say prices and dates the way a person says them. If the answer is not
 in the data, say that this detail is not available right now and offer to note it. Never invent facts.
+Think from the {role}'s side over the WHOLE memory file, not only the latest item: when the question is a complaint or a
+"why" (no good enquiries, leads not working, buyers not responding), find the cause in the numbers (unread or unanswered
+enquiries, missed buyer calls, buyleads bought without replies, few products) and say it first with the number, then ask
+one question or offer one concrete action (for a seller: reply to those buyers on their behalf; for a buyer: more sellers).
 If the question is about what the {role} just did or sent (WhatsApp, website, enquiry, "just now"), answer from
 LIVE EVENTS (newest first; today is {today}) and the WHATSAPP CHAT below: say what they did or wrote, then one
 short follow-up question about it.
@@ -501,6 +526,46 @@ def live_search(q: str, limit: int = 12):
         raise HTTPException(status_code=502, detail=f"indiamart.com search unavailable: {str(e)[:120]}") from e
 
 
+# Curated demo users: the strongest buyers and sellers in the organiser dataset (scored on 10 Oct by recent
+# enquiries, unread count, VANI calls, WhatsApp turns, buyer calls and buy-leads). Any other GLID in the dataset works too.
+DEMO_USERS = [
+    {"glid": 274238067, "role": "buyer", "name": "Aarti Singh", "city": "Gharaunda", "hint": "RCC bollards, active buy-lead, WhatsApp replies"},
+    {"glid": 59681744, "role": "buyer", "name": "Ramesh", "city": "Mumbai", "hint": "paper bags & hand bells, 22 enquiries, 5 IndiaMART calls"},
+    {"glid": 274154429, "role": "buyer", "name": "Shinehomz", "city": "Surat", "hint": "25 enquiries, 25 seller calls, corner protectors"},
+    {"glid": 99718542, "role": "buyer", "name": "Akshay Chavan", "city": "Raigad", "hint": "scrub pads, dhoopbatti raw material, 22 enquiries"},
+    {"glid": 43279328, "role": "buyer", "name": "Prem Kumar", "city": "Patna", "hint": "cotton mattresses, 2 active buy-leads"},
+    {"glid": 95568576, "role": "seller", "name": "Alfa Enterprises", "city": "New Delhi", "hint": "pen drives; 66 enquiries, meeting fixed, 90 buy-leads"},
+    {"glid": 253633098, "role": "seller", "name": "Govind Enterprise", "city": "Kolkata", "hint": "corrugated boxes; 33 unread, chatty on WhatsApp"},
+    {"glid": 35178044, "role": "seller", "name": "DK Bean Bags", "city": "New Delhi", "hint": "bean bags; 47 unread enquiries, meeting fixed"},
+    {"glid": 87677035, "role": "seller", "name": "Anuradha Oil Mill", "city": "Kanpur", "hint": "oil; memory built live on first call"},
+    {"glid": 93557756, "role": "seller", "name": "Visionary Style", "city": "Surat", "hint": "hard case: called 22 times, said stop, met the executive"},
+]
+
+
+@app.get("/users")
+def demo_users():
+    return DEMO_USERS
+
+
+@app.get("/lookup/{glid}")
+def lookup(glid: int):
+    """Cheap check used by the start page: is this GLID in the dataset, and who is it? (does not build the memory)"""
+    role = role_of(glid)  # 404 if unknown
+    if role == "seller":
+        prof = _seller_csv("gc_seller_profile.csv")
+        r = prof[prof["fk_glusr_usr_id"] == glid].iloc[0]
+        return {"glid": glid, "role": role, "name": str(r["company_name"]), "city": str(r["seller_city"])}
+    from app.sources.buyer import get_buyer_events
+    ev = get_buyer_events(glid)
+    return {"glid": glid, "role": role, "name": ev["profile"].get("name") or f"GLID {glid}", "city": ev["profile"].get("city") or ""}
+
+
+@app.get("/", response_class=HTMLResponse)
+def start_page():
+    """Entry page: enter a GLID or pick a demo user, then open /demo#<glid>."""
+    return (ROOT / "web" / "start.html").read_text()
+
+
 @app.get("/home-feed")
 def home_feed_route():
     """Real www.indiamart.com home sections (trending tiles, industry rows) for the emulated home page."""
@@ -606,8 +671,9 @@ class WaSend(BaseModel):
     request: str = Field(..., examples=["seller contact details for the Card Pen Drive", "the quotes I asked for"])
 
 
-WA_SEND_PROMPT = """VANI (IndiaMART's voice assistant) is on a call with a {role} named {name} and promised to send something on WhatsApp.
-What VANI was asked to send: {request}
+WA_SEND_PROMPT = """Tanya (IndiaMART's voice assistant; she signs as "Tanya from IndiaMART") is on a call with a {role} named {name} and promised to send something on WhatsApp.
+Tanya, the speaker, is a woman: in Hindi or Hinglish she uses FEMININE forms for herself ("main bol rahi hoon", "kar sakti hoon", "bhej deti hoon", "karungi"; Devanagari "बोल रही हूँ", "कर सकती हूँ"), never masculine ("bol raha hoon", "kar sakta hoon"). The user is addressed only with neutral polite "aap" forms; the user's gender is never guessed from the name.
+What Tanya was asked to send: {request}
 
 Data available (facts only; never invent a name, number, price or link):
 PRODUCTS / SUPPLIERS the {role} is dealing with right now (newest first){live_note}:
@@ -618,11 +684,11 @@ MEMORY CARD:
 {card}
 
 Write ONLY a JSON object with two keys:
-- "message": the WhatsApp message VANI sends, {lang_rule}. Start with one short line saying this is what was discussed on the call,
+- "message": the WhatsApp message Tanya sends, {lang_rule}. Start with one short line saying this is what was discussed on the call,
   then the details as short lines (one fact per line, use emoji bullets sparingly: 📦 product, 💰 price, 🏢 supplier/buyer, 📍 city,
   ⭐ rating, 🔗 link). Include every relevant link given above. Under 110 words. End with one short line offering the next step.
   If the data does not contain what was asked, send what is available and say the rest will follow.
-- "spoken": one sentence VANI says on the call right after sending, in {spoken_lang}, under 18 words, confirming it is sent on WhatsApp.
+- "spoken": one sentence Tanya says on the call right after sending, in {spoken_lang}, under 18 words, confirming it is sent on WhatsApp.
 """
 
 
@@ -776,7 +842,8 @@ def call_me(req: CallRequest):
     Needs a Sarvam phone number (connection) + API key — set SARVAM_AGENT_API_KEY, SARVAM_CONNECTION_ID,
     SARVAM_AGENT_NUMBER in .env once the workspace has a number (event day). Until then returns 503."""
     key, conn, agent_no = os.getenv("SARVAM_AGENT_API_KEY"), os.getenv("SARVAM_CONNECTION_ID"), os.getenv("SARVAM_AGENT_NUMBER")
-    app_id = os.getenv("SARVAM_APP_ID", "VANI-IndiaM-b67b20da-8a1b")
+    app_id = (os.getenv("SARVAM_APP_ID_SELLER", "VANI-IndiaM-61f2af95-c5b7") if role_of(req.glid) == "seller"
+              else os.getenv("SARVAM_APP_ID", "VANI-IndiaM-b67b20da-8a1b"))  # one agent per role
     if not (key and conn and agent_no):
         raise HTTPException(status_code=503, detail="Outbound not configured yet: workspace has no Sarvam phone number. "
                             "Set SARVAM_AGENT_API_KEY / SARVAM_CONNECTION_ID / SARVAM_AGENT_NUMBER in .env.")
@@ -859,6 +926,22 @@ def demo_page():
     """Simplified showroom demo: phone (WhatsApp + VANI call) · desktop (IndiaMART website) · live memory file."""
     from fastapi.responses import FileResponse
     return FileResponse(str(ROOT / "web" / "demo.html"))
+
+
+@app.get("/config.js")
+def config_js():
+    """Widget config for the demo pages, built from .env (no key lives in the repo any more).
+    Needs SARVAM_EMBED_KEY (embed-scoped, NOT the server key); the ids have the two VANI agents as defaults."""
+    cfg = {
+        "apiKey": os.getenv("SARVAM_EMBED_KEY", ""),
+        "orgId": os.getenv("SARVAM_ORG_ID", "01a11128-bd2a-794c-a92a-5f518eacaba5"),
+        "workspaceId": os.getenv("SARVAM_WORKSPACE_ID", "01a11128-bd2f-7b40-9f2d-a2a3b2edf5d7"),
+        "appId": os.getenv("SARVAM_APP_ID", "VANI-IndiaM-b67b20da-8a1b"),            # buyer agent
+        "appIdSeller": os.getenv("SARVAM_APP_ID_SELLER", "VANI-IndiaM-61f2af95-c5b7"),  # seller agent
+    }
+    body = "window.SARVAM_EMBED = " + json.dumps(cfg) + ";\n"
+    from fastapi.responses import Response
+    return Response(body, media_type="application/javascript", headers={"Cache-Control": "no-store"})
 
 
 app.mount("/", StaticFiles(directory=str(ROOT / "web"), html=True), name="web")

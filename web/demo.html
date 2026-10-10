@@ -31,6 +31,7 @@
   @media (max-width:1560px) { .brand small { display:none; } .chip .r { display:none; } }
   .chip { height:40px; padding:0 14px; border-radius:999px; background:transparent; color:var(--ink); font-size:14px; white-space:nowrap; display:flex; align-items:center; gap:8px; }
   .chip:hover { background:var(--card2); }
+  a.chip.more { text-decoration:none; color:var(--muted); font-weight:500; }
   .chip.on { background:var(--black); color:#fff; }
   .chip .r { font-size:10px; font-weight:600; letter-spacing:.4px; text-transform:uppercase; padding:2px 6px; border-radius:6px; background:var(--card2); color:var(--muted); }
   .chip.on .r { background:rgba(255,255,255,.18); color:#fff; }
@@ -39,6 +40,7 @@
   .brain { height:40px; background:transparent; color:var(--ink); padding:0 8px 0 14px; border-radius:999px; font-size:14px; display:flex; align-items:center; gap:10px; }
   .brain:hover { background:var(--card2); }
   .brain.on { background:var(--black); color:#fff; }
+  .brain .fresh { display:none; }  /* user: do not show 'updated N s ago' in the top bar; memory still refreshes silently */
   .fresh { font-size:11px; font-weight:600; padding:4px 10px; border-radius:999px; background:var(--card2); color:var(--muted); white-space:nowrap; }
   .brain.on .fresh { background:rgba(255,255,255,.18); color:#fff; }
   .fresh.hot { background:#dcfce7; color:#166534; }
@@ -357,21 +359,21 @@
     <div class="label"><div class="t"><span class="ico">☎</span>VANI call</div><b id="lblCall"></b></div>
     <div class="phone"><div class="notch"></div><div class="screen">
       <div class="scr callscr idle" id="callIdle">
-        <div class="big">V</div>
-        <h2>VANI</h2><div class="sub">IndiaMART helpline · voice assistant</div>
-        <div class="helpnote">Need help with an enquiry, a quote or a supplier?<br>Call VANI, or VANI will call you when you need help.</div>
-        <button class="ringbtn" id="dial">📞 Call VANI</button>
+        <div class="big">T</div>
+        <h2>Tanya</h2><div class="sub">IndiaMART helpline · VANI voice assistant</div>
+        <div class="helpnote">Need help with an enquiry, a quote or a supplier?<br>Call Tanya, or Tanya will call you when you need help.</div>
+        <button class="ringbtn" id="dial">📞 Call Tanya</button>
         <div class="sub" id="lastCall" style="font-size:11px;margin-top:14px;padding:0 18px"></div>
       </div>
       <div class="scr callscr ringing" id="incoming" hidden>
-        <div class="big">V</div>
-        <h2>VANI</h2><div class="sub">IndiaMART is calling you…</div>
+        <div class="big">T</div>
+        <h2>Tanya</h2><div class="sub">IndiaMART is calling you…</div>
         <div class="sub" style="margin-top:20px;font-size:12px;color:#ffb27a;padding:0 18px" id="incHint"></div>
         <div class="callbtns"><button class="cbtn dec" id="decline" title="Decline"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .4-.23.74-.56.9-.98.5-1.87 1.12-2.66 1.85-.18.18-.43.29-.7.29-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.29-.79-.73-1.68-1.35-2.66-1.85a.998.998 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg></button><button class="cbtn acc" id="accept" title="Answer"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg></button></div>
       </div>
       <div class="scr callscr idle" id="incall" hidden>
-        <div class="big">V</div>
-        <h2>VANI</h2><div class="sub" id="callStatus">Connecting…</div><div class="timer" id="timer">00:00</div>
+        <div class="big">T</div>
+        <h2>Tanya</h2><div class="sub" id="callStatus">Connecting…</div><div class="timer" id="timer">00:00</div>
         <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="caption" id="caption"><span class="hint">Connecting to Sarvam…</span></div>
         <div class="keys">
@@ -385,7 +387,7 @@
         <div class="endrow"><button class="cbtn dec" id="endBtn" title="End call"><svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .4-.23.74-.56.9-.98.5-1.87 1.12-2.66 1.85-.18.18-.43.29-.7.29-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.29-.79-.73-1.68-1.35-2.66-1.85a.998.998 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg></button></div>
       </div>
       <div class="scr callscr idle" id="callDone" hidden>
-        <div class="big">V</div>
+        <div class="big">T</div>
         <h2>Call ended</h2><div class="sub" id="doneDur">00:00</div>
         <div class="done"><div class="st" id="doneState">🧠 VANI is saving this call to memory…</div></div>
         <button class="ringbtn" id="doneBack" style="background:#374151;color:#fff;box-shadow:none">Back</button>
@@ -409,13 +411,7 @@
 <script>
 const $ = s => document.querySelector(s);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const USERS = [
-  { glid: 274238067, name: "Aarti Singh", role: "buyer",  hint: "bollards, Gharaunda" },
-  { glid: 59681744,  name: "Ramesh",      role: "buyer",  hint: "hand bells, Mumbai" },
-  { glid: 95568576,  name: "Alfa Enterprises", role: "seller", hint: "pen drives, Delhi" },
-  { glid: 87677035,  name: "Anuradha Oil Mill", role: "seller", hint: "Kanpur" },
-  { glid: 93557756,  name: "Visionary Style", role: "seller", hint: "said stop calling" },
-];
+let USERS = [];   // curated demo users from GET /users; any other dataset GLID is added on the fly
 let user = null, ctx = null, knownEvents = 0, posting = Promise.resolve(), lastRefresh = null, lastBuildSeconds = null;
 
 /* ---------- helpers ---------- */
@@ -471,11 +467,20 @@ $("#drawerClose").onclick = () => { $("#drawer").classList.remove("open"); $("#b
 
 /* ---------- users ---------- */
 function renderUsers() {
-  $("#users").innerHTML = USERS.map(u => `<button class="chip ${user && user.glid === u.glid ? "on" : ""}" data-glid="${u.glid}"><span class="r">${u.role}</span>${u.name}</button>`).join("");
+  const shown = USERS.filter(u => !user || u.role === user.role || u.glid === user.glid).slice(0, 6);
+  $("#users").innerHTML = shown.map(u => `<button class="chip ${user && user.glid === u.glid ? "on" : ""}" data-glid="${u.glid}"><span class="r">${u.role}</span>${u.name}</button>`).join("") + `<a class="chip more" href="/" title="Enter any GLID">⌂ change user</a>`;
   $("#users").querySelectorAll(".chip").forEach(b => b.onclick = () => selectUser(Number(b.dataset.glid)));
 }
+async function userFromLookup(glid) {
+  const r = await fetch(`/lookup/${glid}`); if (!r.ok) return null; const d = await r.json();
+  return { glid: d.glid, name: d.name, role: d.role, hint: d.city, extra: true };
+}
 async function selectUser(glid) {
-  user = USERS.find(u => u.glid === glid); renderUsers();
+  user = USERS.find(u => u.glid === glid) || await userFromLookup(glid);
+  if (!user) { location.href = "/"; return; }                      // unknown GLID: back to the start page
+  if (!USERS.some(u => u.glid === user.glid)) USERS = USERS.filter(u => !u.extra).concat([user]);
+  location.hash = String(glid) + (mode === "live" ? "&live" : "");
+  renderUsers();
   $("#lblPhone").textContent = user.name; $("#lblCall").textContent = user.name; $("#fresh").className = "fresh busy"; $("#fresh").textContent = "loading…";
   $("#chat").innerHTML = `<div class="sys">Today</div><div class="sys">${user.role === "buyer" ? "Hi " + user.name + "! This is IndiaMART. Tell us what you need." : "Hi " + user.name + "! IndiaMART here. Reply to buyers or tell us your rates."}</div>`;
   showScr("callIdle");
@@ -771,9 +776,10 @@ let widget = null, callTimer = null, callT0 = 0, pollTimer = null, audioCtx = nu
 function ensureWidget() {
   const cfg = window.SARVAM_EMBED;
   if (!cfg || !cfg.apiKey) throw new Error("web/config.js has no Sarvam embed key");
-  if (widget && widget.getAttribute("user-id") === String(user.glid)) return widget;
+  const appId = user.role === "seller" && cfg.appIdSeller ? cfg.appIdSeller : cfg.appId;   // one agent per role
+  if (widget && widget.getAttribute("user-id") === String(user.glid) && widget.getAttribute("app-id") === appId) return widget;
   $("#widgetSlot").innerHTML = ""; widget = document.createElement("sarvam-widget");
-  Object.entries({ "api-key": cfg.apiKey, "app-id": cfg.appId, "org-id": cfg.orgId, "workspace-id": cfg.workspaceId, "user-id": String(user.glid), "button-text": "Start", "position": "bottom-left" })
+  Object.entries({ "api-key": cfg.apiKey, "app-id": appId, "org-id": cfg.orgId, "workspace-id": cfg.workspaceId, "user-id": String(user.glid), "button-text": "Start", "position": "bottom-left" })
     .forEach(([k, v]) => widget.setAttribute(k, v));
   $("#widgetSlot").appendChild(widget); return widget;
 }
@@ -868,7 +874,7 @@ async function userCalls(intent) {
 const who = () => user.role === "buyer" ? "Buyer" : "Seller";
 $("#dial").onclick = () => userCalls({ source: "dialer", label: "IndiaMART helpline", topic: "the IndiaMART helpline", reason: "the user called the IndiaMART helpline" });
 $("#decline").onclick = () => {
-  ringtone(false); showScr("callIdle"); sysline("📵 Missed call from VANI");
+  ringtone(false); showScr("callIdle"); sysline("📵 Missed call from Tanya (IndiaMART)");
   if (callCtx) { postEvent("voice", `VANI called ${firstName()} about ${callCtx.topic || callCtx.label || "a recent activity"}; no answer`, { kind: "vani_call", missed: true, source: callCtx.source }); $("#lastCall").textContent = `📵 Missed: VANI called about ${callCtx.label || "your activity"}`; fetch("/active/call", { method: "DELETE" }); callCtx = null; }
 };
 $("#accept").onclick = async () => {
@@ -883,7 +889,7 @@ async function waPollOnce() {
   let t; try { t = await fetch(`/whatsapp/${user.glid}`).then(r => r.json()); } catch (e) { return; }
   if (!Array.isArray(t)) return;
   if (t.length > waKnown) {
-    t.slice(waKnown).forEach(m => { bubble((m.image ? `<img class="pic" src="${m.image}" alt="">` : "") + linkify(esc(m.text)).replace(/\n/g, "<br>"), m.from === "user" ? "out" : "in"); if (m.via === "call") sysline("📲 Sent by VANI during the call"); });
+    t.slice(waKnown).forEach(m => { bubble((m.image ? `<img class="pic" src="${m.image}" alt="">` : "") + linkify(esc(m.text)).replace(/\n/g, "<br>"), m.from === "user" ? "out" : "in"); if (m.via === "call") sysline("📲 Sent by Tanya during the call"); });
     waKnown = t.length; knownEvents++; refreshMemory(true, "✔ whatsapp (sent by VANI) → " + user.role + ".md");
   }
   if (!callTimer && Date.now() > waPollUntil) { clearInterval(waPoll); waPoll = null; }
@@ -910,8 +916,8 @@ async function connectCall() {
   if (!connected) { ringtone(false); $("#callStatus").textContent = "⚠ no answer from Sarvam"; return; }
   if (inbound) { const left = 4000 - (Date.now() - dialT0); if (left > 0) await sleep(left); }   // let it ring at least ~4 s, like a real pickup
   ringtone(false); pickupClick();
-  $("#incall").className = "scr callscr oncall"; $("#callStatus").textContent = inbound ? "VANI answered" : "VANI · IndiaMART"; callT0 = Date.now();
-  if (inbound) setTimeout(() => { if (callTimer) $("#callStatus").textContent = "IndiaMART helpline · VANI"; }, 1800);
+  $("#incall").className = "scr callscr oncall"; $("#callStatus").textContent = inbound ? "Tanya answered" : "Tanya · IndiaMART"; callT0 = Date.now();
+  if (inbound) setTimeout(() => { if (callTimer) $("#callStatus").textContent = "IndiaMART helpline · Tanya"; }, 1800);
   $("#caption").innerHTML = `<span class="hint">Memory loaded. Listen…</span>`;
   $("#lastCall").textContent = callCtx ? (callCtx.direction === "inbound" ? `Last: you called VANI about ${callCtx.label}` : `Last: VANI called you about ${callCtx.label}`) : "";
   callTimer = setInterval(() => { const s = Math.floor((Date.now() - callT0) / 1000); $("#timer").textContent = `${String(s / 60 | 0).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; if (widgetState() !== "connected") endCall(false); }, 500);
@@ -987,7 +993,8 @@ setInterval(async () => { if (!user || pollTimer) return; const ev = await fetch
 
 // deep link: /demo#95568576  (dev: #95568576&scr=incoming|incall|callDone shows a call screen; &mem opens the drawer)
 const hash = new URLSearchParams(location.hash.slice(1).replace(/^(\d+)/, "glid=$1"));
-selectUser(USERS.some(u => u.glid === Number(hash.get("glid"))) ? Number(hash.get("glid")) : USERS[0].glid).then(() => { if (hash.get("scr")) { showScr(hash.get("scr")); if (hash.get("state") === "oncall") { $("#incall").className = "scr callscr oncall"; $("#callStatus").textContent = "IndiaMART helpline · VANI"; $("#timer").textContent = "00:10"; $("#caption").innerHTML = '<div class="a"><b>VANI:</b> नमस्ते Aarti, IndiaMART helpline में आपका स्वागत है।</div>'; } } if (hash.has("mem")) $("#brainBtn").click(); if (hash.has("live")) setMode("live"); });
+window.addEventListener("hashchange", () => { const g = Number((location.hash.slice(1).match(/^(\d+)/) || [])[1]); if (g && (!user || g !== user.glid)) selectUser(g); });   // typed URL / back button
+fetch("/users").then(r => r.json()).catch(() => []).then(list => { USERS = list; return selectUser(Number(hash.get("glid")) || USERS[0].glid); }).then(() => { if (hash.get("scr")) { showScr(hash.get("scr")); if (hash.get("state") === "oncall") { $("#incall").className = "scr callscr oncall"; $("#callStatus").textContent = "IndiaMART helpline · VANI"; $("#timer").textContent = "00:10"; $("#caption").innerHTML = '<div class="a"><b>VANI:</b> नमस्ते Aarti, IndiaMART helpline में आपका स्वागत है।</div>'; } } if (hash.has("mem")) $("#brainBtn").click(); if (hash.has("live")) setMode("live"); });
 </script>
 </body>
 </html>

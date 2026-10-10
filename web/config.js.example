@@ -1,8 +1,4 @@
-// Copy to web/config.js (git-ignored). Get the EMBED-SCOPED key from indus.sarvam.ai → Deploy with code → API keys
-// (choose the embed / widget scope, never the server key). org/workspace/app ids are from CLAUDE.md.
-window.SARVAM_EMBED = {
-  apiKey: "PASTE_EMBED_SCOPED_KEY_HERE",
-  orgId: "01a11128-bd2a-794c-a92a-5f518eacaba5",
-  workspaceId: "01a11128-bd2f-7b40-9f2d-a2a3b2edf5d7",
-  appId: "VANI-IndiaM-b67b20da-8a1b",
-};
+// NOT NEEDED ANY MORE. The demo pages load /config.js, which the API builds from .env:
+//   SARVAM_EMBED_KEY=<embed-scoped key from indus.sarvam.ai -> Deploy with code -> API keys (never the server key)>
+//   SARVAM_ORG_ID / SARVAM_WORKSPACE_ID / SARVAM_APP_ID (buyer agent) / SARVAM_APP_ID_SELLER (seller agent)  (optional, defaults in app/api.py)
+// A real web/config.js would be shadowed by the API route anyway and is still git-ignored.

@@ -92,7 +92,8 @@ python -m app.builder.seller_md 95568576           # build one seller file (add 
 python -m app.builder.buyer_md 274238067           # build one buyer file
 ```
 
-`.env` needs `SARVAM_API_KEY`. `web/config.js` needs the embed-scoped Sarvam key (see `web/config.js.example`).
+`.env` needs `SARVAM_API_KEY` (server key for the LLM) and `SARVAM_EMBED_KEY` (embed-scoped key for the web widget);
+the demo pages fetch `/config.js`, which the API builds from `.env`, so no key is stored in the repo.
 Dataset and generated files are git-ignored.
 
 ## Credits
