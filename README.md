@@ -94,3 +94,8 @@ python -m app.builder.buyer_md 274238067           # build one buyer file
 
 `.env` needs `SARVAM_API_KEY`. `web/config.js` needs the embed-scoped Sarvam key (see `web/config.js.example`).
 Dataset and generated files are git-ignored.
+
+## Credits
+
+- Ringback tone on the demo phone: "UK ringback tone" by Lcmortensen, Wikimedia Commons, CC BY-SA 3.0 (`web/ringback.ogg`; the UK 400/450 Hz cadence is the same one Indian networks use).
+- IndiaMART logo and product images belong to IndiaMART InterMESH Ltd and its sellers; used only inside this internal hackathon demo.

@@ -4,3 +4,4 @@ fastapi
 uvicorn
 pydantic
 streamlit
+httpx>=0.28
